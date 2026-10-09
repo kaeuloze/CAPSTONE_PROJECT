@@ -17,4 +17,14 @@ return [
         'nama' => env('KADER_AWAL_NAMA', 'Kader Posyandu Mawar 1'),
     ],
 
+    // Pengaman login (SOP Capstone poin 1: mitigasi brute force).
+    'login' => [
+        // Salah sandi berturut-turut (per username + alamat IP) sebelum dikunci.
+        'maks_percobaan' => (int) env('LOGIN_MAKS_PERCOBAAN', 5),
+        // Lama kunci dalam detik.
+        'durasi_kunci_detik' => (int) env('LOGIN_DURASI_KUNCI_DETIK', 60),
+        // Batas total percobaan login per menit dari satu alamat IP (semua username).
+        'maks_per_ip_per_menit' => (int) env('LOGIN_MAKS_PER_IP_PER_MENIT', 20),
+    ],
+
 ];
