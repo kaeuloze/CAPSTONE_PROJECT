@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
 // Halaman publik (Profil Posyandu) — sementara memakai halaman bawaan, dibuat di tahap frontend.
@@ -18,4 +19,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard'); // sementara; isi Dashboard dibuat di Tahap 4
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    // Data Warga (SKF-05). Parameter {warga} = NIK.
+    Route::resource('warga', WargaController::class)
+        ->parameters(['warga' => 'warga'])
+        ->where(['warga' => '[0-9]{16}']);
 });

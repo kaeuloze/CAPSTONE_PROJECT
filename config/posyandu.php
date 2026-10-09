@@ -27,4 +27,18 @@ return [
         'maks_per_ip_per_menit' => (int) env('LOGIN_MAKS_PER_IP_PER_MENIT', 20),
     ],
 
+    // Batas kategori usia (tahun, dihitung dari tanggal lahir). Disetujui 10 Okt 2026:
+    // Balita < 5, Remaja 5–17, Dewasa 18–59, Lansia >= 60.
+    'kategori_usia' => [
+        'remaja_mulai' => 5,
+        'dewasa_mulai' => 18,
+        'lansia_mulai' => 60,
+    ],
+
+    // Data Warga.
+    'warga' => [
+        // Jumlah baris per halaman di daftar warga (SOP poin 5: wajib pagination).
+        'per_halaman' => 15,
+    ],
+
 ];
