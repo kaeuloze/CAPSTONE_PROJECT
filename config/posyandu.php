@@ -41,4 +41,17 @@ return [
         'per_halaman' => 15,
     ],
 
+    // Kegiatan & Presensi (SKF-06).
+    'kegiatan' => [
+        // Kegiatan otomatis selesai setelah sekian jam sejak dibuat / dibuka kembali (revisi).
+        'durasi_jam' => 24,
+        // Jumlah kartu kegiatan per halaman.
+        'per_halaman' => 9,
+    ],
+    'presensi' => [
+        'per_halaman' => 15,
+        // Jeda pembaruan otomatis halaman realtime, dalam detik (keputusan 23: polling 5 detik).
+        'polling_detik' => (int) env('POLLING_DETIK', 5),
+    ],
+
 ];

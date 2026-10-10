@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +26,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('warga', WargaController::class)
         ->parameters(['warga' => 'warga'])
         ->where(['warga' => '[0-9]{16}']);
+
+    // Kegiatan & Presensi (SKF-06). Parameter {kegiatan} = id_kegiatan.
+    Route::resource('kegiatan', KegiatanController::class)
+        ->except(['show'])
+        ->where(['kegiatan' => '[0-9]+']);
+    Route::prefix('kegiatan/{kegiatan}')->whereNumber('kegiatan')->group(function () {
+        Route::post('selesaikan', [KegiatanController::class, 'selesaikan'])->name('kegiatan.selesaikan');
+        Route::get('presensi', [PresensiController::class, 'index'])->name('presensi.index');
+        Route::get('presensi/status', [PresensiController::class, 'status'])->name('presensi.status'); // polling realtime
+        Route::post('presensi/{warga}', [PresensiController::class, 'atur'])
+            ->where('warga', '[0-9]{16}')
+            ->name('presensi.atur');
+    });
 });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\KategoriUsia;
 use App\Enums\StatusKondisi;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -68,10 +69,13 @@ class Warga extends Model
         return $this->jenis_kelamin === false && $this->kategori_usia_terkini !== KategoriUsia::Balita;
     }
 
-    /** True jika warga sudah punya data kegiatan (presensi, pemeriksaan, vaksinasi, ASI). */
+    /**
+     * True jika warga sudah punya data kegiatan: pernah HADIR, diperiksa, divaksin, atau punya data ASI.
+     * Catatan "Tidak Hadir" tidak menghalangi (disetujui 10 Okt 2026).
+     */
     public function sudahDipakai(): bool
     {
-        return $this->kehadiran()->exists()
+        return $this->kehadiran()->where('status_kehadiran', true)->exists()
             || $this->pemeriksaan()->exists()
             || $this->vaksinasi()->exists()
             || $this->asiEksklusif()->exists();
@@ -88,23 +92,24 @@ class Warga extends Model
 
         $aman = addcslashes($kata, '\\%_'); // karakter % dan _ dicari apa adanya, bukan wildcard
         $query->where(function (Builder $q) use ($aman) {
-            $q->where('nama_warga', 'like', "%{$aman}%")
-                ->orWhere('nik', 'like', "{$aman}%");
+            $q->where($q->getModel()->qualifyColumn('nama_warga'), 'like', "%{$aman}%")
+                ->orWhere($q->getModel()->qualifyColumn('nik'), 'like', "{$aman}%");
         });
     }
 
-    /** Filter kategori usia berdasarkan tanggal lahir (selalu tepat per hari ini). */
+    /** Filter kategori usia berdasarkan tanggal lahir (per hari ini, atau per tanggal acuan mis. tanggal kegiatan). */
     #[Scope]
-    protected function kategori(Builder $query, ?KategoriUsia $kategori): void
+    protected function kategori(Builder $query, ?KategoriUsia $kategori, ?CarbonInterface $acuan = null): void
     {
         if ($kategori === null) {
             return;
         }
 
-        $rentang = $kategori->rentangTanggalLahir();
-        $query->where('tanggal_lahir', '<=', $rentang['sampai']);
+        $kolom = $query->getModel()->qualifyColumn('tanggal_lahir');
+        $rentang = $kategori->rentangTanggalLahir($acuan);
+        $query->where($kolom, '<=', $rentang['sampai']);
         if ($rentang['setelah'] !== null) {
-            $query->where('tanggal_lahir', '>', $rentang['setelah']);
+            $query->where($kolom, '>', $rentang['setelah']);
         }
     }
 

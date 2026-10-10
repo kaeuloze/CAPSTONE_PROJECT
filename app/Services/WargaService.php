@@ -62,7 +62,8 @@ class WargaService
 
     /**
      * Menghapus warga beserta riwayat PTM-nya (Activity Diagram 2.32).
-     * Ditolak jika warga sudah punya data presensi/pemeriksaan/vaksinasi/ASI (keputusan 17).
+     * Ditolak jika warga pernah hadir/diperiksa/divaksin/punya data ASI (keputusan 17 & 28).
+     * Catatan "Tidak Hadir" ikut terhapus.
      *
      * @throws DataMasihDipakaiException
      */
@@ -71,11 +72,12 @@ class WargaService
         DB::transaction(function () use ($warga) {
             if ($warga->sudahDipakai()) {
                 throw new DataMasihDipakaiException(
-                    "Data {$warga->nama_warga} tidak bisa dihapus karena sudah memiliki data presensi, pemeriksaan, vaksinasi, atau ASI."
+                    "Data {$warga->nama_warga} tidak bisa dihapus karena sudah pernah hadir, diperiksa, divaksin, atau memiliki data ASI."
                 );
             }
 
             $warga->riwayatPtm()->delete(); // riwayat PTM adalah bagian dari data induk warga
+            $warga->kehadiran()->where('status_kehadiran', false)->delete(); // catatan "Tidak Hadir"
             $warga->delete();
         });
     }

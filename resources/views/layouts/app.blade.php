@@ -11,9 +11,9 @@
 @php
     // Menu sesuai urutan sidebar wireframe. 'rute' = null berarti modul belum dibuat.
     $menu = [
-        ['Dashboard', 'dashboard', 'dashboard'],
-        ['Kegiatan', null, null],
-        ['Data Warga', 'warga.index', 'warga.*'],
+        ['Dashboard', 'dashboard', ['dashboard']],
+        ['Kegiatan', 'kegiatan.index', ['kegiatan.*', 'presensi.*']],
+        ['Data Warga', 'warga.index', ['warga.*']],
         ['Pemeriksaan', null, null],
         ['Vaksinasi Balita', null, null],
         ['Master Vaksin', null, null],
@@ -33,8 +33,8 @@
                 @foreach ($menu as [$nama, $rute, $pola])
                     <li>
                         @if ($rute)
-                            <a href="{{ route($rute) }}" @class(['aktif' => request()->routeIs($pola)])
-                               @if (request()->routeIs($pola)) aria-current="page" @endif><i aria-hidden="true"></i>{{ $nama }}</a>
+                            <a href="{{ route($rute) }}" @class(['aktif' => request()->routeIs(...$pola)])
+                               @if (request()->routeIs(...$pola)) aria-current="page" @endif><i aria-hidden="true"></i>{{ $nama }}</a>
                         @else
                             <span class="nonaktif" title="Modul ini belum tersedia"><i aria-hidden="true"></i>{{ $nama }}</span>
                         @endif
