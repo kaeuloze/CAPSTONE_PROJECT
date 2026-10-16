@@ -38,6 +38,12 @@
             tulis('hasil-lp', lp + ' cm — ' + (risiko ? 'Berisiko' : 'Normal'));
         } else { tulis('hasil-lp', 'Isi lingkar perut'); }
 
+        if (document.getElementById('hasil-gds')) {
+            var gds = angka('isian-pengukuran-kadar_gula_darah');
+            tulis('hasil-gds', gds === null ? 'Belum diisi (diisi Nakes)'
+                : gds + ' mg/dl — ' + (gds >= batas.gula_darah_berisiko ? 'Berisiko' : 'Normal'));
+        }
+
         var gejala = document.querySelectorAll('[data-bagian="tbc"] input[type=checkbox]:checked').length;
         tulis('hasil-tbc', gejala + ' gejala "Ya" — ' + (gejala >= batas.tbc_minimal_gejala ? 'Berisiko, rujuk Puskesmas' : 'Normal'));
     }

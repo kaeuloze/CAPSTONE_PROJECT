@@ -236,4 +236,28 @@ class FormDewasaTest extends TestCase
             ->assertSee('Pemeriksaan 6 Bulan Sekali<small class="tab-ket"> · tidak diperiksa</small>', false);
         $this->actingAs($this->kader)->get(route('riwayat.edit', $p))->assertOk()->assertSee('Simpan Perubahan');
     }
+
+    // ---------- Gula Darah Sewaktu (GDS) ----------
+
+    public function test_status_gds_dihitung_dari_angka_dengan_batas_200(): void
+    {
+        $this->assertNull(\App\Services\Pemeriksaan\Kalkulator::statusGulaDarah(null));
+        $this->assertSame(StatusRisiko::Normal, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('199.9'));
+        $this->assertSame(StatusRisiko::Berisiko, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('200'));
+
+        $warga = $this->dewasa();
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))->assertSee('Gula darah (GDS)');
+        $this->kirim($warga, ['pengukuran' => $this->rutin(['kadar_gula_darah' => '200'])], 'submit')->assertSessionHas('sukses');
+
+        $this->actingAs($this->kader)->get(route('riwayat.warga', $warga->nik))->assertSee('TD Normal · GDS Berisiko');
+    }
+
+    public function test_kotak_hasil_remaja_tanpa_gula_darah(): void
+    {
+        $remaja = $this->buatWarga('3404000000000009', ['tanggal_lahir' => '2010-01-01']);
+        $this->kegiatan->kehadiran()->create(['nik' => $remaja->nik, 'status_kehadiran' => true, 'waktu_kehadiran' => now()]);
+
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $remaja->nik))
+            ->assertSee('Hasil dihitung otomatis')->assertDontSee('Gula darah (GDS)');
+    }
 }

@@ -74,6 +74,16 @@ class Kalkulator
         return $jumlahYa >= (int) config('posyandu.ambang.tbc_minimal_gejala') ? StatusRisiko::Berisiko : StatusRisiko::Normal;
     }
 
+    /** GDS Berisiko bila ≥ 200 mg/dl (disetujui); dihitung dari angka, tanpa kolom status. */
+    public static function statusGulaDarah(mixed $kadarMgDl): ?StatusRisiko
+    {
+        if (! is_numeric($kadarMgDl)) {
+            return null;
+        }
+
+        return (float) $kadarMgDl >= (float) config('posyandu.ambang.gula_darah_berisiko') ? StatusRisiko::Berisiko : StatusRisiko::Normal;
+    }
+
     /** Gangguan bila salah satu sisi (kanan/kiri) Gangguan; null bila keduanya belum diisi. */
     public static function statusSensorik(?string $kanan, ?string $kiri): ?StatusSensorik
     {

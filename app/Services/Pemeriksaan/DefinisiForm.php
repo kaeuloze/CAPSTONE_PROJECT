@@ -62,6 +62,9 @@ abstract class DefinisiForm
         if ($ukur?->status_tekanan_darah) {
             $hasil[] = 'TD '.$ukur->status_tekanan_darah->label();
         }
+        if (\App\Services\Pemeriksaan\Kalkulator::statusGulaDarah($ukur?->kadar_gula_darah) === \App\Enums\StatusRisiko::Berisiko) {
+            $hasil[] = 'GDS Berisiko';
+        }
         if ($pemeriksaan->skriningPuma?->status_ppok === \App\Enums\StatusPpok::Berisiko) {
             $hasil[] = 'Berisiko PPOK';
         }
