@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Services\Pemeriksaan\Form\FormDewasa;
+use App\Services\Pemeriksaan\Form\FormIbuHamil;
+use App\Services\Pemeriksaan\Form\FormIbuNifas;
+use App\Services\Pemeriksaan\Form\FormLansia;
+use App\Services\Pemeriksaan\Form\FormRemaja;
+use App\Services\Pemeriksaan\KatalogForm;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +20,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Daftar formulir pemeriksaan yang sudah tersedia (ditambah satu per satu, keputusan 39).
+        $this->app->singleton(KatalogForm::class, function () {
+            $katalog = new KatalogForm;
+            $katalog->daftarkan(new FormRemaja);
+            $katalog->daftarkan(new FormDewasa);
+            $katalog->daftarkan(new FormLansia);
+            $katalog->daftarkan(new FormIbuHamil);
+            $katalog->daftarkan(new FormIbuNifas);
+
+            return $katalog;
+        });
     }
 
     /**

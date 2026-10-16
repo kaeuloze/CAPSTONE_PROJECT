@@ -48,6 +48,42 @@ return [
         // Jumlah baris tabel Arsip Kegiatan per halaman.
         'per_halaman' => 15,
     ],
+    // Batas status otomatis hasil pemeriksaan (keputusan 5), mengikuti format resmi Rekapitulasi (Figma 306:103).
+    'ambang' => [
+        // IMT: Kurus < 18,5 ≤ Normal < 25,0 ≤ Gemuk ≤ 27,0 < Obesitas (rekap: Normal 18,5–24,9 / Risiko).
+        'imt' => ['normal_mulai' => 18.5, 'gemuk_mulai' => 25.0, 'gemuk_sampai' => 27.0],
+        // Tekanan darah Tinggi bila sistolik ≥ 130 atau diastolik ≥ 85 (rekap: Normal < 130/85).
+        'tekanan_darah' => ['sistolik_tinggi' => 130, 'diastolik_tinggi' => 85],
+        // Lingkar perut berisiko bila lebih dari batas (cm).
+        'lingkar_perut' => ['perempuan' => 80, 'laki_laki' => 90],
+        // Kadar HB remaja putri normal bila ≥ 12 g/dL.
+        'hb_remaja_putri' => 12,
+        // Skrining TBC berisiko bila jumlah gejala "Ya" minimal sekian (disetujui: 2).
+        'tbc_minimal_gejala' => 2,
+        // Peringatan interval pemeriksaan (Activity Diagram 2.17 & 2.18), dalam bulan.
+        'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
+        // Ploting LILA ibu hamil (Kartu Bantu Ibu Hamil): KEK bila LILA < 23,5 cm (disetujui: otomatis dari angka).
+        'lila_kek_di_bawah' => 23.5,
+        // Gula Darah Sewaktu (GDS, rekap Dewasa & Lansia): berisiko bila >= 200 mg/dl (disetujui 17 Okt 2026).
+        // Status tidak disimpan di database; dihitung dari angka kadar_gula_darah.
+        'gula_darah_berisiko' => 200,
+        // AKS (Indeks Barthel skala 20, Kartu Bantu Pemeriksaan Lansia): total 20 = Mandiri, 12-19 Ringan,
+        // 9-11 Sedang, 5-8 Berat, 0-4 Total; skor < 20 dirujuk ke Pustu/Puskesmas.
+        'aks' => ['mandiri' => 20, 'ringan_mulai' => 12, 'sedang_mulai' => 9, 'berat_mulai' => 5],
+        // Skrining PPOK PUMA (disetujui 16 Okt 2026): khusus usia >= 40; skor usia 40-49 = 0, 50-59 = 1, >= 60 = 2;
+        // laki-laki = 1; berisiko PPOK bila total skor >= 6 (PDPI).
+        'puma' => [
+            'usia_minimal' => 40,
+            'skor_usia' => [50 => 1, 60 => 2], // usia mulai => skor
+            'berisiko_mulai' => 6,
+        ],
+    ],
+
+    'riwayat' => [
+        // Jumlah baris per halaman di Daftar Warga Riwayat & Riwayat per Warga (SOP poin 5).
+        'per_halaman' => 15,
+    ],
+
     'presensi' => [
         'per_halaman' => 15,
         // Jeda pembaruan otomatis halaman realtime, dalam detik (keputusan 23: polling 5 detik).
