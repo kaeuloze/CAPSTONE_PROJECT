@@ -57,5 +57,5 @@
 
     @include('partials.halaman', ['data' => $daftarWarga, 'satuan' => 'warga'])
 
-    <div class="info">Seluruh warga terekam di sini. Setiap pemeriksaan yang sudah di-Submit tercatat sebagai satu riwayat (catatan vaksin/ASI balita menyusul bersama menu Vaksinasi Balita). Filter kategori mempersempit daftar. Klik Lihat Riwayat untuk membuka detail per tanggal.</div>
+    <div class="info">Seluruh warga terekam di sini. Setiap pemeriksaan yang sudah di-Submit, serta setiap tambahan centang vaksin/ASI balita per kunjungan, tercatat sebagai riwayat. Filter kategori mempersempit daftar. Klik Lihat Riwayat untuk membuka detail per tanggal.</div>
 @endsection
