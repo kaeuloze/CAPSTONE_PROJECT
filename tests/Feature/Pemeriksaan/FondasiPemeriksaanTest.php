@@ -179,10 +179,10 @@ class FondasiPemeriksaanTest extends TestCase
 
     public function test_kategori_tanpa_form_menampilkan_sedang_disiapkan(): void
     {
-        $remaja = $this->hadirkan($this->buatWarga('3404000000000001', ['tanggal_lahir' => '2012-01-01']));
+        $lansia = $this->hadirkan($this->buatWarga('3404000000000001', ['tanggal_lahir' => '1950-01-01']));
 
-        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $remaja->nik))
-            ->assertOk()->assertSee('Form Remaja sedang disiapkan');
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $lansia->nik))
+            ->assertOk()->assertSee('Form Lansia sedang disiapkan');
     }
 
     // ---------- Simpan ----------

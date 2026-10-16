@@ -27,6 +27,11 @@ final class Bagian
      * @param  array<int, string>  $boolean  kolom centang (tidak dicentang = "Tidak")
      * @param  JenisPemeriksaan  $jenis  jenis pemeriksaan yang tercatat bila bagian ini terisi
      * @param  Closure|null  $hitung  fn(array $nilai, Warga, Kegiatan): array kolom otomatis (IMT, status, dll.)
+     * @param  Closure|null  $uraikan  fn(array $kolomDb): array isian formulir — bila isian berbeda dari kolom database
+     *                                 (mis. kolom "120/80" ditampilkan sebagai 2 kotak sistolik & diastolik)
+     * @param  Closure|null  $susun  fn(array $isian): array kolom database — kebalikan dari $uraikan
+     * @param  Closure|null  $berlaku  fn(Warga): bool — bagian hanya berlaku untuk warga tertentu
+     *                                 (mis. Kadar HB hanya remaja putri); bila false isiannya diabaikan
      */
     public function __construct(
         public readonly string $kunci,
@@ -37,6 +42,9 @@ final class Bagian
         public readonly array $boolean = [],
         public readonly JenisPemeriksaan $jenis = JenisPemeriksaan::Rutin,
         public readonly ?Closure $hitung = null,
+        public readonly ?Closure $uraikan = null,
+        public readonly ?Closure $susun = null,
+        public readonly ?Closure $berlaku = null,
     ) {
     }
 
@@ -54,6 +62,9 @@ final class Bagian
     public function nilaiTersimpan(?Model $baris): array
     {
         $mentah = $baris?->getAttributes() ?? [];
+        if ($this->uraikan) {
+            $mentah = ($this->uraikan)($mentah) + $mentah;
+        }
         $hasil = [];
         foreach ($this->kolom() as $kolom) {
             $hasil[$kolom] = $this->rapikan($kolom, $mentah[$kolom] ?? null);
@@ -76,6 +87,17 @@ final class Bagian
         }
 
         return $hasil;
+    }
+
+    /** Mengubah isian formulir menjadi kolom database (setelah dirapikan). */
+    public function keDatabase(array $nilai): array
+    {
+        return $this->susun ? ($this->susun)($nilai) : $nilai;
+    }
+
+    public function berlakuUntuk(Warga $warga): bool
+    {
+        return $this->berlaku === null || ($this->berlaku)($warga);
     }
 
     /** Penanda versi = sidik jari isi bagian. Berubah bila ada kader lain yang menyimpan bagian ini. */

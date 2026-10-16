@@ -189,3 +189,12 @@ dialog p { margin: 0; color: #6b7280; font-size: 13px; }
 .aksi-pemeriksaan p { margin: 0 0 6px; }
 .aksi-pemeriksaan .ket { margin: 0 0 14px; font-size: 12px; color: #6b7280; }
 .tombol.utama:disabled { background: #d4d4d4; border-color: #d4d4d4; color: #fff; cursor: not-allowed; }
+.tab-form button:disabled { color: #c4c4c4; cursor: not-allowed; background: #fafafa; }
+.isian-td { border: 0; padding: 0; margin: 0 0 16px; }
+.baris-td { display: flex; align-items: center; gap: 8px; }
+.baris-td input { width: 120px; }
+.hasil-otomatis { display: block; margin: 0 0 20px; padding: 16px 20px; }
+.hasil-otomatis::before { display: none; }
+.hasil-otomatis dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 10px 0 0; }
+.hasil-otomatis dt { color: #6b7280; }
+.hasil-otomatis dd { margin: 0; font-weight: 500; }

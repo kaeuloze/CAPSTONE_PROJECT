@@ -17,11 +17,33 @@ abstract class DefinisiForm
     abstract public function judul(): string;
 
     /**
-     * Tab formulir: kunci => ['label' => 'Rutin Bulanan', 'bagian' => ['pengukuran', 'tbc', ...]].
+     * Tab formulir: kunci => [
+     *   'label' => 'Rutin Bulanan', 'bagian' => ['pengukuran', 'tbc'],
+     *   'jenis' => JenisPemeriksaan (opsional; untuk peringatan interval 6 bulan / 1 tahun),
+     *   'catatan' => teks di atas tombol Simpan/Submit saat tab ini dibuka (opsional),
+     * ].
      *
-     * @return array<string, array{label: string, bagian: array<int, string>}>
+     * @return array<string, array<string, mixed>>
      */
     abstract public function tab(): array;
+
+    /** Bagian yang tampil di bawah semua tab (mis. Penyuluhan & Rujukan). */
+    public function bagianUmum(): array
+    {
+        return [];
+    }
+
+    /** Tab yang dinonaktifkan untuk warga tertentu: kunci tab => alasan. */
+    public function tabNonaktif(\App\Models\Warga $warga): array
+    {
+        return [];
+    }
+
+    /** View tambahan di bawah semua bagian (mis. kotak "Hasil dihitung otomatis"), null bila tidak ada. */
+    public function viewTambahan(): ?string
+    {
+        return null;
+    }
 
     /** @return array<int, Bagian> */
     abstract protected function daftarBagian(): array;

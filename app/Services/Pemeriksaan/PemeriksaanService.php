@@ -74,6 +74,41 @@ class PemeriksaanService
         };
     }
 
+    /**
+     * Peringatan interval (Activity Diagram 2.17 & 2.18): bila pemeriksaan sejenis yang sudah di-Submit
+     * pada kegiatan lain belum lewat 6 bulan / 1 tahun, kembalikan pesan pop-up untuk tab tersebut.
+     *
+     * @return array<string, string> kunci tab => pesan
+     */
+    public function peringatanInterval(DefinisiForm $form, Warga $warga, Kegiatan $kegiatan): array
+    {
+        $pesan = [];
+        foreach ($form->tab() as $kunci => $tab) {
+            $jenis = $tab['jenis'] ?? null;
+            if (! $jenis instanceof \App\Enums\JenisPemeriksaan || $jenis === \App\Enums\JenisPemeriksaan::Rutin) {
+                continue;
+            }
+            $terakhir = Pemeriksaan::query()
+                ->where('nik', $warga->nik)
+                ->where('id_kegiatan', '<>', $kegiatan->id_kegiatan)
+                ->where('status_pemeriksaan', StatusPemeriksaan::Selesai->value)
+                ->whereRaw('FIND_IN_SET(?, jenis_pemeriksaan)', [$jenis->value])
+                ->max('tanggal_pemeriksaan');
+            if (! $terakhir) {
+                continue;
+            }
+
+            $bulan = (int) config("posyandu.ambang.interval_bulan.{$jenis->value}");
+            $tanggal = \Carbon\CarbonImmutable::parse($terakhir);
+            if ($tanggal->addMonthsNoOverflow($bulan)->greaterThan($kegiatan->tanggal_kegiatan)) {
+                $teks = $tanggal->locale('id')->translatedFormat('j F Y');
+                $pesan[$kunci] = "Pemeriksaan {$tab['label']} terakhir untuk {$warga->nama_warga} dilakukan pada {$teks} (belum {$bulan} bulan). Tetap lanjutkan pengisian?";
+            }
+        }
+
+        return $pesan;
+    }
+
     /** True bila warga tercatat HADIR pada kegiatan. */
     public function hadir(Kegiatan $kegiatan, Warga $warga): bool
     {
@@ -115,6 +150,9 @@ class PemeriksaanService
                 if ($diubah !== null && ! in_array($bagian->kunci, $diubah, true)) {
                     continue; // bagian ini tidak disentuh kader → biarkan isian meja lain
                 }
+                if (! $bagian->berlakuUntuk($warga)) {
+                    continue; // mis. Kadar HB untuk remaja laki-laki (tab dinonaktifkan)
+                }
 
                 $baris = $pemeriksaan->{$bagian->relasi}()->lockForUpdate()->first();
                 $baru = $bagian->nilaiIsian($isian[$bagian->kunci] ?? []);
@@ -127,7 +165,7 @@ class PemeriksaanService
                     continue;
                 }
 
-                $data = $baru + ($bagian->hitung ? ($bagian->hitung)($baru, $warga, $kegiatan) : []);
+                $data = $bagian->keDatabase($baru) + ($bagian->hitung ? ($bagian->hitung)($baru, $warga, $kegiatan) : []);
                 $baris ? $baris->update($data) : $pemeriksaan->{$bagian->relasi}()->create($data);
             }
 
@@ -138,7 +176,7 @@ class PemeriksaanService
             }
 
             if ($submit) {
-                $this->submit($pemeriksaan, $form);
+                $this->submit($pemeriksaan, $form, $warga);
             } else {
                 $pemeriksaan->touch();
             }
@@ -148,11 +186,14 @@ class PemeriksaanService
     }
 
     /** Mengecek isian wajib (gabungan isian semua meja) lalu menandai pemeriksaan selesai. */
-    private function submit(Pemeriksaan $pemeriksaan, DefinisiForm $form): void
+    private function submit(Pemeriksaan $pemeriksaan, DefinisiForm $form, Warga $warga): void
     {
         $kurang = [];
         $jenis = [];
         foreach ($form->bagian() as $bagian) {
+            if (! $bagian->berlakuUntuk($warga)) {
+                continue;
+            }
             $nilai = $bagian->nilaiTersimpan($pemeriksaan->{$bagian->relasi}()->first());
             foreach ($bagian->wajibKosong($nilai) as $kolom) {
                 $kurang["bagian.{$bagian->kunci}.{$kolom}"] = 'Wajib diisi sebelum Submit.';

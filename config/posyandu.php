@@ -48,6 +48,22 @@ return [
         // Jumlah baris tabel Arsip Kegiatan per halaman.
         'per_halaman' => 15,
     ],
+    // Batas status otomatis hasil pemeriksaan (keputusan 5), mengikuti format resmi Rekapitulasi (Figma 306:103).
+    'ambang' => [
+        // IMT: Kurus < 18,5 ≤ Normal < 25,0 ≤ Gemuk ≤ 27,0 < Obesitas (rekap: Normal 18,5–24,9 / Risiko).
+        'imt' => ['normal_mulai' => 18.5, 'gemuk_mulai' => 25.0, 'gemuk_sampai' => 27.0],
+        // Tekanan darah Tinggi bila sistolik ≥ 130 atau diastolik ≥ 85 (rekap: Normal < 130/85).
+        'tekanan_darah' => ['sistolik_tinggi' => 130, 'diastolik_tinggi' => 85],
+        // Lingkar perut berisiko bila lebih dari batas (cm).
+        'lingkar_perut' => ['perempuan' => 80, 'laki_laki' => 90],
+        // Kadar HB remaja putri normal bila ≥ 12 g/dL.
+        'hb_remaja_putri' => 12,
+        // Skrining TBC berisiko bila jumlah gejala "Ya" minimal sekian (disetujui: 2).
+        'tbc_minimal_gejala' => 2,
+        // Peringatan interval pemeriksaan (Activity Diagram 2.17 & 2.18), dalam bulan.
+        'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
+    ],
+
     'presensi' => [
         'per_halaman' => 15,
         // Jeda pembaruan otomatis halaman realtime, dalam detik (keputusan 23: polling 5 detik).
