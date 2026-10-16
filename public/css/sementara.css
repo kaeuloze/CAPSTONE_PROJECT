@@ -164,3 +164,28 @@ dialog p { margin: 0; color: #6b7280; font-size: 13px; }
 .pesan.info-arsip { background: #f5f5f5; border: 0; color: #374151; }
 @media (max-width: 1100px) { .per-kelompok { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .per-kelompok { grid-template-columns: 1fr; } }
+
+/* Pemeriksaan (Figma "hasil rev") */
+.kosong-tengah { max-width: 720px; margin: 40px auto; text-align: center; }
+.tombol.draft { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+.identitas-periksa { display: flex; align-items: center; gap: 16px; padding: 16px 24px; margin-bottom: 16px; }
+.identitas-periksa .avatar { width: 44px; height: 44px; border-radius: 50%; background: #e5e5e5; flex-shrink: 0; }
+.identitas-periksa div { flex: 1; min-width: 0; }
+.identitas-periksa strong { display: block; font-size: 16px; font-weight: 500; }
+.identitas-periksa small { color: #6b7280; }
+.tab-form { display: flex; flex-wrap: wrap; margin-bottom: 16px; }
+.tab-form button { padding: 10px 20px; border: 1px solid #d4d4d4; background: #f5f5f5; color: #6b7280; font: inherit; cursor: pointer; }
+.tab-form button + button { border-left: 0; }
+.tab-form button.aktif { background: #fff; color: #111827; }
+.tab-form button:focus-visible { outline: 2px solid #9ca3af; }
+.bagian-periksa h2 { margin-bottom: 4px; }
+.bagian-periksa .ket { margin: 0 0 16px; }
+.isian { margin-bottom: 16px; max-width: 360px; }
+.isian:last-child { margin-bottom: 0; }
+.wajib { color: #dc2626; }
+.baris-centang { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px 0; margin: 0; font-size: 14px; color: #374151; }
+.baris-centang input[type=checkbox] { width: 20px; height: 20px; flex-shrink: 0; }
+.aksi-pemeriksaan { border: 1.5px dashed #d4d4d4; border-radius: 12px; background: #fafafa; padding: 20px 24px; margin-bottom: 20px; }
+.aksi-pemeriksaan p { margin: 0 0 6px; }
+.aksi-pemeriksaan .ket { margin: 0 0 14px; font-size: 12px; color: #6b7280; }
+.tombol.utama:disabled { background: #d4d4d4; border-color: #d4d4d4; color: #fff; cursor: not-allowed; }

@@ -14,7 +14,7 @@
         ['Dashboard', 'dashboard', ['dashboard']],
         ['Kegiatan', 'kegiatan.index', ['kegiatan.*', 'presensi.*']],
         ['Data Warga', 'warga.index', ['warga.*']],
-        ['Pemeriksaan', null, null],
+        ['Pemeriksaan', 'pemeriksaan.index', ['pemeriksaan.*']],
         ['Vaksinasi Balita', null, null],
         ['Master Vaksin', null, null],
         ['Riwayat Pemeriksaan', null, null],

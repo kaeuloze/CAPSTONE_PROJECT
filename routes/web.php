@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\PemeriksaanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
@@ -38,5 +39,13 @@ Route::middleware('auth')->group(function () {
         Route::post('presensi/{warga}', [PresensiController::class, 'atur'])
             ->where('warga', '[0-9]{16}')
             ->name('presensi.atur');
+    });
+
+    // Pemeriksaan (SKF-07 & SKF-08). Parameter {warga} = NIK; kegiatan = kegiatan yang sedang berlangsung.
+    Route::prefix('pemeriksaan')->name('pemeriksaan.')->group(function () {
+        Route::get('/', [PemeriksaanController::class, 'index'])->name('index');
+        Route::get('status', [PemeriksaanController::class, 'status'])->name('status'); // polling realtime
+        Route::get('{warga}', [PemeriksaanController::class, 'form'])->where('warga', '[0-9]{16}')->name('form');
+        Route::post('{warga}', [PemeriksaanController::class, 'simpan'])->where('warga', '[0-9]{16}')->name('simpan');
     });
 });

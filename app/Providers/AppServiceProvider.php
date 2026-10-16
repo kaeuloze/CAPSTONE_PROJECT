@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Pemeriksaan\KatalogForm;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -14,7 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Daftar formulir pemeriksaan yang sudah tersedia (ditambah satu per satu, keputusan 39).
+        $this->app->singleton(KatalogForm::class, function () {
+            return new KatalogForm;
+        });
     }
 
     /**
