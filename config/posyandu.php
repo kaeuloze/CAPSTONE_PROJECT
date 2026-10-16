@@ -65,6 +65,9 @@ return [
         // Gula Darah Sewaktu (GDS, rekap Dewasa & Lansia): berisiko bila >= 200 mg/dl (disetujui 17 Okt 2026).
         // Status tidak disimpan di database; dihitung dari angka kadar_gula_darah.
         'gula_darah_berisiko' => 200,
+        // AKS (Indeks Barthel skala 20, Kartu Bantu Pemeriksaan Lansia): total 20 = Mandiri, 12-19 Ringan,
+        // 9-11 Sedang, 5-8 Berat, 0-4 Total; skor < 20 dirujuk ke Pustu/Puskesmas.
+        'aks' => ['mandiri' => 20, 'ringan_mulai' => 12, 'sedang_mulai' => 9, 'berat_mulai' => 5],
         // Skrining PPOK PUMA (disetujui 16 Okt 2026): khusus usia >= 40; skor usia 40-49 = 0, 50-59 = 1, >= 60 = 2;
         // laki-laki = 1; berisiko PPOK bila total skor >= 6 (PDPI).
         'puma' => [

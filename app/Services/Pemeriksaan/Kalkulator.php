@@ -2,6 +2,7 @@
 
 namespace App\Services\Pemeriksaan;
 
+use App\Enums\StatusAks;
 use App\Enums\StatusImt;
 use App\Enums\StatusPpok;
 use App\Enums\StatusRisiko;
@@ -143,6 +144,71 @@ class Kalkulator
 
         return $skor >= (int) config('posyandu.ambang.puma.berisiko_mulai') ? StatusPpok::Berisiko : StatusPpok::TidakBerisiko;
     }
+
+    /**
+     * Total skor AKS; null bila masih ada item yang belum dipilih (total butuh ke-10 item).
+     *
+     * @param  array<int, ?string>  $skor
+     */
+    public static function skorAks(array $skor): ?int
+    {
+        foreach ($skor as $nilai) {
+            if (! is_numeric($nilai)) {
+                return null;
+            }
+        }
+
+        return array_sum(array_map('intval', $skor));
+    }
+
+    /** Mandiri 20 · Ringan 12–19 · Sedang 9–11 · Berat 5–8 · Total 0–4 (Kartu Bantu Pemeriksaan Lansia). */
+    public static function statusAks(?int $total): ?StatusAks
+    {
+        if ($total === null) {
+            return null;
+        }
+        $batas = config('posyandu.ambang.aks');
+
+        return match (true) {
+            $total >= $batas['mandiri'] => StatusAks::Mandiri,
+            $total >= $batas['ringan_mulai'] => StatusAks::Ringan,
+            $total >= $batas['sedang_mulai'] => StatusAks::Sedang,
+            $total >= $batas['berat_mulai'] => StatusAks::Berat,
+            default => StatusAks::Total,
+        };
+    }
+
+    /**
+     * Kelompok SKILAS yang ditemukan masalah (centang = "Ya"/perlu perhatian). Tidak disimpan di database.
+     *
+     * @param  array<string, mixed>  $nilai  kolom tabel skrining_skilas (imunisasi_covid: 1 = sudah)
+     * @return array<int, string> nama kelompok
+     */
+    public static function temuanSkilas(array $nilai): array
+    {
+        $ya = fn (string $k) => filter_var($nilai[$k] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $temuan = [];
+        foreach (self::KELOMPOK_SKILAS as $kelompok => $kolom) {
+            if (array_filter($kolom, $ya)) {
+                $temuan[] = $kelompok;
+            }
+        }
+        if (array_key_exists('imunisasi_covid', $nilai) && $nilai['imunisasi_covid'] !== null && ! $ya('imunisasi_covid')) {
+            $temuan[] = 'Belum imunisasi COVID-19';
+        }
+
+        return $temuan;
+    }
+
+    /** Kelompok pertanyaan SKILAS (Kartu Bantu Pemeriksaan Lansia, C3). */
+    public const KELOMPOK_SKILAS = [
+        'Penurunan Kognitif' => ['orientasi_waktu_tempat', 'mengulang_tiga_kata'],
+        'Keterbatasan Mobilitas' => ['tes_berdiri_kursi'],
+        'Malnutrisi' => ['bb_berkurang', 'hilang_nafsu_makan', 'lila_kurang'],
+        'Gangguan Penglihatan' => ['masalah_penglihatan', 'tes_melihat'],
+        'Gangguan Pendengaran' => ['tes_berbisik'],
+        'Gejala Depresi' => ['perasaan_sedih', 'kurang_minat'],
+    ];
 
     /** Konfigurasi batas untuk kalkulator di layar (JavaScript). */
     public static function untukLayar(): array

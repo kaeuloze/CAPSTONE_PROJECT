@@ -210,3 +210,8 @@ fieldset.bagian-baca input:disabled, fieldset.bagian-baca select:disabled { colo
 .skor-otomatis dt { color: #6b7280; }
 .skor-otomatis dd { margin: 0; font-weight: 600; }
 @media (max-width: 640px) { .skor-otomatis { grid-template-columns: 1fr; } }
+
+/* AKS & SKILAS (Lansia) */
+.kisi-aks .isian { max-width: none; }
+.kisi-aks select { max-width: 100%; }
+.sub-kelompok { font-size: 13px; font-weight: 600; color: #6b7280; margin: 16px 0 6px; }

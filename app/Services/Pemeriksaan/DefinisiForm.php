@@ -68,6 +68,12 @@ abstract class DefinisiForm
         if ($pemeriksaan->skriningPuma?->status_ppok === \App\Enums\StatusPpok::Berisiko) {
             $hasil[] = 'Berisiko PPOK';
         }
+        if ($pemeriksaan->skriningAks?->status_aks && $pemeriksaan->skriningAks->status_aks !== \App\Enums\StatusAks::Mandiri) {
+            $hasil[] = 'AKS '.$pemeriksaan->skriningAks->status_aks->label();
+        }
+        if ($pemeriksaan->skriningSkilas && ($temuan = \App\Services\Pemeriksaan\Kalkulator::temuanSkilas($pemeriksaan->skriningSkilas->getAttributes())) !== []) {
+            $hasil[] = 'SKILAS: '.count($temuan).' temuan';
+        }
         if ($pemeriksaan->skriningTbc?->status_gejala_tbc === \App\Enums\StatusRisiko::Berisiko) {
             $hasil[] = 'Gejala TBC Berisiko';
         }

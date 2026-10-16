@@ -74,3 +74,48 @@
     bagian.addEventListener('change', hitung);
     hitung();
 })();
+
+// Total AKS & tingkat ketergantungan (tab Tahunan Lansia). Total hanya dihitung bila ke-10 item sudah dipilih.
+(function () {
+    var kotak = document.getElementById('hasil-aks');
+    if (!kotak) { return; }
+    var batas = JSON.parse(kotak.getAttribute('data-batas'));
+    var bagian = document.querySelector('[data-bagian="aks"]');
+
+    function hitung() {
+        var pilihan = bagian.querySelectorAll('select');
+        var terisi = 0, total = 0;
+        pilihan.forEach(function (p) { if (p.value !== '') { terisi++; total += parseInt(p.value, 10); } });
+        var isi = document.getElementById('hasil-aks-isi');
+        if (terisi === 0) { isi.textContent = 'Belum diisi'; return; }
+        if (terisi < pilihan.length) { isi.textContent = 'Lengkapi semua item (' + terisi + '/' + pilihan.length + ' terisi)'; return; }
+        var tingkat = total >= batas.mandiri ? 'Mandiri'
+            : total >= batas.ringan_mulai ? 'Ketergantungan Ringan'
+            : total >= batas.sedang_mulai ? 'Ketergantungan Sedang'
+            : total >= batas.berat_mulai ? 'Ketergantungan Berat' : 'Ketergantungan Total';
+        isi.textContent = total + ' — ' + tingkat + (total < batas.mandiri ? ', sarankan rujuk ke Pustu/Puskesmas' : '');
+    }
+
+    bagian.addEventListener('change', hitung);
+    hitung();
+})();
+
+// Hasil SKILAS: kelompok yang ditemukan masalah (centang = "Ya"). Hanya saran, tidak disimpan.
+(function () {
+    var kotak = document.getElementById('hasil-skilas');
+    if (!kotak) { return; }
+    var bagian = document.querySelector('[data-bagian="skilas"]');
+
+    function hitung() {
+        var temuan = [];
+        bagian.querySelectorAll('[data-kelompok-skilas]').forEach(function (k) {
+            if (k.querySelector('input[type=checkbox]:checked')) { temuan.push(k.getAttribute('data-kelompok-skilas')); }
+        });
+        document.getElementById('hasil-skilas-isi').textContent = temuan.length === 0
+            ? 'Tidak ditemukan masalah'
+            : 'Ditemukan ' + temuan.length + ' masalah (' + temuan.join(', ') + ') — sarankan rujuk ke Puskesmas';
+    }
+
+    bagian.addEventListener('change', hitung);
+    hitung();
+})();
