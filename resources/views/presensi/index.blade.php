@@ -5,14 +5,14 @@
 
 @section('judul', $kegiatan->nama_kegiatan)
 @section('subjudul')
-    {{ $kegiatan->tanggalLengkap() }} · Status: <span id="label-status">{{ $kegiatan->labelStatus() }}</span>
+    {{ $kegiatan->tanggalLengkap() }} · Status: <span id="label-status">{{ $kegiatan->labelStatus() }}</span>@unless ($berlangsung) · Hanya-lihat @endunless
 @endsection
 @section('aksi-kepala')
     <span style="display:flex;gap:8px;flex-wrap:wrap">
         @if ($berlangsung)
             <button type="button" class="tombol utama" id="tombol-selesaikan" data-buka-dialog="dialog-selesaikan">Selesaikan Kegiatan</button>
         @endif
-        <a href="{{ route('kegiatan.index', ['tab' => $berlangsung ? 'berlangsung' : 'arsip']) }}" class="tombol">← Kembali ke daftar</a>
+        <a href="{{ route('kegiatan.index', ['tab' => $berlangsung ? 'berlangsung' : 'arsip']) }}" class="tombol">{{ $berlangsung ? '← Kembali ke daftar' : '← Kembali ke Arsip' }}</a>
     </span>
 @endsection
 
@@ -22,11 +22,11 @@
          data-jeda="{{ max(2, (int) config('posyandu.presensi.polling_detik')) * 1000 }}"
          data-berlangsung="{{ $berlangsung ? '1' : '0' }}">
 
-        <div class="pesan galat" role="alert" id="pesan-selesai" @if ($berlangsung) hidden @endif>
+        <div @class(['pesan', 'galat' => $berlangsung, 'info-arsip' => ! $berlangsung]) role="alert" id="pesan-selesai" @if ($berlangsung) hidden @endif>
             @if ($berlangsung)
                 Kegiatan ini baru saja diselesaikan. Presensi tidak bisa diubah lagi.
             @else
-                Kegiatan ini sudah selesai. Presensi hanya dapat dilihat.
+                Kegiatan sudah selesai, sehingga status kehadiran hanya dapat dilihat. Warga yang belum ditandai saat kegiatan diselesaikan tercatat "Tidak Hadir". Untuk koreksi, buka kembali kegiatan lewat tombol "✎ Edit" di tab Arsip Kegiatan (ubah status menjadi "Berlangsung").
             @endif
         </div>
 
@@ -105,18 +105,7 @@
     <div class="notifikasi" id="notifikasi" aria-live="assertive"></div>
 
     @if ($berlangsung)
-        {{-- Dialog konfirmasi Selesaikan Kegiatan (revisi). --}}
-        <dialog id="dialog-selesaikan" aria-labelledby="judul-selesaikan">
-            <h3 id="judul-selesaikan">Selesaikan kegiatan ini?</h3>
-            <p>Warga yang belum hadir akan otomatis dicatat <strong>Tidak Hadir</strong> dan presensi tidak bisa diubah lagi. Kegiatan masih bisa dibuka kembali dari Arsip.</p>
-            <form method="POST" action="{{ route('kegiatan.selesaikan', $kegiatan) }}" data-memuat="Menyelesaikan...">
-                @csrf
-                <div class="dialog-tombol">
-                    <button type="button" class="tombol" data-tutup-dialog>Tidak</button>
-                    <button type="submit" class="tombol utama">Ya, Selesaikan</button>
-                </div>
-            </form>
-        </dialog>
+        @include('kegiatan.partials.dialog-selesaikan', ['kegiatan' => $kegiatan, 'belumSubmit' => $belumSubmit])
     @endif
 @endsection
 

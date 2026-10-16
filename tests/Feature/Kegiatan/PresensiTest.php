@@ -172,7 +172,7 @@ class PresensiTest extends TestCase
         $this->buatWarga('3404000000000003', ['nama_warga' => 'Citra Baru']);
 
         $this->actingAs($this->kader)->get(route('presensi.index', $this->kegiatan))
-            ->assertOk()->assertSee('Presensi hanya dapat dilihat')->assertSee('Tidak Hadir')
+            ->assertOk()->assertSee('status kehadiran hanya dapat dilihat')->assertSee('Kembali ke Arsip')->assertSee('Hanya-lihat')->assertSee('Tidak Hadir')
             ->assertDontSee('Tandai Hadir')->assertDontSee('Selesaikan Kegiatan')->assertDontSee('Citra Baru')
             ->assertSee('id="jumlah-total">2<', false)->assertSee('id="jumlah-hadir">1<', false);
     }

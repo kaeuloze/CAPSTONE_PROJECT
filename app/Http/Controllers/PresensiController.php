@@ -37,6 +37,7 @@ class PresensiController extends Controller
             'ringkasan' => $this->presensiService->ringkasan($kegiatan, $cari, $kategori),
             'cari' => $cari ?? '',
             'kategoriDipilih' => $kategori,
+            'belumSubmit' => $kegiatan->status_kegiatan ? $kegiatan->pemeriksaan()->draft()->count() : 0,
         ]);
     }
 
