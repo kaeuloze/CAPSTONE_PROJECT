@@ -64,6 +64,11 @@ return [
         'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
     ],
 
+    'riwayat' => [
+        // Jumlah baris per halaman di Daftar Warga Riwayat & Riwayat per Warga (SOP poin 5).
+        'per_halaman' => 15,
+    ],
+
     'presensi' => [
         'per_halaman' => 15,
         // Jeda pembaruan otomatis halaman realtime, dalam detik (keputusan 23: polling 5 detik).

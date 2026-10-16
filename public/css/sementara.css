@@ -198,3 +198,9 @@ dialog p { margin: 0; color: #6b7280; font-size: 13px; }
 .hasil-otomatis dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 10px 0 0; }
 .hasil-otomatis dt { color: #6b7280; }
 .hasil-otomatis dd { margin: 0; font-weight: 500; }
+
+/* Riwayat Pemeriksaan */
+.ket { font-size: 12px; color: #6b7280; }
+.tab-ket { font-size: 11px; color: #9ca3af; }
+fieldset.bagian-baca { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.bagian-baca input:disabled, fieldset.bagian-baca select:disabled { color: #111827; background: #fafafa; opacity: 1; -webkit-text-fill-color: #111827; }

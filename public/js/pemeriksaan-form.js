@@ -1,12 +1,13 @@
 // Formulir pemeriksaan: tab, penanda bagian yang diubah (simpan per bagian),
 // tombol Submit aktif setelah isian wajib (*) terisi, konfirmasi Batal, dan status memuat.
+// Dipakai juga di Detail Riwayat (hanya-baca: hanya tab) dan Edit Riwayat.
 (function () {
     var form = document.getElementById('form-pemeriksaan');
     if (!form) { return; }
 
     var daftarDiubah = document.getElementById('daftar-diubah');
     var tombolSubmit = document.getElementById('tombol-submit');
-    var adaPerubahan = daftarDiubah.children.length > 0;
+    var adaPerubahan = daftarDiubah ? daftarDiubah.children.length > 0 : false;
 
     // ---- Tab ----
     var tombolTab = document.querySelectorAll('[data-tab]');
@@ -60,6 +61,8 @@
         var panel = salahPertama.closest('.panel-tab');
         if (panel) { bukaTab(panel.id.replace('panel-', '')); }
     }
+
+    if (!daftarDiubah) { return; } // halaman hanya-baca (Detail Riwayat): cukup tab
 
     // ---- Penanda bagian yang diubah ----
     function tandaiDiubah(bagian) {

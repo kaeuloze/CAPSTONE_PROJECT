@@ -17,7 +17,7 @@
         ['Pemeriksaan', 'pemeriksaan.index', ['pemeriksaan.*']],
         ['Vaksinasi Balita', null, null],
         ['Master Vaksin', null, null],
-        ['Riwayat Pemeriksaan', null, null],
+        ['Riwayat Pemeriksaan', 'riwayat.index', ['riwayat.*']],
         ['Manajemen Pengguna', null, null],
         ['Rekapitulasi', null, null],
     ];

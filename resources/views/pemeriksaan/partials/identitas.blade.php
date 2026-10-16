@@ -1,4 +1,7 @@
-{{-- Kartu identitas warga + keterangan kehadiran (Figma form "hasil rev"). Variabel: $warga, $kategori, $usia. --}}
+{{--
+    Kartu identitas warga (Figma form "hasil rev" & Detail Riwayat). Variabel: $warga, $kategori, $usia.
+    Opsional: $keterangan (teks di bawah kartu; bawaan = keterangan kehadiran).
+--}}
 <section class="kartu identitas-periksa">
     <span class="avatar" aria-hidden="true"></span>
     <div>
@@ -7,4 +10,4 @@
     </div>
     <span class="badge">{{ $kategori->label() }} · {{ $usia }} th</span>
 </section>
-<div class="info" style="margin:0 0 16px">Kehadiran: Hadir (tercatat dari presensi kegiatan)</div>
+<div class="info" style="margin:0 0 16px">{{ $keterangan ?? 'Kehadiran: Hadir (tercatat dari presensi kegiatan)' }}</div>

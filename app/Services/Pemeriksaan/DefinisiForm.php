@@ -45,6 +45,33 @@ abstract class DefinisiForm
         return null;
     }
 
+    /**
+     * Hasil utama untuk kolom "Ringkasan" di Riwayat per Warga (disetujui: jenis + hasil utama).
+     * Relasi pengukuranDasar, skriningTbc, dan penyuluhanRujukan sebaiknya sudah di-eager-load.
+     * Form lain boleh menambah hasil khususnya (mis. skor PUMA pada Lansia).
+     *
+     * @return array<int, string>
+     */
+    public function ringkasan(\App\Models\Pemeriksaan $pemeriksaan): array
+    {
+        $hasil = [];
+        $ukur = $pemeriksaan->pengukuranDasar;
+        if ($ukur?->status_imt) {
+            $hasil[] = 'IMT '.$ukur->status_imt->label();
+        }
+        if ($ukur?->status_tekanan_darah) {
+            $hasil[] = 'TD '.$ukur->status_tekanan_darah->label();
+        }
+        if ($pemeriksaan->skriningTbc?->status_gejala_tbc === \App\Enums\StatusRisiko::Berisiko) {
+            $hasil[] = 'Gejala TBC Berisiko';
+        }
+        if ($pemeriksaan->penyuluhanRujukan?->status_rujukan === \App\Enums\StatusRujukan::RujukPuskesmas) {
+            $hasil[] = 'Dirujuk ke Puskesmas';
+        }
+
+        return $hasil;
+    }
+
     /** @return array<int, Bagian> */
     abstract protected function daftarBagian(): array;
 

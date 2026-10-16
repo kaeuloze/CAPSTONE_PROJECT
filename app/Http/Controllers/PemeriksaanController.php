@@ -109,13 +109,7 @@ class PemeriksaanController extends Controller
             return view('pemeriksaan.belum-tersedia', $data);
         }
 
-        $nilai = [];
-        $versi = [];
-        foreach ($definisi->bagian() as $bagian) {
-            $baris = $pemeriksaan?->{$bagian->relasi}()->first();
-            $nilai[$bagian->kunci] = $bagian->nilaiTersimpan($baris);
-            $versi[$bagian->kunci] = $bagian->versi($baris);
-        }
+        [$nilai, $versi] = $this->layanan->nilaiFormulir($definisi, $pemeriksaan);
 
         return view('pemeriksaan.form', $data + [
             'definisi' => $definisi,
@@ -149,7 +143,7 @@ class PemeriksaanController extends Controller
             'versi.*' => ['nullable', 'string', 'size:32'],
             'diubah' => ['nullable', 'array'],
             'diubah.*' => ['string', Rule::in(array_keys($definisi->bagian()))],
-        ], $this->pesanValidasi());
+        ], self::pesanValidasi());
 
         $submit = $data['aksi'] === 'submit';
         try {
@@ -180,7 +174,8 @@ class PemeriksaanController extends Controller
         return [$filter['cari'] ?? null, KategoriPemeriksaan::tryFrom($filter['kategori'] ?? '')];
     }
 
-    private function pesanValidasi(): array
+    /** Pesan validasi isian formulir pemeriksaan (dipakai juga Edit Riwayat). */
+    public static function pesanValidasi(): array
     {
         return [
             'numeric' => 'Isian harus berupa angka.',

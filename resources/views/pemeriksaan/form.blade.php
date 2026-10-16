@@ -23,52 +23,7 @@
     <form method="POST" action="{{ route('pemeriksaan.simpan', $warga->nik) }}" id="form-pemeriksaan" novalidate>
         @csrf
 
-        @php $tabAktif = array_key_first($definisi->tab()); @endphp
-        @if (count($definisi->tab()) > 1)
-            <div class="tab-form" role="tablist" aria-label="Jenis pemeriksaan">
-                @foreach ($definisi->tab() as $kunciTab => $tab)
-                    <button type="button" role="tab" id="tab-{{ $kunciTab }}" aria-controls="panel-{{ $kunciTab }}"
-                            aria-selected="{{ $kunciTab === $tabAktif ? 'true' : 'false' }}" @class(['aktif' => $kunciTab === $tabAktif])
-                            data-tab="{{ $kunciTab }}"
-                            @isset($tab['catatan']) data-catatan="{{ $tab['catatan'] }}" @endisset
-                            @isset($peringatan[$kunciTab]) data-peringatan="{{ $peringatan[$kunciTab] }}" @endisset
-                            @isset($tabNonaktif[$kunciTab]) disabled title="{{ $tabNonaktif[$kunciTab] }}" @endisset>{{ $tab['label'] }}</button>
-                @endforeach
-            </div>
-        @endif
-
-        @foreach ($definisi->tab() as $kunciTab => $tab)
-            @continue(isset($tabNonaktif[$kunciTab]))
-            <div role="tabpanel" id="panel-{{ $kunciTab }}" aria-labelledby="tab-{{ $kunciTab }}" class="panel-tab" @unless ($kunciTab === $tabAktif) hidden @endunless>
-                @foreach ($tab['bagian'] as $kunciBagian)
-                    @php $bagian = $definisi->bagian()[$kunciBagian]; @endphp
-                    <section class="kartu bagian-periksa" data-bagian="{{ $kunciBagian }}">
-                        <input type="hidden" name="versi[{{ $kunciBagian }}]" value="{{ old("versi.$kunciBagian", $versi[$kunciBagian]) }}">
-                        @include($definisi->view().'.'.$kunciBagian, ['kunci' => $kunciBagian, 'isi' => $nilai[$kunciBagian], 'bagian' => $bagian])
-                    </section>
-                @endforeach
-            </div>
-        @endforeach
-
-        {{-- Bagian di bawah semua tab (mis. Penyuluhan & Rujukan). --}}
-        @foreach ($definisi->bagianUmum() as $kunciBagian)
-            @php $bagian = $definisi->bagian()[$kunciBagian]; @endphp
-            <section class="kartu bagian-periksa" data-bagian="{{ $kunciBagian }}">
-                <input type="hidden" name="versi[{{ $kunciBagian }}]" value="{{ old("versi.$kunciBagian", $versi[$kunciBagian]) }}">
-                @include($definisi->view().'.'.$kunciBagian, ['kunci' => $kunciBagian, 'isi' => $nilai[$kunciBagian], 'bagian' => $bagian])
-            </section>
-        @endforeach
-
-        @if ($definisi->viewTambahan())
-            @include($definisi->viewTambahan())
-        @endif
-
-        {{-- Bagian yang diubah kader ini (diisi otomatis oleh JavaScript; keputusan 39: simpan per bagian). --}}
-        <div id="daftar-diubah">
-            @foreach ((array) old('diubah', []) as $kunciDiubah)
-                <input type="hidden" name="diubah[]" value="{{ $kunciDiubah }}">
-            @endforeach
-        </div>
+        @include('pemeriksaan.partials.isi-form')
 
         <div class="aksi-pemeriksaan">
             <p><strong>Simpan dan Submit berlaku untuk seluruh tab ({{ collect($definisi->tab())->pluck('label')->implode(', ') }}) — semua isian dikirim sekaligus sebagai satu pemeriksaan.</strong></p>

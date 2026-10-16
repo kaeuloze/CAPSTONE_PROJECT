@@ -109,6 +109,24 @@ class PemeriksaanService
         return $pesan;
     }
 
+    /**
+     * Nilai tersimpan & versi tiap bagian untuk mengisi formulir (menu Pemeriksaan, Detail & Edit Riwayat).
+     *
+     * @return array{0: array<string, array<string, ?string>>, 1: array<string, string>}
+     */
+    public function nilaiFormulir(DefinisiForm $form, ?Pemeriksaan $pemeriksaan): array
+    {
+        $nilai = [];
+        $versi = [];
+        foreach ($form->bagian() as $bagian) {
+            $baris = $pemeriksaan?->{$bagian->relasi}()->first();
+            $nilai[$bagian->kunci] = $bagian->nilaiTersimpan($baris);
+            $versi[$bagian->kunci] = $bagian->versi($baris);
+        }
+
+        return [$nilai, $versi];
+    }
+
     /** True bila warga tercatat HADIR pada kegiatan. */
     public function hadir(Kegiatan $kegiatan, Warga $warga): bool
     {
@@ -145,38 +163,10 @@ class PemeriksaanService
                 throw new AksiDitolakException("Pemeriksaan {$warga->nama_warga} sudah di-Submit. Koreksi dilakukan di menu Riwayat Pemeriksaan.");
             }
 
-            $konflik = [];
-            foreach ($form->bagian() as $bagian) {
-                if ($diubah !== null && ! in_array($bagian->kunci, $diubah, true)) {
-                    continue; // bagian ini tidak disentuh kader → biarkan isian meja lain
-                }
-                if (! $bagian->berlakuUntuk($warga)) {
-                    continue; // mis. Kadar HB untuk remaja laki-laki (tab dinonaktifkan)
-                }
-
-                $baris = $pemeriksaan->{$bagian->relasi}()->lockForUpdate()->first();
-                $baru = $bagian->nilaiIsian($isian[$bagian->kunci] ?? []);
-                if ($baru === $bagian->nilaiTersimpan($baris)) {
-                    continue; // tidak ada perubahan
-                }
-                if (($versi[$bagian->kunci] ?? null) !== $bagian->versi($baris)) {
-                    $konflik[] = $bagian->judul;
-
-                    continue;
-                }
-
-                $data = $bagian->keDatabase($baru) + ($bagian->hitung ? ($bagian->hitung)($baru, $warga, $kegiatan) : []);
-                $baris ? $baris->update($data) : $pemeriksaan->{$bagian->relasi}()->create($data);
-            }
-
-            if ($konflik !== []) {
-                throw new DataSudahBerubahException(
-                    'Bagian "'.implode('", "', $konflik).'" baru saja diubah oleh kader lain. Muat ulang halaman untuk melihat data terbaru, lalu ulangi perubahan Anda.'
-                );
-            }
+            $this->terapkanIsian($pemeriksaan, $kegiatan, $warga, $form, $isian, $versi, $diubah);
 
             if ($submit) {
-                $this->submit($pemeriksaan, $form, $warga);
+                $this->tandaiSelesai($pemeriksaan, $form, $warga);
             } else {
                 $pemeriksaan->touch();
             }
@@ -185,8 +175,53 @@ class PemeriksaanService
         });
     }
 
-    /** Mengecek isian wajib (gabungan isian semua meja) lalu menandai pemeriksaan selesai. */
-    private function submit(Pemeriksaan $pemeriksaan, DefinisiForm $form, Warga $warga): void
+    /**
+     * Menyimpan isian per bagian (keputusan 39). Dipakai menu Pemeriksaan (Simpan/Submit) dan Edit Riwayat.
+     * Hanya bagian yang diubah yang disimpan; bila bagian yang sama sudah diubah kader lain sejak
+     * formulir dibuka (versi berbeda) → seluruh perubahan ditolak.
+     *
+     * @throws DataSudahBerubahException
+     */
+    public function terapkanIsian(Pemeriksaan $pemeriksaan, Kegiatan $kegiatan, Warga $warga, DefinisiForm $form, array $isian, array $versi, ?array $diubah): void
+    {
+        $konflik = [];
+        foreach ($form->bagian() as $bagian) {
+            if ($diubah !== null && ! in_array($bagian->kunci, $diubah, true)) {
+                continue; // bagian ini tidak disentuh kader → biarkan isian meja lain
+            }
+            if (! $bagian->berlakuUntuk($warga)) {
+                continue; // mis. Kadar HB untuk remaja laki-laki (tab dinonaktifkan)
+            }
+
+            $baris = $pemeriksaan->{$bagian->relasi}()->lockForUpdate()->first();
+            $baru = $bagian->nilaiIsian($isian[$bagian->kunci] ?? []);
+            if ($baru === $bagian->nilaiTersimpan($baris)) {
+                continue; // tidak ada perubahan
+            }
+            if (($versi[$bagian->kunci] ?? null) !== $bagian->versi($baris)) {
+                $konflik[] = $bagian->judul;
+
+                continue;
+            }
+
+            $data = $bagian->keDatabase($baru) + ($bagian->hitung ? ($bagian->hitung)($baru, $warga, $kegiatan) : []);
+            $baris ? $baris->update($data) : $pemeriksaan->{$bagian->relasi}()->create($data);
+        }
+
+        if ($konflik !== []) {
+            throw new DataSudahBerubahException(
+                'Bagian "'.implode('", "', $konflik).'" baru saja diubah oleh kader lain. Muat ulang halaman untuk melihat data terbaru, lalu ulangi perubahan Anda.'
+            );
+        }
+    }
+
+    /**
+     * Mengecek isian wajib (gabungan isian semua meja) lalu menandai pemeriksaan selesai dan
+     * menghitung ulang jenis pemeriksaan dari bagian yang terisi. Dipakai Submit dan Edit Riwayat.
+     *
+     * @throws ValidationException
+     */
+    public function tandaiSelesai(Pemeriksaan $pemeriksaan, DefinisiForm $form, Warga $warga): void
     {
         $kurang = [];
         $jenis = [];
