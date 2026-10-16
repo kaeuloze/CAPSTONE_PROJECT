@@ -76,7 +76,9 @@ abstract class DefinisiForm
         }
         $bumil = $pemeriksaan->pemeriksaanBumil;
         if ($bumil?->usia_kehamilan_minggu) {
-            $hasil[] = 'Usia kehamilan '.str_replace('-', '–', $bumil->usia_kehamilan_minggu).' minggu';
+            $hasil[] = $bumil->jenis_ibu === \App\Enums\JenisIbu::Nifas
+                ? 'Setelah bersalin '.$bumil->usia_kehamilan_minggu
+                : 'Usia kehamilan '.str_replace('-', '–', $bumil->usia_kehamilan_minggu).' minggu';
         }
         if ($bumil?->status_ploting_lila === \App\Enums\StatusLila::Kek) {
             $hasil[] = 'LILA KEK';

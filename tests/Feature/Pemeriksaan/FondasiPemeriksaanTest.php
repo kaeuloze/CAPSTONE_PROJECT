@@ -179,6 +179,8 @@ class FondasiPemeriksaanTest extends TestCase
 
     public function test_kategori_tanpa_form_menampilkan_sedang_disiapkan(): void
     {
+        // Semua kategori sudah punya form; uji pengaman memakai katalog kosong.
+        $this->app->instance(KatalogForm::class, new KatalogForm);
         $bunifas = $this->hadirkan($this->buatWarga('3404000000000001', ['status_kondisi' => 'nifas']));
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $bunifas->nik))

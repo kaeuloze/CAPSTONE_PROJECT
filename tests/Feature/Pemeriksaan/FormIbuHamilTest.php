@@ -87,7 +87,7 @@ class FormIbuHamilTest extends TestCase
             ->assertOk()
             ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Hamil · 28 th')
             ->assertSeeInOrder(['Ibu Hamil', 'Ibu Nifas'])
-            ->assertSee('disabled title="Status ibu saat ini: Hamil"', false)
+            ->assertSee('disabled title="Status ibu saat ini: Ibu Hamil"', false)
             ->assertSee('Pemeriksaan Sesuai Umur Kehamilan')->assertSee('&lt; 4 minggu', false)->assertSee('36 - 40 minggu')
             ->assertSeeInOrder(['Berat badan (kg)', 'LILA (cm)', 'Tekanan darah (mmHg)'])
             ->assertDontSee('Tinggi Badan (cm)')

@@ -9,7 +9,8 @@
     $peringatan ??= [];
     $hanyaBaca ??= false;
     $jenisDilakukan ??= null;
-    $tabAktif = array_key_first($definisi->tab());
+    // Tab pertama yang tidak dikunci (mis. Ibu Nifas: tab Ibu Hamil dikunci).
+    $tabAktif = collect(array_keys($definisi->tab()))->first(fn ($k) => ! isset($tabNonaktif[$k]));
     $tidakDiperiksa = fn (array $tab) => $jenisDilakukan !== null
         && ! in_array(($tab['jenis'] ?? \App\Enums\JenisPemeriksaan::Rutin)->value, $jenisDilakukan, true);
 @endphp

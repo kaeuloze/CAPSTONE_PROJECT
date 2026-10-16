@@ -57,7 +57,7 @@ class FormIbuHamil extends DefinisiForm
 
     public function tabNonaktif(Warga $warga, CarbonInterface $tanggalPeriksa): array
     {
-        return ['nifas' => 'Status ibu saat ini: Hamil'];
+        return ['nifas' => 'Status ibu saat ini: Ibu Hamil'];
     }
 
     public function keteranganAksi(): ?string
@@ -77,63 +77,77 @@ class FormIbuHamil extends DefinisiForm
 
     protected function daftarBagian(): array
     {
-        $jenisIbu = ['jenis_ibu' => JenisIbu::Hamil];
-        $relasiBumil = 'pemeriksaanBumil';
-
         return [
-            new Bagian(
-                kunci: 'kehamilan',
-                judul: 'Pemeriksaan Sesuai Umur Kehamilan',
-                relasi: $relasiBumil,
-                aturan: ['usia_kehamilan_minggu' => ['nullable', Rule::in(array_keys(self::USIA_KEHAMILAN))]],
-                wajib: ['usia_kehamilan_minggu'],
-                hitung: fn () => $jenisIbu,
-            ),
-            new Bagian(
-                kunci: 'pengukuran',
-                judul: 'Skrining Penimbangan dan Pengukuran',
-                relasi: 'pengukuranDasar',
-                aturan: ['berat_badan' => BagianUmum::angka(1, 300), 'lila' => BagianUmum::angka(5, 60)] + BagianUmum::aturanTekananDarah(),
-                wajib: ['berat_badan', 'lila', 'td_sistolik', 'td_diastolik'],
-                hitung: fn (array $n) => ['status_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik'])],
-                uraikan: BagianUmum::uraikanTekananDarah(...),
-                susun: BagianUmum::susunTekananDarah(...),
-                // Ploting LILA & TD dihitung otomatis dari angka (disetujui), disimpan di pemeriksaan_bumil.
-                turunan: fn (array $n) => [$relasiBumil => $jenisIbu + [
-                    'status_ploting_lila' => Kalkulator::statusLila($n['lila']),
-                    'status_ploting_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik']),
-                ]],
-            ),
-            new Bagian(
-                kunci: 'ploting_imt',
-                judul: 'Ploting IMT sesuai kurva Buku KIA',
-                relasi: $relasiBumil,
-                aturan: ['status_ploting_imt' => ['nullable', Rule::in(array_keys(self::PLOTING_IMT))]],
-                hitung: fn () => $jenisIbu,
-            ),
+            $this->bagianRentang('kehamilan', 'Pemeriksaan Sesuai Umur Kehamilan', self::USIA_KEHAMILAN),
+            $this->bagianPengukuran(['berat_badan' => BagianUmum::angka(1, 300), 'lila' => BagianUmum::angka(5, 60)]),
+            $this->bagianPlotingImt(),
             BagianUmum::tbc(),
-            new Bagian(
-                kunci: 'pelayanan',
-                judul: 'Pelayanan Kesehatan',
-                relasi: $relasiBumil,
-                aturan: [
-                    'jumlah_ttd_mms' => ['nullable', 'integer', 'between:0,500'],
-                    'status_konsumsi_ttd_rutin' => ['nullable', 'boolean'],
-                    'komposisi_mt_bumil_kek' => ['nullable', 'string', 'max:255', 'not_regex:/[<>]/'],
-                    'status_rutin_mt_kek' => ['nullable', 'boolean'],
-                ],
-                boolean: ['status_konsumsi_ttd_rutin', 'status_rutin_mt_kek'],
-                hitung: fn () => $jenisIbu,
-            ),
-            new Bagian(
-                kunci: 'kelas',
-                judul: 'Kelas Ibu Hamil',
-                relasi: $relasiBumil,
-                aturan: ['ikut_kelas_ibu_hamil' => ['nullable', 'boolean']],
-                boolean: ['ikut_kelas_ibu_hamil'],
-                hitung: fn () => $jenisIbu,
-            ),
+            $this->bagianBumil('pelayanan', 'Pelayanan Kesehatan', [
+                'jumlah_ttd_mms' => ['nullable', 'integer', 'between:0,500'],
+                'status_konsumsi_ttd_rutin' => ['nullable', 'boolean'],
+                'komposisi_mt_bumil_kek' => ['nullable', 'string', 'max:255', 'not_regex:/[<>]/'],
+                'status_rutin_mt_kek' => ['nullable', 'boolean'],
+            ], ['status_konsumsi_ttd_rutin', 'status_rutin_mt_kek']),
+            $this->bagianBumil('kelas', 'Kelas Ibu Hamil', ['ikut_kelas_ibu_hamil' => ['nullable', 'boolean']], ['ikut_kelas_ibu_hamil']),
             BagianUmum::penyuluhan(),
         ];
+    }
+
+    /** Jenis ibu yang dicatat di pemeriksaan_bumil.jenis_ibu. */
+    protected function jenisIbu(): JenisIbu
+    {
+        return JenisIbu::Hamil;
+    }
+
+    /** Bagian yang tersimpan di tabel pemeriksaan_bumil (selalu menyertakan jenis_ibu). */
+    protected function bagianBumil(string $kunci, string $judul, array $aturan, array $boolean = [], array $wajib = []): Bagian
+    {
+        $jenisIbu = ['jenis_ibu' => $this->jenisIbu()];
+
+        return new Bagian(
+            kunci: $kunci,
+            judul: $judul,
+            relasi: 'pemeriksaanBumil',
+            aturan: $aturan,
+            wajib: $wajib,
+            boolean: $boolean,
+            hitung: fn () => $jenisIbu,
+        );
+    }
+
+    /** Pilihan rentang waktu (usia kehamilan / waktu setelah bersalin), wajib, disimpan di usia_kehamilan_minggu. */
+    protected function bagianRentang(string $kunci, string $judul, array $pilihan): Bagian
+    {
+        return $this->bagianBumil($kunci, $judul, ['usia_kehamilan_minggu' => ['nullable', Rule::in(array_keys($pilihan))]], wajib: ['usia_kehamilan_minggu']);
+    }
+
+    /** Ploting IMT sesuai kurva Buku KIA — dipilih kader. */
+    protected function bagianPlotingImt(): Bagian
+    {
+        return $this->bagianBumil('ploting_imt', 'Ploting IMT sesuai kurva Buku KIA', ['status_ploting_imt' => ['nullable', Rule::in(array_keys(self::PLOTING_IMT))]]);
+    }
+
+    /**
+     * BB (+ LILA untuk ibu hamil) & TD, semuanya wajib. Ploting LILA & TD dihitung otomatis (disetujui) dan
+     * disimpan di pemeriksaan_bumil lewat turunan; status TD juga di pengukuran_dasar.
+     */
+    protected function bagianPengukuran(array $aturanAngka): Bagian
+    {
+        $jenisIbu = ['jenis_ibu' => $this->jenisIbu()];
+        $adaLila = array_key_exists('lila', $aturanAngka);
+
+        return new Bagian(
+            kunci: 'pengukuran',
+            judul: 'Skrining Penimbangan dan Pengukuran',
+            relasi: 'pengukuranDasar',
+            aturan: $aturanAngka + BagianUmum::aturanTekananDarah(),
+            wajib: [...array_keys($aturanAngka), 'td_sistolik', 'td_diastolik'],
+            hitung: fn (array $n) => ['status_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik'])],
+            uraikan: BagianUmum::uraikanTekananDarah(...),
+            susun: BagianUmum::susunTekananDarah(...),
+            turunan: fn (array $n) => ['pemeriksaanBumil' => $jenisIbu
+                + ($adaLila ? ['status_ploting_lila' => Kalkulator::statusLila($n['lila'])] : [])
+                + ['status_ploting_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik'])]],
+        );
     }
 }
