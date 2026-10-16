@@ -60,10 +60,12 @@ class KegiatanTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('kegiatan.index'))
             ->assertOk()->assertSee('Kelola Kegiatan')->assertSee('Posyandu Aktif')->assertDontSee('Posyandu September')
-            ->assertSee('Sabtu, 10 Oktober 2026')->assertSee('Total: 2')->assertSee('Presensi');
+            ->assertSee('Sabtu, 10 Oktober 2026')->assertSee('Presensi')->assertSee('Selesaikan Kegiatan')
+            ->assertSee('Kehadiran per kategori (Hadir / Total)')->assertSee('Arsip Kegiatan <span class="badge kecil">1</span>', false);
 
         $this->actingAs($this->kader)->get(route('kegiatan.index', ['tab' => 'arsip']))
-            ->assertOk()->assertSee('Posyandu September')->assertDontSee('Posyandu Aktif')->assertSee('Lihat Presensi');
+            ->assertOk()->assertSee('Posyandu September')->assertDontSee('Posyandu Aktif')->assertSee('Lihat Presensi')
+            ->assertSee('Rabu, 16 September 2026')->assertSee('Hadir / Total');
     }
 
     public function test_buat_dan_mulai_kegiatan(): void
@@ -137,7 +139,7 @@ class KegiatanTest extends TestCase
         $this->assertTrue($k->fresh()->status_kegiatan);
 
         $this->travelTo(CarbonImmutable::parse('2026-10-11 08:00:00'));
-        $this->actingAs($this->kader)->get(route('kegiatan.index'))->assertSee('Belum ada kegiatan yang berlangsung');
+        $this->actingAs($this->kader)->get(route('kegiatan.index'))->assertSee('Belum ada kegiatan yang sedang berlangsung');
         $this->assertFalse($k->fresh()->status_kegiatan);
         $this->assertSame(1, $k->kehadiran()->where('status_kehadiran', false)->count());
     }
@@ -242,5 +244,63 @@ class KegiatanTest extends TestCase
         $this->actingAs($this->kader)->delete(route('kegiatan.destroy', $k2))->assertSessionHas('galat');
 
         $this->assertSame(2, Kegiatan::count());
+    }
+
+    public function test_kartu_berlangsung_menampilkan_kehadiran_per_kategori(): void
+    {
+        $k = $this->kegiatan();
+        $balita = $this->buatWarga('3404000000000001', ['tanggal_lahir' => '2024-01-01']);
+        $this->buatWarga('3404000000000002', ['tanggal_lahir' => '2012-01-01']);              // remaja
+        $dewasa = $this->buatWarga('3404000000000003');                                      // dewasa
+        $this->buatWarga('3404000000000004', ['tanggal_lahir' => '1950-01-01']);              // lansia
+        $hamil = $this->buatWarga('3404000000000005', ['status_kondisi' => 'hamil']);         // dewasa tapi hamil
+        $this->buatWarga('3404000000000006', ['status_kondisi' => 'menyusui']);
+        foreach ([$balita, $dewasa, $hamil] as $w) {
+            $k->kehadiran()->create(['nik' => $w->nik, 'status_kehadiran' => true, 'waktu_kehadiran' => now()]);
+        }
+
+        $perKelompok = app(\App\Services\PresensiService::class)->ringkasanPerKelompok($k);
+        $this->assertSame(['hadir' => 1, 'total' => 1], array_intersect_key($perKelompok['balita'], ['hadir' => 0, 'total' => 0]));
+        $this->assertSame(1, $perKelompok['remaja']['total']);
+        $this->assertSame(['hadir' => 1, 'total' => 1], array_intersect_key($perKelompok['dewasa'], ['hadir' => 0, 'total' => 0]));
+        $this->assertSame(1, $perKelompok['lansia']['total']);
+        $this->assertSame(['hadir' => 1, 'total' => 2], array_intersect_key($perKelompok['ibu'], ['hadir' => 0, 'total' => 0]));
+        $this->assertSame(6, array_sum(array_column($perKelompok, 'total'))); // jumlah kelompok = Total Warga
+
+        $this->actingAs($this->kader)->get(route('kegiatan.index'))
+            ->assertSee('Ibu Hamil / Nifas')->assertSee('1 / 2');
+    }
+
+    public function test_tampilan_kosong_punya_tombol_buat_dan_lihat_arsip(): void
+    {
+        $this->actingAs($this->kader)->get(route('kegiatan.index'))
+            ->assertSee('Belum ada kegiatan yang sedang berlangsung')
+            ->assertSee('+ Buat Kegiatan Baru')->assertSee('Lihat Arsip Kegiatan');
+    }
+
+    public function test_arsip_bisa_dicari_dan_difilter_tahun(): void
+    {
+        $this->kegiatan(['nama_kegiatan' => 'Posyandu Mei 2025', 'status_kegiatan' => false, 'tanggal_kegiatan' => '2025-05-14']);
+        $this->kegiatan(['nama_kegiatan' => 'Posyandu Juni 2026', 'status_kegiatan' => false, 'tanggal_kegiatan' => '2026-06-10']);
+
+        $this->actingAs($this->kader)->get(route('kegiatan.index', ['tab' => 'arsip', 'tahun' => 2025]))
+            ->assertSee('Posyandu Mei 2025')->assertDontSee('Posyandu Juni 2026')->assertSee('Tahun: 2026');
+        $this->actingAs($this->kader)->get(route('kegiatan.index', ['tab' => 'arsip', 'cari' => 'juni']))
+            ->assertSee('Posyandu Juni 2026')->assertDontSee('Posyandu Mei 2025');
+        $this->actingAs($this->kader)->get(route('kegiatan.index', ['tab' => 'arsip', 'tahun' => 'abc']))
+            ->assertSessionHasErrors('tahun');
+    }
+
+    public function test_dialog_selesaikan_memperingatkan_pemeriksaan_belum_submit(): void
+    {
+        $k = $this->kegiatan(['nama_kegiatan' => 'Posyandu Oktober']);
+        $this->buatPemeriksaan($this->buatWarga('3404000000000001'), $k); // status draft
+        $this->buatPemeriksaan($this->buatWarga('3404000000000002'), $k);
+
+        $this->actingAs($this->kader)->get(route('kegiatan.index'))
+            ->assertSee('Selesaikan kegiatan Posyandu Oktober?')
+            ->assertSee('<strong>2 pemeriksaan yang belum di-Submit</strong>', false);
+        $this->actingAs($this->kader)->get(route('presensi.index', $k))
+            ->assertSee('<strong>2 pemeriksaan yang belum di-Submit</strong>', false);
     }
 }

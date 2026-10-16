@@ -144,3 +144,23 @@ dialog p { margin: 0; color: #6b7280; font-size: 13px; }
     .grid-kartu, .ringkasan { grid-template-columns: 1fr; }
     .notifikasi { left: 16px; right: 16px; max-width: none; }
 }
+
+/* Daftar Kegiatan (Figma hasil rev) */
+.badge.kecil { padding: 1px 8px; font-size: 11px; margin-left: 4px; }
+.kartu-kegiatan .kepala-kartu { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.kartu-kegiatan .judul-kartu { display: flex; gap: 16px; align-items: center; }
+.kartu-kegiatan .judul-kartu .ikon { width: 48px; height: 48px; }
+.kartu-kegiatan .judul-kartu h2 { font-size: 20px; margin: 0 0 4px; }
+.kartu-kegiatan .tombol-kartu { margin: 0; }
+.per-kelompok { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.per-kelompok div { display: flex; justify-content: space-between; gap: 8px; background: #f5f5f5; border-radius: 8px; padding: 8px 12px; font-size: 12px; }
+.per-kelompok strong { font-weight: 500; white-space: nowrap; }
+.kartu-kegiatan .petunjuk { border-top: 1px solid #e5e7eb; padding-top: 12px; }
+.kartu-kegiatan { margin-bottom: 20px; }
+.kosong-besar { border-style: dashed; border-width: 1.5px; padding: 48px 16px; margin-bottom: 20px; }
+.kosong-besar .ikon-bulat { display: block; width: 56px; height: 56px; border-radius: 50%; background: #e5e5e5; margin: 0 auto 16px; }
+.kosong-besar h2 { font-size: 18px; font-weight: 500; color: #111827; margin: 0 0 8px; }
+.kosong-besar p { max-width: 520px; margin: 0 auto 20px; font-size: 13px; }
+.pesan.info-arsip { background: #f5f5f5; border: 0; color: #374151; }
+@media (max-width: 1100px) { .per-kelompok { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .per-kelompok { grid-template-columns: 1fr; } }

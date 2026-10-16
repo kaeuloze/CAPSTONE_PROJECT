@@ -1,4 +1,4 @@
-{{-- Kelola Kegiatan (wireframe 2.39; Activity Diagram 2.5; revisi: tab Berlangsung / Arsip). --}}
+{{-- Kelola Kegiatan (Figma "Daftar Kegiatan — hasil rev": Tab Berlangsung, Tab Arsip, Tampilan kosong). --}}
 @extends('layouts.app')
 
 @section('judul', 'Kelola Kegiatan')
@@ -10,48 +10,107 @@
 @section('isi')
     <nav class="tab" aria-label="Status kegiatan">
         <a href="{{ route('kegiatan.index') }}" @class(['aktif' => $tab === 'berlangsung']) @if ($tab === 'berlangsung') aria-current="page" @endif>Kegiatan Berlangsung</a>
-        <a href="{{ route('kegiatan.index', ['tab' => 'arsip']) }}" @class(['aktif' => $tab === 'arsip']) @if ($tab === 'arsip') aria-current="page" @endif>Arsip Kegiatan</a>
+        <a href="{{ route('kegiatan.index', ['tab' => 'arsip']) }}" @class(['aktif' => $tab === 'arsip']) @if ($tab === 'arsip') aria-current="page" @endif>
+            Arsip Kegiatan <span class="badge kecil">{{ $jumlahArsip }}</span>
+        </a>
     </nav>
 
-    @if ($daftar->isEmpty())
-        <div class="kosong-besar">
-            @if ($tab === 'berlangsung')
-                <strong>Belum ada kegiatan yang berlangsung.</strong><br>
-                Klik "+ Buat Kegiatan Baru" untuk memulai kegiatan posyandu hari ini.
-            @else
-                Belum ada kegiatan yang selesai.
-            @endif
-        </div>
-    @else
-        <div class="grid-kartu">
-            @foreach ($daftar as $kegiatan)
-                <article @class(['kartu-kegiatan', 'berlangsung' => $kegiatan->status_kegiatan])>
-                    <div class="atas">
-                        <span class="ikon" aria-hidden="true"></span>
-                        <span class="badge">{{ $kegiatan->labelStatus() }}</span>
-                    </div>
-                    <h2><a href="{{ route('kegiatan.edit', $kegiatan) }}">{{ $kegiatan->nama_kegiatan }}</a></h2>
-                    <p class="meta">{{ $kegiatan->tanggalLengkap() }}</p>
-                    <p class="meta">Hadir: {{ $kegiatan->jumlah_hadir }} &nbsp; Total: {{ $kegiatan->status_kegiatan ? $totalWarga : $kegiatan->jumlah_tercatat }}</p>
-                    <div class="tombol-kartu">
-                        @if ($kegiatan->status_kegiatan)
-                            <a href="{{ route('presensi.index', $kegiatan) }}" class="tombol">Presensi</a>
-                        @else
-                            <a href="{{ route('presensi.index', $kegiatan) }}" class="tombol kecil">Lihat Presensi</a>
-                            <a href="{{ route('kegiatan.edit', $kegiatan) }}" class="tombol kecil">Edit</a>
-                        @endif
-                    </div>
-                    <p class="petunjuk">*Klik untuk melihat detail kegiatan</p>
-                </article>
-            @endforeach
-        </div>
-    @endif
-
-    @include('partials.halaman', ['data' => $daftar, 'satuan' => 'kegiatan'])
-
     @if ($tab === 'berlangsung')
-        <div class="info">Hanya satu kegiatan yang dapat berlangsung pada satu waktu. Kegiatan otomatis selesai {{ config('posyandu.kegiatan.durasi_jam') }} jam setelah dibuat atau dibuka kembali; warga yang belum hadir dicatat Tidak Hadir.</div>
+        @if ($aktif)
+            <article class="kartu-kegiatan berlangsung">
+                <div class="kepala-kartu">
+                    <div class="judul-kartu">
+                        <span class="ikon" aria-hidden="true"></span>
+                        <div>
+                            <h2><a href="{{ route('kegiatan.edit', $aktif) }}">{{ $aktif->nama_kegiatan }}</a></h2>
+                            <p class="meta">{{ $aktif->tanggalLengkap() }}</p>
+                        </div>
+                    </div>
+                    <div class="tombol-kartu">
+                        <a href="{{ route('presensi.index', $aktif) }}" class="tombol">Presensi</a>
+                        <button type="button" class="tombol" data-buka-dialog="dialog-selesaikan">Selesaikan Kegiatan</button>
+                    </div>
+                </div>
+
+                <div class="ringkasan">
+                    <div><span>Total Warga</span><strong>{{ $ringkasan['total'] }}</strong></div>
+                    <div><span>Hadir</span><strong>{{ $ringkasan['hadir'] }}</strong></div>
+                    <div><span>Belum Hadir</span><strong>{{ $ringkasan['tidak_hadir'] }}</strong></div>
+                </div>
+
+                <p class="label">Kehadiran per kategori (Hadir / Total)</p>
+                <div class="per-kelompok">
+                    @foreach ($perKelompok as $kelompok)
+                        <div><span>{{ $kelompok['label'] }}</span><strong>{{ $kelompok['hadir'] }} / {{ $kelompok['total'] }}</strong></div>
+                    @endforeach
+                </div>
+
+                <p class="petunjuk">*Klik kartu untuk melihat dan mengubah detail kegiatan</p>
+            </article>
+
+            @include('kegiatan.partials.dialog-selesaikan', ['kegiatan' => $aktif, 'belumSubmit' => $belumSubmit])
+        @else
+            <div class="kosong-besar">
+                <span class="ikon-bulat" aria-hidden="true"></span>
+                <h2>Belum ada kegiatan yang sedang berlangsung</h2>
+                <p>Buat kegiatan posyandu bulan ini untuk mulai mencatat presensi, pemeriksaan, dan vaksinasi balita. Kegiatan sebelumnya yang sudah selesai tetap tersimpan di tab Arsip Kegiatan.</p>
+                <div class="aksi-form" style="justify-content:center">
+                    <a href="{{ route('kegiatan.create') }}" class="tombol abu">+ Buat Kegiatan Baru</a>
+                    <a href="{{ route('kegiatan.index', ['tab' => 'arsip']) }}" class="tombol">Lihat Arsip Kegiatan</a>
+                </div>
+            </div>
+        @endif
+
+        <div class="info">Tab ini menampilkan kegiatan yang sedang berlangsung pada hari pelaksanaan posyandu. Kegiatan yang diselesaikan, atau aktif lebih dari {{ config('posyandu.kegiatan.durasi_jam') }} jam, otomatis pindah ke tab Arsip Kegiatan. Hitungan {{ config('posyandu.kegiatan.durasi_jam') }} jam dimulai sejak kegiatan dibuat, atau sejak dibuka kembali dari arsip.</div>
     @else
-        <div class="info">Kegiatan di arsip dapat dibuka kembali melalui Edit → status Berlangsung (misalnya untuk melanjutkan pemeriksaan yang masih draft).</div>
+        <form method="GET" action="{{ route('kegiatan.index') }}" class="saring" role="search">
+            <input type="hidden" name="tab" value="arsip">
+            <input type="search" name="cari" value="{{ $cari }}" maxlength="100" placeholder="Cari nama kegiatan..." aria-label="Cari nama kegiatan">
+            <select name="tahun" aria-label="Filter tahun" onchange="this.form.submit()">
+                <option value="">Tahun: Semua</option>
+                @foreach ($daftarTahun as $tahun)
+                    <option value="{{ $tahun }}" @selected((int) $tahunDipilih === (int) $tahun)>Tahun: {{ $tahun }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="tombol">Cari</button>
+        </form>
+
+        <div class="bungkus-tabel">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col" style="width:56px">No</th>
+                        <th scope="col">Nama Kegiatan</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col">Hadir / Total</th>
+                        <th scope="col">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($daftar as $kegiatan)
+                        <tr>
+                            <td>{{ $daftar->firstItem() + $loop->index }}</td>
+                            <td>{{ $kegiatan->nama_kegiatan }}</td>
+                            <td>{{ $kegiatan->tanggalLengkap() }}</td>
+                            <td>{{ $kegiatan->jumlah_hadir }} / {{ $kegiatan->jumlah_tercatat }}</td>
+                            <td>
+                                <div class="aksi">
+                                    <a href="{{ route('presensi.index', $kegiatan) }}" class="tombol kecil">Lihat Presensi</a>
+                                    <a href="{{ route('kegiatan.edit', $kegiatan) }}" class="tombol kecil">✎ Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="kosong">
+                            {{ ($cari !== '' || $tahunDipilih) ? 'Tidak ada kegiatan yang cocok dengan pencarian atau filter.' : 'Belum ada kegiatan yang selesai.' }}
+                        </td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @include('partials.halaman', ['data' => $daftar, 'satuan' => 'kegiatan'])
+
+        <div class="info">Arsip berisi kegiatan yang sudah selesai. "Lihat Presensi" membuka daftar kehadiran kegiatan tersebut (hanya-lihat). "✎ Edit" membuka halaman Detail dan Edit Kegiatan; bila perlu koreksi presensi, ubah status menjadi "Berlangsung" di sana, lalu kegiatan kembali muncul di tab Kegiatan Berlangsung.</div>
     @endif
 @endsection

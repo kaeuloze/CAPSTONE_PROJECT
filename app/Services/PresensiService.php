@@ -44,6 +44,55 @@ class PresensiService
         return ['total' => $total, 'hadir' => $hadir, 'tidak_hadir' => $total - $hadir];
     }
 
+    /** Label kelompok kehadiran di kartu Kegiatan Berlangsung (Figma "Daftar Kegiatan — hasil rev"). */
+    public const KELOMPOK = [
+        'balita' => 'Balita',
+        'remaja' => 'Remaja',
+        'dewasa' => 'Dewasa',
+        'lansia' => 'Lansia',
+        'ibu' => 'Ibu Hamil / Nifas',
+    ];
+
+    /**
+     * Kehadiran per kelompok (Hadir / Total). Ibu hamil/nifas/menyusui dihitung terpisah di kelompok
+     * "Ibu Hamil / Nifas" dan tidak ikut kategori usianya (disetujui), sehingga jumlah semua kelompok = Total.
+     * Kategori usia dihitung per tanggal kegiatan.
+     *
+     * @return array<string, array{label: string, hadir: int, total: int}>
+     */
+    public function ringkasanPerKelompok(Kegiatan $kegiatan): array
+    {
+        $acuan = $kegiatan->tanggal_kegiatan;
+        $sampai = fn (KategoriUsia $k) => $k->rentangTanggalLahir($acuan)['sampai'];
+
+        $baris = $this->dasar($kegiatan, null, null)
+            ->toBase()
+            ->selectRaw(
+                "CASE
+                    WHEN warga.status_kondisi <> 'normal' THEN 'ibu'
+                    WHEN warga.tanggal_lahir <= ? THEN 'lansia'
+                    WHEN warga.tanggal_lahir <= ? THEN 'dewasa'
+                    WHEN warga.tanggal_lahir <= ? THEN 'remaja'
+                    ELSE 'balita'
+                 END as kelompok, COUNT(*) as total, COALESCE(SUM(COALESCE(k.status_kehadiran, 0)), 0) as hadir",
+                [$sampai(KategoriUsia::Lansia), $sampai(KategoriUsia::Dewasa), $sampai(KategoriUsia::Remaja)]
+            )
+            ->groupBy('kelompok')
+            ->get()
+            ->keyBy('kelompok');
+
+        $hasil = [];
+        foreach (self::KELOMPOK as $kunci => $label) {
+            $hasil[$kunci] = [
+                'label' => $label,
+                'hadir' => (int) ($baris[$kunci]->hadir ?? 0),
+                'total' => (int) ($baris[$kunci]->total ?? 0),
+            ];
+        }
+
+        return $hasil;
+    }
+
     private function dasar(Kegiatan $kegiatan, ?string $cari, ?KategoriUsia $kategori): Builder
     {
         $gabung = function (JoinClause $join) use ($kegiatan) {

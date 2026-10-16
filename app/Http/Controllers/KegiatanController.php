@@ -7,8 +7,8 @@ use App\Exceptions\DataMasihDipakaiException;
 use App\Exceptions\DataSudahBerubahException;
 use App\Http\Requests\Kegiatan\SimpanKegiatanRequest;
 use App\Models\Kegiatan;
-use App\Models\Warga;
 use App\Services\KegiatanService;
+use App\Services\PresensiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,20 +18,50 @@ use Illuminate\View\View;
  */
 class KegiatanController extends Controller
 {
-    public function __construct(private readonly KegiatanService $layanan)
-    {
+    public function __construct(
+        private readonly KegiatanService $layanan,
+        private readonly PresensiService $presensi,
+    ) {
     }
 
-    /** Daftar kegiatan dalam tab Berlangsung / Arsip. */
+    /**
+     * Daftar kegiatan (Figma "Daftar Kegiatan — hasil rev"):
+     * - Tab Berlangsung: satu kartu kegiatan aktif + ringkasan & kehadiran per kategori.
+     * - Tab Arsip: tabel kegiatan selesai dengan pencarian nama & filter tahun.
+     */
     public function index(Request $request): View
     {
         $this->layanan->tutupYangKedaluwarsa();
 
         $tab = $request->query('tab') === 'arsip' ? 'arsip' : 'berlangsung';
+        $data = [
+            'tab' => $tab,
+            'jumlahArsip' => Kegiatan::query()->selesai()->count(),
+        ];
 
-        $daftar = Kegiatan::query()
-            ->select(['id_kegiatan', 'nama_kegiatan', 'tanggal_kegiatan', 'status_kegiatan', 'waktu_dibuka'])
-            ->when($tab === 'arsip', fn ($q) => $q->selesai(), fn ($q) => $q->berlangsung())
+        if ($tab === 'berlangsung') {
+            $aktif = Kegiatan::query()->berlangsung()->latest('waktu_dibuka')->first();
+            $data['aktif'] = $aktif;
+            if ($aktif) {
+                $data['ringkasan'] = $this->presensi->ringkasan($aktif, null, null);
+                $data['perKelompok'] = $this->presensi->ringkasanPerKelompok($aktif);
+                $data['belumSubmit'] = $aktif->pemeriksaan()->draft()->count();
+            }
+
+            return view('kegiatan.index', $data);
+        }
+
+        $filter = $request->validate([
+            'cari' => ['nullable', 'string', 'max:100'],
+            'tahun' => ['nullable', 'integer', 'between:2000,2100'],
+        ]);
+        $cari = trim((string) ($filter['cari'] ?? ''));
+
+        $data['daftar'] = Kegiatan::query()
+            ->select(['id_kegiatan', 'nama_kegiatan', 'tanggal_kegiatan', 'status_kegiatan'])
+            ->selesai()
+            ->when($cari !== '', fn ($q) => $q->where('nama_kegiatan', 'like', '%'.addcslashes($cari, '\\%_').'%'))
+            ->when($filter['tahun'] ?? null, fn ($q, $tahun) => $q->whereYear('tanggal_kegiatan', $tahun))
             ->withCount([
                 'kehadiran as jumlah_hadir' => fn ($q) => $q->where('status_kehadiran', true),
                 'kehadiran as jumlah_tercatat',
@@ -40,13 +70,14 @@ class KegiatanController extends Controller
             ->orderByDesc('id_kegiatan')
             ->paginate(config('posyandu.kegiatan.per_halaman'))
             ->withQueryString();
+        $data['cari'] = $cari;
+        $data['tahunDipilih'] = $filter['tahun'] ?? null;
+        $data['daftarTahun'] = Kegiatan::query()->selesai()
+            ->selectRaw('DISTINCT YEAR(tanggal_kegiatan) as tahun')
+            ->orderByDesc('tahun')
+            ->pluck('tahun');
 
-        return view('kegiatan.index', [
-            'daftar' => $daftar,
-            'tab' => $tab,
-            'totalWarga' => Warga::query()->count(), // total untuk kegiatan yang masih berlangsung
-            'adaYangBerlangsung' => Kegiatan::query()->berlangsung()->exists(),
-        ]);
+        return view('kegiatan.index', $data);
     }
 
     public function create(): View

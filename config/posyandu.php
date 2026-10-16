@@ -45,8 +45,8 @@ return [
     'kegiatan' => [
         // Kegiatan otomatis selesai setelah sekian jam sejak dibuat / dibuka kembali (revisi).
         'durasi_jam' => 24,
-        // Jumlah kartu kegiatan per halaman.
-        'per_halaman' => 9,
+        // Jumlah baris tabel Arsip Kegiatan per halaman.
+        'per_halaman' => 15,
     ],
     'presensi' => [
         'per_halaman' => 15,
