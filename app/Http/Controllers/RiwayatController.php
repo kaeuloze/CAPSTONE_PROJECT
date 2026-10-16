@@ -55,6 +55,7 @@ class RiwayatController extends Controller
         return view('riwayat.warga', [
             'warga' => $warga,
             'daftar' => $this->layanan->riwayatWarga($warga),
+            'riwayatVaksin' => app(\App\Services\VaksinasiService::class)->riwayat($warga),
             'katalog' => $this->katalog,
         ]);
     }

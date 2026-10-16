@@ -31,17 +31,18 @@ class RiwayatService
     /** Daftar Warga Riwayat Pemeriksaan: cari nama/NIK, filter kategori usia, kunjungan terakhir. */
     public function daftarWarga(?string $cari, ?KategoriUsia $kategori): LengthAwarePaginator
     {
-        // Catatan: vaksinasi & ASI balita ikut dihitung sebagai kunjungan setelah modul Vaksinasi Balita dibuat.
-        $kunjunganTerakhir = Pemeriksaan::query()
-            ->selesai()
-            ->whereColumn('pemeriksaan.nik', 'warga.nik')
-            ->selectRaw('MAX(pemeriksaan.tanggal_pemeriksaan)');
+        // Kunjungan terakhir = tanggal terbaru dari pemeriksaan yang di-Submit, kegiatan saat vaksin dicatat,
+        // atau tanggal ASI dicatat (disetujui: vaksin & ASI ikut tercatat di Riwayat).
+        $periksa = '(SELECT MAX(p.tanggal_pemeriksaan) FROM pemeriksaan p WHERE p.nik = warga.nik AND p.status_pemeriksaan = ?)';
+        $vaksin = '(SELECT MAX(COALESCE(kg.tanggal_kegiatan, v.tanggal_vaksinasi)) FROM vaksinasi v LEFT JOIN kegiatan kg ON kg.id_kegiatan = v.id_kegiatan WHERE v.nik = warga.nik AND v.status_vaksinasi = 1)';
+        $asi = '(SELECT MAX(a.tanggal_dicatat) FROM asi_eksklusif a WHERE a.nik = warga.nik)';
+        $kunjunganTerakhir = "NULLIF(GREATEST(COALESCE({$periksa}, '1000-01-01'), COALESCE({$vaksin}, '1000-01-01'), COALESCE({$asi}, '1000-01-01')), '1000-01-01')";
 
         return Warga::query()
             ->cari($cari)
             ->when($kategori, fn ($q) => $q->kategori($kategori))
             ->select('warga.*')
-            ->selectSub($kunjunganTerakhir, 'kunjungan_terakhir')
+            ->selectRaw("{$kunjunganTerakhir} as kunjungan_terakhir", [\App\Enums\StatusPemeriksaan::Selesai->value])
             ->orderBy('warga.nama_warga')
             ->orderBy('warga.nik')
             ->paginate(config('posyandu.riwayat.per_halaman'))

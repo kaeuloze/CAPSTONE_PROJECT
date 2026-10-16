@@ -162,6 +162,12 @@ class KegiatanService
             if (! $hadir && $warga->pemeriksaan()->where('id_kegiatan', $kegiatan->id_kegiatan)->exists()) {
                 throw new AksiDitolakException("Kehadiran {$warga->nama_warga} tidak bisa dibatalkan karena sudah mulai/selesai diperiksa.");
             }
+            if (! $hadir && (
+                $warga->vaksinasi()->where('id_kegiatan', $kegiatan->id_kegiatan)->exists()
+                || $warga->asiEksklusif()->whereDate('tanggal_dicatat', $kegiatan->tanggal_kegiatan)->exists()
+            )) {
+                throw new AksiDitolakException("Kehadiran {$warga->nama_warga} tidak bisa dibatalkan karena sudah ada catatan vaksinasi/ASI pada kegiatan ini.");
+            }
 
             $kehadiran = Kehadiran::query()
                 ->where('id_kegiatan', $kegiatan->id_kegiatan)

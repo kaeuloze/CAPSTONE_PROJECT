@@ -41,11 +41,39 @@
                         <td><a href="{{ route('riwayat.show', $p) }}" class="tombol kecil">Detail</a></td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="kosong">Belum ada pemeriksaan yang di-Submit untuk warga ini.</td></tr>
+                    <tr><td colspan="4" class="kosong">Belum ada pemeriksaan yang di-Submit untuk warga ini.@if ($riwayatVaksin !== []) Catatan vaksinasi &amp; ASI ada di tabel bawah.@endif</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
     @include('partials.halaman', ['data' => $daftar, 'satuan' => 'pemeriksaan'])
+
+    @if ($riwayatVaksin !== [])
+        <p class="ket" style="margin-top:20px">Riwayat Vaksinasi &amp; ASI Eksklusif (dicatat di menu Vaksinasi Balita)</p>
+        <div class="bungkus-tabel">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Tanggal / Kegiatan</th>
+                        <th scope="col">Kategori saat itu</th>
+                        <th scope="col">Ringkasan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($riwayatVaksin as $catatan)
+                        <tr>
+                            <td>{{ $catatan['tanggal']?->translatedFormat('j F Y') ?? '-' }}@if ($catatan['kegiatan'])<br><small class="ket">{{ $catatan['kegiatan'] }}</small>@endif</td>
+                            <td><span class="badge">Balita</span></td>
+                            <td>{{ collect([
+                                $catatan['vaksin'] ? 'Vaksinasi: '.implode(', ', $catatan['vaksin']) : null,
+                                $catatan['asi'] ? 'ASI '.implode(', ', $catatan['asi']) : null,
+                            ])->filter()->implode(' · ') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="info">Koreksi catatan vaksinasi dan ASI dilakukan di menu Vaksinasi Balita saat balita hadir di kegiatan posyandu.</div>
+    @endif
 @endsection

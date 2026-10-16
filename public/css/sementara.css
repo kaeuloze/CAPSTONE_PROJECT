@@ -215,3 +215,14 @@ fieldset.bagian-baca input:disabled, fieldset.bagian-baca select:disabled { colo
 .kisi-aks .isian { max-width: none; }
 .kisi-aks select { max-width: 100%; }
 .sub-kelompok { font-size: 13px; font-weight: 600; color: #6b7280; margin: 16px 0 6px; }
+
+/* Popup form (Master Vaksin) */
+dialog form .isian { text-align: left; }
+.kepala-dialog { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.kepala-dialog h3 { margin: 0; }
+
+/* Vaksinasi Balita */
+.judul-bagian { font-size: 15px; margin: 20px 0 10px; }
+.centang-status { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.tabel-vaksin input[type=date] { padding: 6px 8px; border: 1px solid #d4d4d4; border-radius: 8px; font: inherit; }
+.tabel-vaksin input[type=date]:disabled { background: #f5f5f5; color: #9ca3af; }

@@ -79,6 +79,14 @@ return [
         ],
     ],
 
+    'vaksinasi' => [
+        // Baris per halaman Daftar Vaksinasi Balita & Master Vaksin (SOP poin 5).
+        'per_halaman' => 15,
+        // ASI Eksklusif dicatat Bulan 0 - 6 seperti SIGIZI Kesga (disetujui 17 Okt 2026); bagian ASI hanya tampil
+        // selama usia balita belum lewat 6 bulan (proposal Gambar 2.60).
+        'asi_bulan_maks' => 6,
+    ],
+
     'riwayat' => [
         // Jumlah baris per halaman di Daftar Warga Riwayat & Riwayat per Warga (SOP poin 5).
         'per_halaman' => 15,

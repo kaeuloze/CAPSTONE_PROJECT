@@ -5,6 +5,8 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\VaksinController;
+use App\Http\Controllers\VaksinasiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,4 +63,17 @@ Route::middleware('auth')->group(function () {
             Route::delete('/', [RiwayatController::class, 'destroy'])->name('destroy');
         });
     });
+
+    // Vaksinasi Balita (SKF-10). {warga} = NIK balita yang Hadir pada kegiatan aktif.
+    Route::prefix('vaksinasi')->name('vaksinasi.')->group(function () {
+        Route::get('/', [VaksinasiController::class, 'index'])->name('index');
+        Route::get('status', [VaksinasiController::class, 'status'])->name('status'); // polling realtime
+        Route::get('{warga}', [VaksinasiController::class, 'form'])->where('warga', '[0-9]{16}')->name('form');
+        Route::post('{warga}', [VaksinasiController::class, 'simpan'])->where('warga', '[0-9]{16}')->name('simpan');
+    });
+
+    // Master Vaksin (pendukung SKF-10). Tambah/Edit lewat popup di halaman daftar.
+    Route::resource('vaksin', VaksinController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->where(['vaksin' => '[0-9]+']);
 });
