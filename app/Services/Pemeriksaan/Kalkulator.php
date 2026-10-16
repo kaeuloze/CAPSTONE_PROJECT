@@ -3,9 +3,12 @@
 namespace App\Services\Pemeriksaan;
 
 use App\Enums\StatusImt;
+use App\Enums\StatusPpok;
 use App\Enums\StatusRisiko;
 use App\Enums\StatusSensorik;
 use App\Enums\StatusTekananDarah;
+use App\Models\Warga;
+use Carbon\CarbonInterface;
 
 /**
  * Perhitungan status otomatis hasil pemeriksaan (keputusan 5). Batas diambil dari
@@ -79,6 +82,56 @@ class Kalkulator
         }
 
         return in_array(StatusSensorik::Gangguan->value, [$kanan, $kiri], true) ? StatusSensorik::Gangguan : StatusSensorik::Normal;
+    }
+
+    /** Usia (tahun penuh) warga pada tanggal pemeriksaan. */
+    public static function usia(Warga $warga, CarbonInterface $tanggal): int
+    {
+        return (int) $warga->tanggal_lahir->diffInYears($tanggal);
+    }
+
+    /** PUMA: laki-laki = 1, perempuan = 0. */
+    public static function skorPumaJenisKelamin(bool $lakiLaki): int
+    {
+        return $lakiLaki ? 1 : 0;
+    }
+
+    /** PUMA: usia 40–49 = 0, 50–59 = 1, ≥ 60 = 2 (batas di config). */
+    public static function skorPumaUsia(int $usia): int
+    {
+        $skor = 0;
+        foreach (config('posyandu.ambang.puma.skor_usia') as $mulai => $nilai) {
+            if ($usia >= $mulai) {
+                $skor = $nilai;
+            }
+        }
+
+        return $skor;
+    }
+
+    /**
+     * Total skor PUMA = jenis kelamin + usia + merokok + jumlah jawaban "Ya" (napas pendek, dahak, batuk, spirometri).
+     * Null bila status merokok belum diisi (skor belum lengkap).
+     *
+     * @param  array<int, ?string>  $gejala  nilai '1' / '0'
+     */
+    public static function skorPuma(int $skorJenisKelamin, int $skorUsia, ?string $skorMerokok, array $gejala): ?int
+    {
+        if (! is_numeric($skorMerokok)) {
+            return null;
+        }
+
+        return $skorJenisKelamin + $skorUsia + (int) $skorMerokok + count(array_filter($gejala, fn ($v) => $v === '1'));
+    }
+
+    /** Berisiko PPOK bila skor PUMA ≥ 6 (disetujui, mengikuti PDPI). */
+    public static function statusPpok(?int $skor): ?StatusPpok
+    {
+        if ($skor === null) {
+            return null;
+        }
+
+        return $skor >= (int) config('posyandu.ambang.puma.berisiko_mulai') ? StatusPpok::Berisiko : StatusPpok::TidakBerisiko;
     }
 
     /** Konfigurasi batas untuk kalkulator di layar (JavaScript). */

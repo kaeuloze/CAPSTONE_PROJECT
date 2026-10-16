@@ -5,6 +5,7 @@ namespace App\Services\Pemeriksaan;
 use App\Enums\JenisPemeriksaan;
 use App\Models\Kegiatan;
 use App\Models\Warga;
+use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,8 +31,10 @@ final class Bagian
      * @param  Closure|null  $uraikan  fn(array $kolomDb): array isian formulir — bila isian berbeda dari kolom database
      *                                 (mis. kolom "120/80" ditampilkan sebagai 2 kotak sistolik & diastolik)
      * @param  Closure|null  $susun  fn(array $isian): array kolom database — kebalikan dari $uraikan
-     * @param  Closure|null  $berlaku  fn(Warga): bool — bagian hanya berlaku untuk warga tertentu
-     *                                 (mis. Kadar HB hanya remaja putri); bila false isiannya diabaikan
+     * @param  Closure|null  $berlaku  fn(Warga, CarbonInterface $tanggalPeriksa): bool — bagian hanya berlaku untuk
+     *                                 warga tertentu (mis. Kadar HB hanya remaja putri, PUMA usia ≥ 40); bila false isiannya diabaikan
+     * @param  array<int, string>  $wajibBilaTerisi  kolom yang wajib saat Submit HANYA bila bagian ini diisi
+     *                                               (mis. status merokok bila PUMA dikerjakan)
      */
     public function __construct(
         public readonly string $kunci,
@@ -45,6 +48,7 @@ final class Bagian
         public readonly ?Closure $uraikan = null,
         public readonly ?Closure $susun = null,
         public readonly ?Closure $berlaku = null,
+        public readonly array $wajibBilaTerisi = [],
     ) {
     }
 
@@ -95,9 +99,9 @@ final class Bagian
         return $this->susun ? ($this->susun)($nilai) : $nilai;
     }
 
-    public function berlakuUntuk(Warga $warga): bool
+    public function berlakuUntuk(Warga $warga, CarbonInterface $tanggalPeriksa): bool
     {
-        return $this->berlaku === null || ($this->berlaku)($warga);
+        return $this->berlaku === null || ($this->berlaku)($warga, $tanggalPeriksa);
     }
 
     /** Penanda versi = sidik jari isi bagian. Berubah bila ada kader lain yang menyimpan bagian ini. */
@@ -121,7 +125,9 @@ final class Bagian
     /** @return array<int, string> kolom wajib yang masih kosong */
     public function wajibKosong(array $nilai): array
     {
-        return array_values(array_filter($this->wajib, fn (string $kolom) => ($nilai[$kolom] ?? null) === null));
+        $wajib = $this->terisi($nilai) ? [...$this->wajib, ...$this->wajibBilaTerisi] : $this->wajib;
+
+        return array_values(array_filter($wajib, fn (string $kolom) => ($nilai[$kolom] ?? null) === null));
     }
 
     private function rapikan(string $kolom, mixed $nilai): ?string

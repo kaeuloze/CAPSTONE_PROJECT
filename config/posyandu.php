@@ -62,6 +62,13 @@ return [
         'tbc_minimal_gejala' => 2,
         // Peringatan interval pemeriksaan (Activity Diagram 2.17 & 2.18), dalam bulan.
         'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
+        // Skrining PPOK PUMA (disetujui 16 Okt 2026): khusus usia >= 40; skor usia 40-49 = 0, 50-59 = 1, >= 60 = 2;
+        // laki-laki = 1; berisiko PPOK bila total skor >= 6 (PDPI).
+        'puma' => [
+            'usia_minimal' => 40,
+            'skor_usia' => [50 => 1, 60 => 2], // usia mulai => skor
+            'berisiko_mulai' => 6,
+        ],
     ],
 
     'riwayat' => [

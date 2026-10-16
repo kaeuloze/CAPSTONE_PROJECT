@@ -46,3 +46,25 @@
     document.getElementById('form-pemeriksaan').addEventListener('change', hitung);
     hitung();
 })();
+
+// Skor PUMA (tab Tahunan Dewasa/Lansia): skor jenis kelamin + usia (otomatis dari data warga) + merokok + jawaban "Ya".
+// Hasil akhir tetap dihitung ulang di server saat Simpan.
+(function () {
+    var kotak = document.getElementById('hasil-puma');
+    if (!kotak) { return; }
+    var tetap = parseInt(kotak.getAttribute('data-skor-tetap'), 10);
+    var batas = parseInt(kotak.getAttribute('data-batas'), 10);
+    var merokok = document.getElementById('isian-puma-skor_merokok');
+    var bagian = document.querySelector('[data-bagian="puma"]');
+
+    function hitung() {
+        var isi = document.getElementById('hasil-puma-isi');
+        if (!merokok || merokok.value === '') { isi.textContent = 'Pilih status merokok untuk menghitung skor'; return; }
+        var skor = tetap + parseInt(merokok.value, 10) + bagian.querySelectorAll('input[type=checkbox]:checked').length;
+        isi.textContent = skor + ' — ' + (skor >= batas ? 'Berisiko PPOK, sarankan rujuk ke Puskesmas' : 'Tidak Berisiko PPOK');
+    }
+
+    bagian.addEventListener('input', hitung);
+    bagian.addEventListener('change', hitung);
+    hitung();
+})();

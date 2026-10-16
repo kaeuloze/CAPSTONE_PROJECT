@@ -140,7 +140,7 @@ class RiwayatController extends Controller
             'kategori' => $pemeriksaan->kategori_usia_saat_periksa,
             'usia' => (int) $warga->tanggal_lahir->diffInYears($pemeriksaan->tanggal_pemeriksaan),
             'definisi' => $definisi,
-            'tabNonaktif' => $definisi?->tabNonaktif($warga) ?? [],
+            'tabNonaktif' => $definisi?->tabNonaktif($warga, $pemeriksaan->tanggal_pemeriksaan) ?? [],
             'nilai' => $nilai,
             'versi' => $versi,
             'jenisDilakukan' => array_map(fn ($j) => $j->value, $pemeriksaan->jenis_pemeriksaan),

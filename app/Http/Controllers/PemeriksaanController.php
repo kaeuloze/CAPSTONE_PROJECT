@@ -113,7 +113,7 @@ class PemeriksaanController extends Controller
 
         return view('pemeriksaan.form', $data + [
             'definisi' => $definisi,
-            'tabNonaktif' => $definisi->tabNonaktif($warga),
+            'tabNonaktif' => $definisi->tabNonaktif($warga, $kegiatan->tanggal_kegiatan),
             'peringatan' => $this->layanan->peringatanInterval($definisi, $warga, $kegiatan),
             'nilai' => $nilai,
             'versi' => $versi,

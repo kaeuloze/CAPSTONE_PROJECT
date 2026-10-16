@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Pemeriksaan\Form\FormDewasa;
 use App\Services\Pemeriksaan\Form\FormRemaja;
 use App\Services\Pemeriksaan\KatalogForm;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -20,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(KatalogForm::class, function () {
             $katalog = new KatalogForm;
             $katalog->daftarkan(new FormRemaja);
+            $katalog->daftarkan(new FormDewasa);
 
             return $katalog;
         });

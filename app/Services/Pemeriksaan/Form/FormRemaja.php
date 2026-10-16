@@ -4,12 +4,10 @@ namespace App\Services\Pemeriksaan\Form;
 
 use App\Enums\JenisPemeriksaan;
 use App\Enums\KategoriPemeriksaan;
-use App\Enums\StatusSensorik;
 use App\Models\Warga;
 use App\Services\Pemeriksaan\Bagian;
 use App\Services\Pemeriksaan\DefinisiForm;
-use App\Services\Pemeriksaan\Kalkulator;
-use Illuminate\Validation\Rule;
+use Carbon\CarbonInterface;
 
 /**
  * Form Pemeriksaan Remaja (Figma 418:65, 424:65, 424:168 "hasil rev"; proposal Gambar 2.48–2.50).
@@ -46,7 +44,7 @@ class FormRemaja extends DefinisiForm
         return ['penyuluhan'];
     }
 
-    public function tabNonaktif(Warga $warga): array
+    public function tabNonaktif(Warga $warga, CarbonInterface $tanggalPeriksa): array
     {
         return $warga->jenis_kelamin ? ['tahunan' => 'Khusus remaja putri'] : [];
     }
@@ -63,27 +61,10 @@ class FormRemaja extends DefinisiForm
 
     protected function daftarBagian(): array
     {
-        $pilihanSensorik = ['nullable', Rule::enum(StatusSensorik::class)];
-
         return [
             BagianUmum::penimbangan(),
             BagianUmum::tbc(),
-            new Bagian(
-                kunci: 'sensorik',
-                judul: 'Tes Penglihatan & Pendengaran',
-                relasi: 'skriningSensorik',
-                aturan: [
-                    'mata_kanan' => $pilihanSensorik,
-                    'mata_kiri' => $pilihanSensorik,
-                    'telinga_kanan' => $pilihanSensorik,
-                    'telinga_kiri' => $pilihanSensorik,
-                ],
-                jenis: JenisPemeriksaan::EnamBulanan,
-                hitung: fn (array $n) => [
-                    'status_penglihatan' => Kalkulator::statusSensorik($n['mata_kanan'], $n['mata_kiri']),
-                    'status_pendengaran' => Kalkulator::statusSensorik($n['telinga_kanan'], $n['telinga_kiri']),
-                ],
-            ),
+            BagianUmum::sensorik(),
             new Bagian(
                 kunci: 'hb',
                 judul: 'Pemeriksaan Kadar HB',

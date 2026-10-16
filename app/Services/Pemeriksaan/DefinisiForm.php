@@ -33,8 +33,8 @@ abstract class DefinisiForm
         return [];
     }
 
-    /** Tab yang dinonaktifkan untuk warga tertentu: kunci tab => alasan. */
-    public function tabNonaktif(\App\Models\Warga $warga): array
+    /** Tab yang dinonaktifkan untuk warga tertentu pada tanggal pemeriksaan: kunci tab => alasan. */
+    public function tabNonaktif(\App\Models\Warga $warga, \Carbon\CarbonInterface $tanggalPeriksa): array
     {
         return [];
     }
@@ -61,6 +61,9 @@ abstract class DefinisiForm
         }
         if ($ukur?->status_tekanan_darah) {
             $hasil[] = 'TD '.$ukur->status_tekanan_darah->label();
+        }
+        if ($pemeriksaan->skriningPuma?->status_ppok === \App\Enums\StatusPpok::Berisiko) {
+            $hasil[] = 'Berisiko PPOK';
         }
         if ($pemeriksaan->skriningTbc?->status_gejala_tbc === \App\Enums\StatusRisiko::Berisiko) {
             $hasil[] = 'Gejala TBC Berisiko';

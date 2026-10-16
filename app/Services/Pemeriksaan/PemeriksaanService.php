@@ -102,7 +102,8 @@ class PemeriksaanService
             $tanggal = \Carbon\CarbonImmutable::parse($terakhir);
             if ($tanggal->addMonthsNoOverflow($bulan)->greaterThan($kegiatan->tanggal_kegiatan)) {
                 $teks = $tanggal->locale('id')->translatedFormat('j F Y');
-                $pesan[$kunci] = "Pemeriksaan {$tab['label']} terakhir untuk {$warga->nama_warga} dilakukan pada {$teks} (belum {$bulan} bulan). Tetap lanjutkan pengisian?";
+                $nama = str_starts_with($tab['label'], 'Pemeriksaan') ? $tab['label'] : "Pemeriksaan {$tab['label']}";
+                $pesan[$kunci] = "{$nama} terakhir untuk {$warga->nama_warga} dilakukan pada {$teks} (belum {$bulan} bulan). Tetap lanjutkan pengisian?";
             }
         }
 
@@ -189,7 +190,7 @@ class PemeriksaanService
             if ($diubah !== null && ! in_array($bagian->kunci, $diubah, true)) {
                 continue; // bagian ini tidak disentuh kader → biarkan isian meja lain
             }
-            if (! $bagian->berlakuUntuk($warga)) {
+            if (! $bagian->berlakuUntuk($warga, $kegiatan->tanggal_kegiatan)) {
                 continue; // mis. Kadar HB untuk remaja laki-laki (tab dinonaktifkan)
             }
 
@@ -226,7 +227,7 @@ class PemeriksaanService
         $kurang = [];
         $jenis = [];
         foreach ($form->bagian() as $bagian) {
-            if (! $bagian->berlakuUntuk($warga)) {
+            if (! $bagian->berlakuUntuk($warga, $pemeriksaan->tanggal_pemeriksaan)) {
                 continue;
             }
             $nilai = $bagian->nilaiTersimpan($pemeriksaan->{$bagian->relasi}()->first());
