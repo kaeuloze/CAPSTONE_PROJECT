@@ -46,9 +46,7 @@ class BagianUmum
                 'berat_badan' => self::angka(1, 300),
                 'tinggi_badan' => self::angka(40, 250),
                 'lingkar_perut' => self::angka(20, 200),
-                'td_sistolik' => ['nullable', 'integer', 'between:50,300', 'required_with:bagian.pengukuran.td_diastolik'],
-                'td_diastolik' => ['nullable', 'integer', 'between:30,200', 'required_with:bagian.pengukuran.td_sistolik'],
-            ] + $aturanTambahan,
+            ] + self::aturanTekananDarah() + $aturanTambahan,
             wajib: $wajib,
             jenis: JenisPemeriksaan::Rutin,
             hitung: function (array $n, Warga $warga) {
@@ -60,18 +58,35 @@ class BagianUmum
                     'status_lingkar_perut' => Kalkulator::statusLingkarPerut($n['lingkar_perut'], (bool) $warga->jenis_kelamin),
                 ];
             },
-            uraikan: function (array $db) {
-                [$sistolik, $diastolik] = array_pad(explode('/', (string) ($db['tekanan_darah'] ?? '')), 2, null);
-
-                return ['td_sistolik' => $sistolik ?: null, 'td_diastolik' => $diastolik ?: null];
-            },
-            susun: function (array $n) {
-                $td = $n['td_sistolik'] !== null && $n['td_diastolik'] !== null ? "{$n['td_sistolik']}/{$n['td_diastolik']}" : null;
-                unset($n['td_sistolik'], $n['td_diastolik']);
-
-                return $n + ['tekanan_darah' => $td];
-            },
+            uraikan: self::uraikanTekananDarah(...),
+            susun: self::susunTekananDarah(...),
         );
+    }
+
+    /** Aturan 2 kotak tekanan darah (harus berpasangan). */
+    public static function aturanTekananDarah(string $kunci = 'pengukuran'): array
+    {
+        return [
+            'td_sistolik' => ['nullable', 'integer', 'between:50,300', "required_with:bagian.{$kunci}.td_diastolik"],
+            'td_diastolik' => ['nullable', 'integer', 'between:30,200', "required_with:bagian.{$kunci}.td_sistolik"],
+        ];
+    }
+
+    /** Kolom "120/80" → 2 kotak sistolik & diastolik. */
+    public static function uraikanTekananDarah(array $db): array
+    {
+        [$sistolik, $diastolik] = array_pad(explode('/', (string) ($db['tekanan_darah'] ?? '')), 2, null);
+
+        return ['td_sistolik' => $sistolik ?: null, 'td_diastolik' => $diastolik ?: null];
+    }
+
+    /** 2 kotak sistolik & diastolik → kolom "120/80". */
+    public static function susunTekananDarah(array $n): array
+    {
+        $td = $n['td_sistolik'] !== null && $n['td_diastolik'] !== null ? "{$n['td_sistolik']}/{$n['td_diastolik']}" : null;
+        unset($n['td_sistolik'], $n['td_diastolik']);
+
+        return $n + ['tekanan_darah' => $td];
     }
 
     /** "Skrining Gejala TBC": 4 centang; Berisiko bila ≥ 2 gejala "Ya". */

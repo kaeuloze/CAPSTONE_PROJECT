@@ -35,6 +35,9 @@ final class Bagian
      *                                 warga tertentu (mis. Kadar HB hanya remaja putri, PUMA usia ≥ 40); bila false isiannya diabaikan
      * @param  array<int, string>  $wajibBilaTerisi  kolom yang wajib saat Submit HANYA bila bagian ini diisi
      *                                               (mis. status merokok bila PUMA dikerjakan)
+     * @param  Closure|null  $turunan  fn(array $nilai, Warga, Kegiatan): array<relasi, array kolom> — kolom otomatis yang
+     *                                 disimpan di tabel detail LAIN (mis. ploting LILA/TD ibu hamil di pemeriksaan_bumil
+     *                                 dihitung dari isian pengukuran di pengukuran_dasar)
      */
     public function __construct(
         public readonly string $kunci,
@@ -49,6 +52,7 @@ final class Bagian
         public readonly ?Closure $susun = null,
         public readonly ?Closure $berlaku = null,
         public readonly array $wajibBilaTerisi = [],
+        public readonly ?Closure $turunan = null,
     ) {
     }
 

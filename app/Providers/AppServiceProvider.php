@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Pemeriksaan\Form\FormDewasa;
+use App\Services\Pemeriksaan\Form\FormIbuHamil;
 use App\Services\Pemeriksaan\Form\FormLansia;
 use App\Services\Pemeriksaan\Form\FormRemaja;
 use App\Services\Pemeriksaan\KatalogForm;
@@ -24,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             $katalog->daftarkan(new FormRemaja);
             $katalog->daftarkan(new FormDewasa);
             $katalog->daftarkan(new FormLansia);
+            $katalog->daftarkan(new FormIbuHamil);
 
             return $katalog;
         });

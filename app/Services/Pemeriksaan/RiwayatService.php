@@ -54,7 +54,7 @@ class RiwayatService
         return Pemeriksaan::query()
             ->selesai()
             ->where('nik', $warga->nik)
-            ->with(['kegiatan', 'pengukuranDasar', 'skriningTbc', 'skriningPuma', 'skriningAks', 'skriningSkilas', 'penyuluhanRujukan'])
+            ->with(['kegiatan', 'pengukuranDasar', 'skriningTbc', 'skriningPuma', 'skriningAks', 'skriningSkilas', 'pemeriksaanBumil', 'penyuluhanRujukan'])
             ->orderByDesc('tanggal_pemeriksaan')
             ->orderByDesc('id_pemeriksaan')
             ->paginate(config('posyandu.riwayat.per_halaman'));

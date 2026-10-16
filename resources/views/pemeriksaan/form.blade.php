@@ -26,7 +26,7 @@
         @include('pemeriksaan.partials.isi-form')
 
         <div class="aksi-pemeriksaan">
-            <p><strong>Simpan dan Submit berlaku untuk seluruh tab ({{ collect($definisi->tab())->pluck('label')->implode(', ') }}) — semua isian dikirim sekaligus sebagai satu pemeriksaan.</strong></p>
+            <p><strong>{{ $definisi->keteranganAksi() ?? 'Simpan dan Submit berlaku untuk seluruh tab ('.collect($definisi->tab())->pluck('label')->implode(', ').') — semua isian dikirim sekaligus sebagai satu pemeriksaan.' }}</strong></p>
             <p class="ket" id="catatan-aksi" data-bawaan="Tanda * wajib diisi. Tombol Submit aktif setelah semua isian bertanda * terisi.">Tanda <span class="wajib">*</span> wajib diisi. Tombol Submit aktif setelah semua isian bertanda <span class="wajib">*</span> terisi.</p>
             <div class="aksi-form">
                 <button type="submit" name="aksi" value="simpan" class="tombol abu">Simpan</button>

@@ -62,6 +62,8 @@ return [
         'tbc_minimal_gejala' => 2,
         // Peringatan interval pemeriksaan (Activity Diagram 2.17 & 2.18), dalam bulan.
         'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
+        // Ploting LILA ibu hamil (Kartu Bantu Ibu Hamil): KEK bila LILA < 23,5 cm (disetujui: otomatis dari angka).
+        'lila_kek_di_bawah' => 23.5,
         // Gula Darah Sewaktu (GDS, rekap Dewasa & Lansia): berisiko bila >= 200 mg/dl (disetujui 17 Okt 2026).
         // Status tidak disimpan di database; dihitung dari angka kadar_gula_darah.
         'gula_darah_berisiko' => 200,

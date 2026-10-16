@@ -11,7 +11,7 @@
         var v = el ? parseFloat(el.value) : NaN;
         return isNaN(v) ? null : v;
     }
-    function tulis(id, teks) { document.getElementById(id).textContent = teks; }
+    function tulis(id, teks) { var el = document.getElementById(id); if (el) { el.textContent = teks; } }
 
     function hitung() {
         var bb = angka('isian-pengukuran-berat_badan');
@@ -37,6 +37,12 @@
             var risiko = lp > batas.lingkar_perut[lakiLaki ? 'laki_laki' : 'perempuan'];
             tulis('hasil-lp', lp + ' cm — ' + (risiko ? 'Berisiko' : 'Normal'));
         } else { tulis('hasil-lp', 'Isi lingkar perut'); }
+
+        if (document.getElementById('hasil-lila')) {
+            var lila = angka('isian-pengukuran-lila');
+            tulis('hasil-lila', lila === null ? 'Isi LILA'
+                : String(lila).replace('.', ',') + ' cm — ' + (lila < batas.lila_kek_di_bawah ? 'KEK (Kurang Energi Kronis)' : 'Normal'));
+        }
 
         if (document.getElementById('hasil-gds')) {
             var gds = angka('isian-pengukuran-kadar_gula_darah');

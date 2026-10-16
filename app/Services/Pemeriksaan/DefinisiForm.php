@@ -39,6 +39,12 @@ abstract class DefinisiForm
         return [];
     }
 
+    /** Keterangan di atas tombol Simpan/Submit; null = bawaan ("berlaku untuk seluruh tab ..."). */
+    public function keteranganAksi(): ?string
+    {
+        return null;
+    }
+
     /** View tambahan di bawah semua bagian (mis. kotak "Hasil dihitung otomatis"), null bila tidak ada. */
     public function viewTambahan(): ?string
     {
@@ -67,6 +73,13 @@ abstract class DefinisiForm
         }
         if ($pemeriksaan->skriningPuma?->status_ppok === \App\Enums\StatusPpok::Berisiko) {
             $hasil[] = 'Berisiko PPOK';
+        }
+        $bumil = $pemeriksaan->pemeriksaanBumil;
+        if ($bumil?->usia_kehamilan_minggu) {
+            $hasil[] = 'Usia kehamilan '.str_replace('-', '–', $bumil->usia_kehamilan_minggu).' minggu';
+        }
+        if ($bumil?->status_ploting_lila === \App\Enums\StatusLila::Kek) {
+            $hasil[] = 'LILA KEK';
         }
         if ($pemeriksaan->skriningAks?->status_aks && $pemeriksaan->skriningAks->status_aks !== \App\Enums\StatusAks::Mandiri) {
             $hasil[] = 'AKS '.$pemeriksaan->skriningAks->status_aks->label();

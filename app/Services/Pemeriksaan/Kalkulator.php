@@ -75,6 +75,16 @@ class Kalkulator
         return $jumlahYa >= (int) config('posyandu.ambang.tbc_minimal_gejala') ? StatusRisiko::Berisiko : StatusRisiko::Normal;
     }
 
+    /** Ploting LILA ibu hamil: KEK bila < 23,5 cm, Normal bila ≥ 23,5 cm. */
+    public static function statusLila(?string $lilaCm): ?\App\Enums\StatusLila
+    {
+        if (! is_numeric($lilaCm)) {
+            return null;
+        }
+
+        return (float) $lilaCm < (float) config('posyandu.ambang.lila_kek_di_bawah') ? \App\Enums\StatusLila::Kek : \App\Enums\StatusLila::Normal;
+    }
+
     /** GDS Berisiko bila ≥ 200 mg/dl (disetujui); dihitung dari angka, tanpa kolom status. */
     public static function statusGulaDarah(mixed $kadarMgDl): ?StatusRisiko
     {

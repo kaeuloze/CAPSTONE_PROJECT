@@ -179,10 +179,10 @@ class FondasiPemeriksaanTest extends TestCase
 
     public function test_kategori_tanpa_form_menampilkan_sedang_disiapkan(): void
     {
-        $bumil = $this->hadirkan($this->buatWarga('3404000000000001', ['status_kondisi' => 'hamil']));
+        $bunifas = $this->hadirkan($this->buatWarga('3404000000000001', ['status_kondisi' => 'nifas']));
 
-        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $bumil->nik))
-            ->assertOk()->assertSee('Form Ibu Hamil sedang disiapkan');
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $bunifas->nik))
+            ->assertOk()->assertSee('Form Ibu Nifas sedang disiapkan');
     }
 
     // ---------- Simpan ----------

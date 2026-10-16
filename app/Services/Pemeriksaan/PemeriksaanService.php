@@ -207,6 +207,12 @@ class PemeriksaanService
 
             $data = $bagian->keDatabase($baru) + ($bagian->hitung ? ($bagian->hitung)($baru, $warga, $kegiatan) : []);
             $baris ? $baris->update($data) : $pemeriksaan->{$bagian->relasi}()->create($data);
+
+            // Kolom otomatis di tabel lain (hanya kolom turunan yang ditulis, isian meja lain tidak tersentuh).
+            foreach ($bagian->turunan ? ($bagian->turunan)($baru, $warga, $kegiatan) : [] as $relasi => $kolom) {
+                $lain = $pemeriksaan->{$relasi}()->lockForUpdate()->first();
+                $lain ? $lain->update($kolom) : $pemeriksaan->{$relasi}()->create($kolom);
+            }
         }
 
         if ($konflik !== []) {
