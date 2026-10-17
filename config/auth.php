@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Kader;
 
 return [
 
@@ -64,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => env('AUTH_MODEL', Kader::class), // login memakai tabel KADER (ERD)
         ],
 
         // 'users' => [

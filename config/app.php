@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'), // WIB (disetujui 10 Okt 2026)
 
     /*
     |--------------------------------------------------------------------------
