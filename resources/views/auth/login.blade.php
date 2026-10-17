@@ -50,6 +50,7 @@
             </div>
 
             <form method="POST" action="{{ route('login.store') }}" class="mt-6 space-y-4">
+            @csrf
 
                 {{-- Username --}}
                 <div>
@@ -113,7 +114,7 @@
 
         {{-- ─── Kembali ─── --}}
         <p class="mt-5 text-center">
-            <a href="{{ route('landing') }}"
+            <a href="{{ route('beranda') }}"
                class="inline-flex items-center gap-1.5 text-xs font-medium text-mawar-700 transition hover:text-mawar-900">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
