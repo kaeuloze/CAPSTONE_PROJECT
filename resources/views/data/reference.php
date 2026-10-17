@@ -108,4 +108,12 @@ return [
         'gizi_normal'     => 31,
         'bergejala_tbc'   => 2,
     ],
+        // ---------- DAFTAR KADER DUMMY (kader) ----------
+    'kader' => [
+        ['username' => 'kader', 'nama_kader' => 'Kader Posyandu Mawar 1', 'created_at' => '12 Oktober 2026', 'sandi_diisi' => true],
+        ['username' => 'yuli',  'nama_kader' => 'Ibu Yuli',                'created_at' => '12 Oktober 2026', 'sandi_diisi' => true],
+        ['username' => 'sri',   'nama_kader' => 'Ibu Sri Wahyuni',         'created_at' => '13 Oktober 2026', 'sandi_diisi' => true],
+        ['username' => 'umi',   'nama_kader' => 'Ibu Umi Astuti',          'created_at' => '13 Oktober 2026', 'sandi_diisi' => true],
+        ['username' => 'maura', 'nama_kader' => 'Maura Anindita Kirana',   'created_at' => '14 Oktober 2026', 'sandi_diisi' => false],
+    ],
 ];

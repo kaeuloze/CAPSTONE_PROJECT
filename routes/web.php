@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
 
     Route::view('/dashboard', 'dashboard.index')->name('dashboard');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::view('/pengguna', 'pengguna.index')->name('pengguna');
 
     // ─── Data Warga (SKF-05) ───
     Route::resource('warga', WargaController::class)
