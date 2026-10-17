@@ -5,7 +5,170 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+
+/* ==========================================================
+   2. THEME
+   ========================================================== */
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@theme {
+    /* --------------------------------------------------------------
+ PALET "MAWAR" — Cyan / Aqua
+       --------------------------------------------------------------
+       Aksen utama  : #00FFFF  (mawar-300)
+       mawar-700 ke atas sengaja digelapkan supaya:
+         - teks putih di header & footer tetap terbaca
+         - tombol & teks di atas background putih tetap kontras
+       -------------------------------------------------------------- */
+
+    --color-mawar-50:  #ecfeff;   /* background paling muda */
+    --color-mawar-100: #cffafe;   /* badge, hover background          */
+    --color-mawar-200: #a5f3fc;   /* border, garis bawah             */
+    --color-mawar-300: #00ffff;   /* ← AKSEN UTAMA #00FFFF            */
+    --color-mawar-400: #22d3ee;   /* ikon, aksen sekunder            */
+    --color-mawar-500: #06b6d4;   /* batang grafik                   */
+    --color-mawar-600: #0891b2;   /* tombol, badge background        */
+    --color-mawar-700: #0e7490;   /* teks di atas background putih   */
+    --color-mawar-800: #155e75;   /* HEADER & FOOTER (gelap)         */
+    --color-mawar-900: #083344;   /* teks paling gelap */
+    --color-mawar-950: #04212e;   /* bayangan / gradient terdalam */
+
+    /* Radius & shadow */
+    --shadow-mawar: 0 4px 20px -4px rgb(8 51 68 / 0.18);
+}
+
+
+/* ==========================================================
+   3. KOMPONEN KELAS
+   ========================================================== */
+
+@layer components {
+
+    /* ---------- TOMBOL ---------- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+ text-sm font-semibold transition
+ focus:outline-none focus:ring-2 focus:ring-mawar-400 focus:ring-offset-2
+               disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .btn-primary {
+        @apply bg-mawar-700 text-white hover:bg-mawar-800 active:bg-mawar-900;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300
+               hover:bg-slate-50 hover:text-slate-900;
+    }
+
+    .btn-danger {
+        @apply bg-rose-600 text-white hover:bg-rose-700;
+    }
+
+    .btn-ghost {
+        @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    }
+
+    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .btn-lg { @apply px-6 py-3 text-base; }
+
+    /* ---------- KARTU ---------- */
+    .card {
+        @apply rounded-xl bg-white shadow-sm ring-1 ring-slate-200;
+    }
+
+    /* ---------- INPUT / SELECT / TEXTAREA ---------- */
+    .input {
+        @apply block w-full rounded-lg border-0 px-3 py-2
+               text-sm text-slate-900 shadow-sm
+               ring-1 ring-inset ring-slate-300
+               placeholder:text-slate-400
+               focus:ring-2 focus:ring-inset focus:ring-mawar-600;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-slate-700;
+    }
+
+    /* ---------- BADGE ---------- */
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5
+               text-xs font-medium;
+    }
+
+    /* ---------- TABEL ---------- */
+    .th {
+        @apply px-4 py-3 text-left text-xs font-semibold
+               uppercase tracking-wide text-slate-500;
+    }
+
+    .td {
+        @apply px-4 py-3 text-slate-700;
+    }
+
+    /* ---------- BADGE WARNA (dipakai lewat class, mis. .badge-ok) ---------- */
+    .badge-mawar   { @apply bg-mawar-100 text-mawar-800 ring-1 ring-mawar-200; }
+    .badge-success { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+    .badge-warning { @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200; }
+    .badge-danger  { @apply bg-rose-100 text-rose-700 ring-1 ring-rose-200; }
+    .badge-info    { @apply bg-sky-100 text-sky-700 ring-1 ring-sky-200; }
+    .badge-slate   { @apply bg-slate-100 text-slate-600 ring-1 ring-slate-200; }
+}
+
+
+/* ==========================================================
+   4. UTILITAS KECIL
+   ========================================================== */
+
+/* Sembunyikan elemen sebelum Alpine.js siap (anti-flicker) */
+[x-cloak] { display: none !important; }
+
+/* Scrollbar tipis bergaya website modern */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+    border: 2px solid #f1f5f9;
+}
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Teks panjang (mis. alamat) tidak bikin tabel melebar */
+.break-anywhere { overflow-wrap: anywhere; }
+
+
+/* ==========================================================
+   5. ANIMASI
+   ========================================================== */
+
+/* Batang grafik tumbuh dari bawah */
+@keyframes barGrow {
+    from { transform: scaleY(0); opacity: .4; }
+    to   { transform: scaleY(1); opacity: 1; }
+}
+.animate-bar {
+    transform-origin: bottom;
+    animation: barGrow .7s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Elemen muncul dari bawah */
+@keyframes fadeUp {
+    from { transform: translateY(14px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-fade-up {
+    animation: fadeUp .6s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Muncul dari kiri (untuk baris tabel / daftar) */
+@keyframes fadeRight {
+    from { transform: translateX(-12px); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+}
+.animate-fade-right {
+    animation: fadeRight .5s cubic-bezier(.22, 1, .36, 1) both;
 }
