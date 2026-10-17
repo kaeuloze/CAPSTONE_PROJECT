@@ -172,3 +172,23 @@
 .animate-fade-right {
     animation: fadeRight .5s cubic-bezier(.22, 1, .36, 1) both;
 }
+/* ===== HOOK LIVE-UPDATE (dikendalikan public/js/presensi.js) =====
+ JS menambah/menghapus kelas .hadir / .belum / .tidak / .abu / .mati,
+   sehingga warna harus berasal dari CSS, bukan utility Tailwind.
+   ============================================================ */
+
+.status-hadir { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+.status-hadir.hadir  { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+.status-hadir.belum  { @apply bg-slate-100 text-slate-500 ring-1 ring-slate-200; }
+.status-hadir.tidak  { @apply bg-rose-100 text-rose-600 ring-1 ring-rose-200; }
+
+.status-hadir::before { content: ''; width: .4rem; height: .4rem; border-radius: 9999px; background: currentColor; }
+
+.form-presensi button.abu { @apply bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50; }
+
+#indikator-langsung { @apply text-[11px] font-medium text-emerald-600; }
+#indikator-langsung.mati { @apply text-slate-400; }
+
+.pesan { @apply rounded-xl border px-4 py-3 text-sm font-medium; }
+.pesan.galat      { @apply border-amber-200 bg-amber-50 text-amber-900; }
+.pesan.info-arsip { @apply border-sky-200 bg-sky-50 text-sky-900; }
