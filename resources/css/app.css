@@ -192,3 +192,32 @@
 .pesan { @apply rounded-xl border px-4 py-3 text-sm font-medium; }
 .pesan.galat      { @apply border-amber-200 bg-amber-50 text-amber-900; }
 .pesan.info-arsip { @apply border-sky-200 bg-sky-50 text-sky-900; }
+
+/* ===== HOOK LIVE-UPDATE (public/js/pemeriksaan-daftar.js) =====
+   JS membuat ulang <tr>/<td> TANPA class Tailwind, jadi warna
+   harus berasal dari CSS di bawah.
+   ============================================================ */
+
+#isi-antrean td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle text-[13px] text-slate-700;
+}
+#isi-antrean td:first-child { @apply w-14 text-slate-400; }
+#isi-antrean td:nth-child(2) { @apply font-semibold text-slate-900; }
+#isi-antrean td:nth-child(3) { @apply font-mono text-[12px] text-slate-500; }
+#isi-antrean td:last-child  { @apply text-right; }
+
+#isi-antrean td.kosong {
+    @apply py-16 text-center align-middle text-[13px] font-medium text-slate-400;
+}
+
+/* JS: tautan.className = 'tombol kecil ' + (draft ? 'draft' : 'abu') */
+.tombol.kecil {
+    @apply inline-flex items-center justify-center rounded-lg px-3.5 py-1.5
+ text-[12px] font-bold shadow-sm transition hover:-translate-y-px;
+}
+.tombol.kecil.abu {
+    @apply bg-mawar-700 text-white hover:bg-mawar-800;
+}
+.tombol.kecil.draft {
+    @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-200;
+}
