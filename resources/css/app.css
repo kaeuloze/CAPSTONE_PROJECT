@@ -221,3 +221,25 @@
 .tombol.kecil.draft {
     @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-200;
 }
+/* ===== HOOK LIVE-UPDATE (public/js/vaksinasi-daftar.js) ===== */
+
+#isi-balita td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle text-[13px] text-slate-700;
+}
+#isi-balita td:first-child { @apply font-semibold text-slate-900; }
+#isi-balita td:nth-child(2) { @apply font-mono text-[12px] text-slate-500; }
+#isi-balita td:last-child  { @apply text-right; }
+#isi-balita td.kosong { @apply py-16 text-center align-middle text-[13px] font-medium text-slate-400; }
+
+/* JS: badge.className = 'badge hadir' */
+.badge.hadir { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+.badge.hadir::before { content: ''; width: .4rem; height: .4rem; border-radius: 9999px; background: currentColor; }
+
+/* JS: tautan.className = 'tombol kecil abu' */
+.tombol.kecil.abu {
+    @apply inline-flex items-center justify-center rounded-lg bg-mawar-700 px-4 py-1.5
+ text-[12px] font-bold text-white shadow-sm transition hover:-translate-y-px hover:bg-mawar-800;
+}
+
+/* Baris vaksin: JS aktif/nonaktifkan input tanggal */
+[data-baris-vaksin] .galat-cell input[type="date"] { @apply ring-rose-400; }
