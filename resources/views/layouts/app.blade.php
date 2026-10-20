@@ -18,7 +18,7 @@
         ['Vaksinasi Balita', 'vaksinasi.index', ['vaksinasi.*']],
         ['Master Vaksin', 'vaksin.index', ['vaksin.*']],
         ['Riwayat Pemeriksaan', 'riwayat.index', ['riwayat.*']],
-        ['Manajemen Pengguna', null, null],
+        ['Manajemen Pengguna', 'pengguna.index', ['pengguna.*']],
         ['Rekapitulasi', null, null],
     ];
 @endphp

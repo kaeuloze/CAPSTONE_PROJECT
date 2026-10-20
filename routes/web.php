@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\VaksinController;
@@ -76,4 +77,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('vaksin', VaksinController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->where(['vaksin' => '[0-9]+']);
+
+    // Manajemen Pengguna / akun kader (SKF-11). Parameter {pengguna} = id_kader. Tambah/Edit di halaman terpisah.
+    Route::resource('pengguna', PenggunaController::class)
+        ->except(['show'])
+        ->parameters(['pengguna' => 'pengguna'])
+        ->where(['pengguna' => '[0-9]+']);
 });
