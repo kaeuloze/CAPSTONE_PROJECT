@@ -92,6 +92,25 @@ return [
         'per_halaman' => 15,
     ],
 
+    // Manajemen Pengguna / akun kader (SKF-11). Aturan disetujui 21 Okt 2026.
+    'pengguna' => [
+        'per_halaman' => 15,
+        // Kata sandi: minimal 8, maksimal 64 karakter, tanpa paksaan huruf besar/angka/simbol (OWASP).
+        'sandi_min' => 8,
+        'sandi_maks' => 64,
+        // Tolak sandi yang pernah bocor (layanan Have I Been Pwned; yang dikirim hanya 5 huruf awal hash,
+        // bukan sandinya). Bila server tidak bisa menghubungi layanan, pengecekan ini dilewati.
+        'cek_sandi_bocor' => (bool) env('PENGGUNA_CEK_SANDI_BOCOR', true),
+        'cek_sandi_bocor_timeout_detik' => 5,
+        // Sandi umum yang selalu ditolak walau server sedang tanpa internet (dibandingkan tanpa huruf besar/kecil).
+        'sandi_umum' => [
+            '12345678', '123456789', '1234567890', '87654321', '11111111', '00000000', '12341234',
+            'password', 'password1', 'password123', 'qwerty123', 'qwertyuiop', 'abcd1234', 'iloveyou',
+            'bismillah', 'indonesia', 'posyandu', 'posyandu1', 'posyandumawar', 'posyandumawar1',
+            'mawar123', 'mawarsatu', 'kader123', 'kaderposyandu', 'admin123', 'administrator',
+        ],
+    ],
+
     'presensi' => [
         'per_halaman' => 15,
         // Jeda pembaruan otomatis halaman realtime, dalam detik (keputusan 23: polling 5 detik).
