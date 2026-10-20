@@ -303,10 +303,12 @@ class PenghitungRekap
     /**
      * Pemeriksaan Submit di kegiatan bulan itu, dikelompokkan per NIK (terbaru lebih dulu).
      *
+     * Dipakai juga oleh Dashboard agar cara hitungnya sama (keputusan 52).
+     *
      * @param  list<KategoriPemeriksaan>  $kategori
      * @return Collection<string, Collection<int, Pemeriksaan>>
      */
-    private function pemeriksaan(Periode $periode, array $kategori): Collection
+    public function pemeriksaan(Periode $periode, array $kategori): Collection
     {
         $idKegiatan = $this->kegiatanDalam($periode)->pluck('id_kegiatan');
         if ($idKegiatan->isEmpty()) {
@@ -319,7 +321,7 @@ class PenghitungRekap
             ->whereIn('kategori_usia_saat_periksa', array_map(fn ($k) => $k->value, $kategori))
             ->select(['id_pemeriksaan', 'nik', 'id_kegiatan', 'kategori_usia_saat_periksa', 'tanggal_pemeriksaan'])
             ->with([
-                'warga:nik,jenis_kelamin',
+                'warga:nik,jenis_kelamin', 'warga.riwayatPtm:id_riwayat,nik,id_penyakit',
                 'pengukuranDasar', 'skriningTbc', 'skriningSensorik', 'skriningPuma', 'pemeriksaanBumil', 'penyuluhanRujukan',
             ])
             ->orderByDesc('tanggal_pemeriksaan')->orderByDesc('id_pemeriksaan')
@@ -333,7 +335,7 @@ class PenghitungRekap
      *
      * @param  Collection<string, Collection<int, Pemeriksaan>>  $data
      */
-    private function hitungWarga(Collection $data, Closure $ambil, Closure $syarat): int
+    public function hitungWarga(Collection $data, Closure $ambil, Closure $syarat): int
     {
         $jumlah = 0;
         foreach ($data as $daftar) {

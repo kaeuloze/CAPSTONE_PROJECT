@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
 use App\Http\Controllers\PenggunaController;
@@ -25,7 +26,10 @@ Route::middleware('guest')->group(function () {
 
 // Hanya untuk kader yang sudah login.
 Route::middleware('auth')->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard'); // sementara; isi Dashboard dibuat di Tahap 4
+    // Dashboard (SKF-03). ?tab=bulan_ini|arsip, ?bulan=&tahun= (arsip), ?kategori= (filter grafik IMT).
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data'); // polling realtime
+    Route::get('/dashboard/excel', [DashboardController::class, 'ekspor'])->name('dashboard.ekspor');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     // Data Warga (SKF-05). Parameter {warga} = NIK.
