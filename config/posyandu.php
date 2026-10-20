@@ -92,6 +92,16 @@ return [
         'per_halaman' => 15,
     ],
 
+    // Identitas posyandu untuk kop file Excel Rekapitulasi (formulir kertas Kemenkes).
+    // Lokasi sesuai proposal: Tegalyoso, Banyuraden, Kecamatan Gamping, Kabupaten Sleman.
+    'profil' => [
+        'nama' => env('POSYANDU_NAMA', 'Posyandu Mawar 1'),
+        'nama_tanpa_awalan' => env('POSYANDU_NAMA_SINGKAT', 'Mawar 1'),
+        'dusun_rt_rw' => env('POSYANDU_DUSUN_RT_RW', 'Tegalyoso'),
+        'desa' => env('POSYANDU_DESA', 'Banyuraden'),
+        'kecamatan' => env('POSYANDU_KECAMATAN', 'Gamping'),
+    ],
+
     // Manajemen Pengguna / akun kader (SKF-11). Aturan disetujui 21 Okt 2026.
     'pengguna' => [
         'per_halaman' => 15,
