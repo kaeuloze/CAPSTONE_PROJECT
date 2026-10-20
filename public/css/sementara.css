@@ -232,3 +232,17 @@ dialog form .isian { text-align: left; }
 .kartu-rekap a.kartu { display: flex; flex-direction: column; gap: 6px; margin: 0; text-decoration: none; color: inherit; }
 .kartu-rekap a.kartu:hover, .kartu-rekap a.kartu:focus-visible { border-color: #9ca3af; }
 .kartu-rekap .ket { margin: 0; }
+
+/* Dashboard — grafik batang sederhana tanpa library (Figma 409:55) */
+.kisi-grafik { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+@media (max-width: 900px) { .kisi-grafik { grid-template-columns: 1fr; } }
+.kartu.grafik { margin: 0; display: flex; flex-direction: column; }
+.kepala-grafik { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.kepala-grafik h2 { margin: 0 0 4px; }
+.kepala-grafik .ket { margin: 0; }
+.kepala-grafik select { width: auto; }
+.batang-grafik { display: flex; align-items: flex-end; justify-content: space-around; gap: 8px; height: 220px; margin-top: 16px; }
+.batang { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.isi-batang { display: block; width: 36px; max-width: 100%; min-height: 2px; background: #9ca3af; border-radius: 4px 4px 0 0; transition: height .3s; }
+.nilai-batang { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.label-batang { font-size: 11px; color: #6b7280; margin-top: 6px; text-align: center; overflow-wrap: anywhere; }
