@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
@@ -13,13 +14,13 @@ use App\Http\Controllers\VaksinasiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman publik (Profil Posyandu) — sementara memakai halaman bawaan, dibuat di tahap frontend.
-Route::view('/', 'welcome')->name('beranda');
+// Halaman publik / Profil Posyandu (SKF-01). Tanpa login; dibatasi jumlah permintaan per alamat IP.
+Route::get('/', [BerandaController::class, 'index'])->middleware('throttle:publik')->name('beranda');
 
-// Hanya untuk tamu (belum login).
+// Hanya untuk tamu (belum login). Alamat login bisa diganti lewat LOGIN_PATH di .env (tidak ditautkan dari beranda).
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])
+    Route::get(config('posyandu.login.path'), [LoginController::class, 'create'])->name('login');
+    Route::post(config('posyandu.login.path'), [LoginController::class, 'store'])
         ->middleware('throttle:login') // batas percobaan per alamat IP
         ->name('login.store');
 });

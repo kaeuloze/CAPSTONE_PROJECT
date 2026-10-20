@@ -25,6 +25,8 @@ return [
         'durasi_kunci_detik' => (int) env('LOGIN_DURASI_KUNCI_DETIK', 60),
         // Batas total percobaan login per menit dari satu alamat IP (semua username).
         'maks_per_ip_per_menit' => (int) env('LOGIN_MAKS_PER_IP_PER_MENIT', 20),
+        // Alamat halaman login kader (tanpa garis miring), mis. "masuk-kader". Tidak ditautkan dari halaman publik.
+        'path' => trim((string) env('LOGIN_PATH', 'login'), '/') ?: 'login',
     ],
 
     // Batas kategori usia (tahun, dihitung dari tanggal lahir). Disetujui 10 Okt 2026:
@@ -100,6 +102,21 @@ return [
         'dusun_rt_rw' => env('POSYANDU_DUSUN_RT_RW', 'Tegalyoso'),
         'desa' => env('POSYANDU_DESA', 'Banyuraden'),
         'kecamatan' => env('POSYANDU_KECAMATAN', 'Gamping'),
+        // Halaman publik / profil posyandu (SKF-01, Figma 141:62). Teks tetap, diganti lewat .env (disetujui 21 Okt 2026).
+        // Isian yang kosong tidak ditampilkan.
+        'wilayah' => env('POSYANDU_WILAYAH', 'Tegalyoso, Banyuraden, Gamping, Sleman'),
+        'deskripsi' => env('POSYANDU_DESKRIPSI', 'Posyandu Mawar 1 adalah pusat pelayanan kesehatan masyarakat yang rutin memantau kondisi balita, remaja, dewasa, lansia, hingga ibu hamil, meliputi pendataan warga, pemeriksaan dan screening kesehatan berkala, pengecekan vaksinasi dan ASI balita melalui Buku KIA, serta rekap data kesehatan bulanan.'),
+        'jadwal' => env('POSYANDU_JADWAL', 'Dilaksanakan setiap bulan.'),
+        'jam' => env('POSYANDU_JAM', ''),
+        'alamat' => env('POSYANDU_ALAMAT', 'Tegalyoso, Banyuraden, Kecamatan Gamping, Kabupaten Sleman, DI Yogyakarta'),
+        'narahubung' => env('POSYANDU_NARAHUBUNG', ''),
+        'telepon' => env('POSYANDU_TELEPON', ''),
+    ],
+
+    // Halaman publik: angka grafik disimpan sementara (detik) & batas permintaan per menit per alamat IP.
+    'publik' => [
+        'cache_detik' => (int) env('PUBLIK_CACHE_DETIK', 600),
+        'maks_per_menit' => (int) env('PUBLIK_MAKS_PER_MENIT', 60),
     ],
 
     // Manajemen Pengguna / akun kader (SKF-11). Aturan disetujui 21 Okt 2026.
