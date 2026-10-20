@@ -5,6 +5,7 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\VaksinController;
 use App\Http\Controllers\VaksinasiController;
@@ -77,6 +78,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('vaksin', VaksinController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->where(['vaksin' => '[0-9]+']);
+
+    // Rekapitulasi + Ekspor Excel (SKF-12). {kategori} = remaja / ibu_hamil_nifas / dewasa_lansia; ?bulan=&tahun=.
+    Route::prefix('rekapitulasi')->name('rekapitulasi.')->group(function () {
+        Route::get('/', [RekapitulasiController::class, 'index'])->name('index');
+        Route::get('{kategori}', [RekapitulasiController::class, 'show'])->name('show');
+        Route::get('{kategori}/excel', [RekapitulasiController::class, 'ekspor'])->name('ekspor');
+    });
 
     // Manajemen Pengguna / akun kader (SKF-11). Parameter {pengguna} = id_kader. Tambah/Edit di halaman terpisah.
     Route::resource('pengguna', PenggunaController::class)

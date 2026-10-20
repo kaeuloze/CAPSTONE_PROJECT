@@ -226,3 +226,9 @@ dialog form .isian { text-align: left; }
 .centang-status { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .tabel-vaksin input[type=date] { padding: 6px 8px; border: 1px solid #d4d4d4; border-radius: 8px; font: inherit; }
 .tabel-vaksin input[type=date]:disabled { background: #f5f5f5; color: #9ca3af; }
+
+/* Rekapitulasi — kartu pilihan kategori (Figma 306:33) */
+.kartu-rekap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.kartu-rekap a.kartu { display: flex; flex-direction: column; gap: 6px; margin: 0; text-decoration: none; color: inherit; }
+.kartu-rekap a.kartu:hover, .kartu-rekap a.kartu:focus-visible { border-color: #9ca3af; }
+.kartu-rekap .ket { margin: 0; }
