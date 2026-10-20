@@ -23,11 +23,17 @@ class RekapitulasiService
     /** Bulan kegiatan posyandu terakhir (Activity Diagram: "menampilkan data dari kegiatan terakhir"). */
     public function periodeBawaan(): Periode
     {
+        return Periode::dariTanggal($this->tanggalKegiatanTerakhir() ?? CarbonImmutable::today());
+    }
+
+    /** Tanggal kegiatan posyandu terakhir (hari ini atau sebelumnya), null bila belum ada. */
+    public function tanggalKegiatanTerakhir(): ?CarbonImmutable
+    {
         $terakhir = Kegiatan::query()
             ->where('tanggal_kegiatan', '<=', CarbonImmutable::today()->toDateString())
             ->max('tanggal_kegiatan');
 
-        return Periode::dariTanggal($terakhir ? CarbonImmutable::parse($terakhir) : CarbonImmutable::today());
+        return $terakhir ? CarbonImmutable::parse($terakhir) : null;
     }
 
     /** Pilihan tahun di filter: tahun kegiatan pertama s.d. tahun ini (terbaru dulu). */

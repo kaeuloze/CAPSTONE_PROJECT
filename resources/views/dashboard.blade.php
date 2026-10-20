@@ -69,39 +69,12 @@
 
     <div class="kisi-grafik" id="grafik-dashboard"
          @unless ($arsip) data-url="{{ route('dashboard.data', $kueri()) }}" data-jeda="{{ max(2, (int) config('posyandu.presensi.polling_detik')) * 1000 }}" data-periode="{{ $periode->kode() }}" @endunless>
-        @foreach ($data['grafik'] as $kunci => $grafik)
-            @php $maks = max([1, ...array_column($grafik['batang'], 'nilai')]); @endphp
-            <section class="kartu grafik" data-grafik="{{ $kunci }}">
-                <div class="kepala-grafik">
-                    <div>
-                        <h2>{{ $grafik['judul'] }}</h2>
-                        <p class="ket">{{ $grafik['keterangan'] }}</p>
-                    </div>
-                    @if ($kunci === 'imt')
-                        <form method="GET" action="{{ route('dashboard') }}">
-                            @if ($arsip)
-                                <input type="hidden" name="tab" value="arsip"><input type="hidden" name="bulan" value="{{ $periode->bulan }}"><input type="hidden" name="tahun" value="{{ $periode->tahun }}">
-                            @endif
-                            <select name="kategori" aria-label="Filter Kategori" onchange="this.form.submit()">
-                                @foreach (\App\Services\DashboardService::FILTER_IMT as $nilai => $label)
-                                    <option value="{{ $nilai }}" @selected($data['filter_imt'] === $nilai)>{{ $nilai === 'semua' ? 'Filter Kategori: Semua' : $label }}</option>
-                                @endforeach
-                            </select>
-                            <noscript><button type="submit" class="tombol kecil">Terapkan</button></noscript>
-                        </form>
-                    @endif
-                </div>
-                <div class="batang-grafik" role="img" aria-label="{{ $grafik['judul'] }}: {{ collect($grafik['batang'])->map(fn ($b) => $b['label'].' '.$b['nilai'])->implode(', ') }}">
-                    @foreach ($grafik['batang'] as $batang)
-                        <div class="batang" data-kunci="{{ $batang['kunci'] }}">
-                            <span class="nilai-batang">{{ $batang['nilai'] }}</span>
-                            <span class="isi-batang" style="height: {{ round($batang['nilai'] / $maks * 100) }}%"></span>
-                            <span class="label-batang">{{ $batang['label'] }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endforeach
+        @include('partials.grafik-dashboard', [
+            'grafik' => $data['grafik'],
+            'filterImt' => $data['filter_imt'],
+            'aksiFilter' => route('dashboard'),
+            'tersembunyi' => $arsip ? ['tab' => 'arsip', 'bulan' => $periode->bulan, 'tahun' => $periode->tahun] : [],
+        ])
     </div>
 @endsection
 

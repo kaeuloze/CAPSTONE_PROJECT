@@ -48,6 +48,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Halaman publik: batas permintaan per menit per alamat IP (melindungi server dari banjir pengunjung/bot).
+        RateLimiter::for('publik', fn (Request $request) => Limit::perMinute((int) config('posyandu.publik.maks_per_menit'))->by($request->ip()));
+
         // Batas total percobaan login per menit dari satu alamat IP (semua username).
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute((int) config('posyandu.login.maks_per_ip_per_menit'))
