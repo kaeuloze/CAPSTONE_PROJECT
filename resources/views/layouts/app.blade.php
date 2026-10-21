@@ -18,8 +18,8 @@
         ['Vaksinasi Balita', 'vaksinasi.index', ['vaksinasi.*']],
         ['Master Vaksin', 'vaksin.index', ['vaksin.*']],
         ['Riwayat Pemeriksaan', 'riwayat.index', ['riwayat.*']],
-        ['Manajemen Pengguna', null, null],
-        ['Rekapitulasi', null, null],
+        ['Manajemen Pengguna', 'pengguna.index', ['pengguna.*']],
+        ['Rekapitulasi', 'rekapitulasi.index', ['rekapitulasi.*']],
     ];
 @endphp
 <div class="tata-letak">

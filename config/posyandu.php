@@ -25,6 +25,8 @@ return [
         'durasi_kunci_detik' => (int) env('LOGIN_DURASI_KUNCI_DETIK', 60),
         // Batas total percobaan login per menit dari satu alamat IP (semua username).
         'maks_per_ip_per_menit' => (int) env('LOGIN_MAKS_PER_IP_PER_MENIT', 20),
+        // Alamat halaman login kader (tanpa garis miring), mis. "masuk-kader". Tidak ditautkan dari halaman publik.
+        'path' => trim((string) env('LOGIN_PATH', 'login'), '/') ?: 'login',
     ],
 
     // Batas kategori usia (tahun, dihitung dari tanggal lahir). Disetujui 10 Okt 2026:
@@ -90,6 +92,50 @@ return [
     'riwayat' => [
         // Jumlah baris per halaman di Daftar Warga Riwayat & Riwayat per Warga (SOP poin 5).
         'per_halaman' => 15,
+    ],
+
+    // Identitas posyandu untuk kop file Excel Rekapitulasi (formulir kertas Kemenkes).
+    // Lokasi sesuai proposal: Tegalyoso, Banyuraden, Kecamatan Gamping, Kabupaten Sleman.
+    'profil' => [
+        'nama' => env('POSYANDU_NAMA', 'Posyandu Mawar 1'),
+        'nama_tanpa_awalan' => env('POSYANDU_NAMA_SINGKAT', 'Mawar 1'),
+        'dusun_rt_rw' => env('POSYANDU_DUSUN_RT_RW', 'Tegalyoso'),
+        'desa' => env('POSYANDU_DESA', 'Banyuraden'),
+        'kecamatan' => env('POSYANDU_KECAMATAN', 'Gamping'),
+        // Halaman publik / profil posyandu (SKF-01, Figma 141:62). Teks tetap, diganti lewat .env (disetujui 21 Okt 2026).
+        // Isian yang kosong tidak ditampilkan.
+        'wilayah' => env('POSYANDU_WILAYAH', 'Tegalyoso, Banyuraden, Gamping, Sleman'),
+        'deskripsi' => env('POSYANDU_DESKRIPSI', 'Posyandu Mawar 1 adalah pusat pelayanan kesehatan masyarakat yang rutin memantau kondisi balita, remaja, dewasa, lansia, hingga ibu hamil, meliputi pendataan warga, pemeriksaan dan screening kesehatan berkala, pengecekan vaksinasi dan ASI balita melalui Buku KIA, serta rekap data kesehatan bulanan.'),
+        'jadwal' => env('POSYANDU_JADWAL', 'Dilaksanakan setiap bulan.'),
+        'jam' => env('POSYANDU_JAM', ''),
+        'alamat' => env('POSYANDU_ALAMAT', 'Tegalyoso, Banyuraden, Kecamatan Gamping, Kabupaten Sleman, DI Yogyakarta'),
+        'narahubung' => env('POSYANDU_NARAHUBUNG', ''),
+        'telepon' => env('POSYANDU_TELEPON', ''),
+    ],
+
+    // Halaman publik: angka grafik disimpan sementara (detik) & batas permintaan per menit per alamat IP.
+    'publik' => [
+        'cache_detik' => (int) env('PUBLIK_CACHE_DETIK', 600),
+        'maks_per_menit' => (int) env('PUBLIK_MAKS_PER_MENIT', 60),
+    ],
+
+    // Manajemen Pengguna / akun kader (SKF-11). Aturan disetujui 21 Okt 2026.
+    'pengguna' => [
+        'per_halaman' => 15,
+        // Kata sandi: minimal 8, maksimal 64 karakter, tanpa paksaan huruf besar/angka/simbol (OWASP).
+        'sandi_min' => 8,
+        'sandi_maks' => 64,
+        // Tolak sandi yang pernah bocor (layanan Have I Been Pwned; yang dikirim hanya 5 huruf awal hash,
+        // bukan sandinya). Bila server tidak bisa menghubungi layanan, pengecekan ini dilewati.
+        'cek_sandi_bocor' => (bool) env('PENGGUNA_CEK_SANDI_BOCOR', true),
+        'cek_sandi_bocor_timeout_detik' => 5,
+        // Sandi umum yang selalu ditolak walau server sedang tanpa internet (dibandingkan tanpa huruf besar/kecil).
+        'sandi_umum' => [
+            '12345678', '123456789', '1234567890', '87654321', '11111111', '00000000', '12341234',
+            'password', 'password1', 'password123', 'qwerty123', 'qwertyuiop', 'abcd1234', 'iloveyou',
+            'bismillah', 'indonesia', 'posyandu', 'posyandu1', 'posyandumawar', 'posyandumawar1',
+            'mawar123', 'mawarsatu', 'kader123', 'kaderposyandu', 'admin123', 'administrator',
+        ],
     ],
 
     'presensi' => [

@@ -8,7 +8,7 @@ a { color: inherit; }
 /* Sidebar */
 .sidebar { width: 240px; flex-shrink: 0; background: #f5f5f5; padding: 20px 16px; }
 .merek { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; margin-bottom: 28px; }
-.merek .logo { width: 28px; height: 28px; border-radius: 6px; background: #e5e7eb; }
+.merek .logo, .merek-publik .logo { width: 28px; height: 28px; border-radius: 6px; background: #e5e7eb; }
 .menu { list-style: none; margin: 0; padding: 0; }
 .menu a, .menu button, .menu span { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border-radius: 8px;
     text-decoration: none; color: #4b5563; font: inherit; background: none; border: 0; cursor: pointer; text-align: left; }
@@ -51,7 +51,7 @@ a { color: inherit; }
 .kisi { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .kisi .penuh { grid-column: 1 / -1; }
 label, .label { display: block; font-size: 12px; color: #4b5563; margin-bottom: 6px; }
-input[type=text], input[type=date], input[type=search], select, .nilai {
+input[type=text], input[type=password], input[type=date], input[type=search], select, .nilai {
     width: 100%; padding: 10px 12px; border: 1px solid #d4d4d4; border-radius: 8px; font: inherit; background: #fff; min-height: 40px; }
 .nilai { background: #fafafa; }
 input:focus, select:focus { outline: 2px solid #9ca3af; outline-offset: 0; }
@@ -226,3 +226,39 @@ dialog form .isian { text-align: left; }
 .centang-status { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .tabel-vaksin input[type=date] { padding: 6px 8px; border: 1px solid #d4d4d4; border-radius: 8px; font: inherit; }
 .tabel-vaksin input[type=date]:disabled { background: #f5f5f5; color: #9ca3af; }
+
+/* Rekapitulasi — kartu pilihan kategori (Figma 306:33) */
+.kartu-rekap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.kartu-rekap a.kartu { display: flex; flex-direction: column; gap: 6px; margin: 0; text-decoration: none; color: inherit; }
+.kartu-rekap a.kartu:hover, .kartu-rekap a.kartu:focus-visible { border-color: #9ca3af; }
+.kartu-rekap .ket { margin: 0; }
+
+/* Dashboard — grafik batang sederhana tanpa library (Figma 409:55) */
+.kisi-grafik { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+@media (max-width: 900px) { .kisi-grafik { grid-template-columns: 1fr; } }
+.kartu.grafik { margin: 0; display: flex; flex-direction: column; }
+.kepala-grafik { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.kepala-grafik h2 { margin: 0 0 4px; }
+.kepala-grafik .ket { margin: 0; }
+.kepala-grafik select { width: auto; }
+.batang-grafik { display: flex; align-items: flex-end; justify-content: space-around; gap: 8px; height: 220px; margin-top: 16px; }
+.batang { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.isi-batang { display: block; width: 36px; max-width: 100%; min-height: 2px; background: #9ca3af; border-radius: 4px 4px 0 0; transition: height .3s; }
+.nilai-batang { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.label-batang { font-size: 11px; color: #6b7280; margin-top: 6px; text-align: center; overflow-wrap: anywhere; }
+
+/* Halaman publik / Profil Posyandu (Figma 141:62) */
+body.publik { background: #fff; }
+.kepala-publik { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 48px; border-bottom: 1px solid #e5e7eb; }
+.merek-publik { display: flex; align-items: center; gap: 12px; color: #111827; text-decoration: none; font-size: 16px; }
+.kepala-publik nav { display: flex; gap: 24px; }
+.kepala-publik nav a { color: #6b7280; text-decoration: none; font-size: 14px; }
+.kepala-publik nav a:hover, .kepala-publik nav a:focus-visible { color: #111827; }
+.pahlawan { background: #f5f5f5; text-align: center; padding: 96px 24px; }
+.pahlawan h1 { margin: 0 0 12px; font-size: 28px; font-weight: 500; }
+.pahlawan p { margin: 0; color: #6b7280; font-size: 14px; }
+.badan-publik { max-width: 1344px; margin: 0 auto; padding: 28px 48px 48px; }
+.badan-publik > .kartu { margin-bottom: 20px; }
+.badan-publik > .kartu p { margin: 8px 0 0; line-height: 1.6; }
+.kaki-publik { border-top: 1px solid #e5e7eb; padding: 16px; text-align: center; font-size: 12px; color: #9ca3af; }
+@media (max-width: 640px) { .kepala-publik, .badan-publik { padding-left: 16px; padding-right: 16px; } .pahlawan { padding: 56px 16px; } }

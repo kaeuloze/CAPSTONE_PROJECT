@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PemeriksaanController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\VaksinController;
 use App\Http\Controllers\VaksinasiController;
@@ -15,6 +19,7 @@ Route::get('/', function () {
 });
 */
 
+<<<<<<< HEAD
 // Landing page publik (frontend Maura)
 Route::view('/', 'landing.index')->name('beranda');
 
@@ -27,6 +32,16 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])
         ->middleware('throttle:login')
+=======
+// Halaman publik / Profil Posyandu (SKF-01). Tanpa login; dibatasi jumlah permintaan per alamat IP.
+Route::get('/', [BerandaController::class, 'index'])->middleware('throttle:publik')->name('beranda');
+
+// Hanya untuk tamu (belum login). Alamat login bisa diganti lewat LOGIN_PATH di .env (tidak ditautkan dari beranda).
+Route::middleware('guest')->group(function () {
+    Route::get(config('posyandu.login.path'), [LoginController::class, 'create'])->name('login');
+    Route::post(config('posyandu.login.path'), [LoginController::class, 'store'])
+        ->middleware('throttle:login') // batas percobaan per alamat IP
+>>>>>>> origin/main
         ->name('login.store');
 });
 
@@ -36,6 +51,14 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
+<<<<<<< HEAD
+=======
+    // Dashboard (SKF-03). ?tab=bulan_ini|arsip, ?bulan=&tahun= (arsip), ?kategori= (filter grafik IMT).
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data'); // polling realtime
+    Route::get('/dashboard/excel', [DashboardController::class, 'ekspor'])->name('dashboard.ekspor');
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+>>>>>>> origin/main
 
     Route::view('/dashboard', 'dashboard.index')->name('dashboard');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
@@ -98,4 +121,21 @@ Route::middleware('auth')->group(function () {
     Route::resource('vaksin', VaksinController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->where(['vaksin' => '[0-9]+']);
+<<<<<<< HEAD
 });
+=======
+
+    // Rekapitulasi + Ekspor Excel (SKF-12). {kategori} = remaja / ibu_hamil_nifas / dewasa_lansia; ?bulan=&tahun=.
+    Route::prefix('rekapitulasi')->name('rekapitulasi.')->group(function () {
+        Route::get('/', [RekapitulasiController::class, 'index'])->name('index');
+        Route::get('{kategori}', [RekapitulasiController::class, 'show'])->name('show');
+        Route::get('{kategori}/excel', [RekapitulasiController::class, 'ekspor'])->name('ekspor');
+    });
+
+    // Manajemen Pengguna / akun kader (SKF-11). Parameter {pengguna} = id_kader. Tambah/Edit di halaman terpisah.
+    Route::resource('pengguna', PenggunaController::class)
+        ->except(['show'])
+        ->parameters(['pengguna' => 'pengguna'])
+        ->where(['pengguna' => '[0-9]+']);
+});
+>>>>>>> origin/main
