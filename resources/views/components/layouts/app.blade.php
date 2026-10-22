@@ -68,6 +68,9 @@
         </div>
 
     </x-confirm-dialog>
+        {{-- Script khusus halaman (pemeriksaan-form, kalkulator, dll) --}}
+    @stack('skrip')
+
 
 </body>
 </html>

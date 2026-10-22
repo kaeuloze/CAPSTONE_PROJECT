@@ -244,3 +244,160 @@
 
 /* Baris vaksin: JS aktif/nonaktifkan input tanggal */
 [data-baris-vaksin] .galat-cell input[type="date"] { @apply ring-rose-400; }
+
+/* ==========================================================
+   FORMULIR PEMERIKSAAN (komponen bersama)
+   Dipakai oleh: pemeriksaan/form, riwayat/detail, riwayat/edit
+   ========================================================== */
+
+/* ---------- TAB ---------- */
+.tab-form {
+    @apply flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm;
+}
+.tab-form button {
+    @apply flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-semibold text-slate-600
+           transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
+}
+.tab-form button[aria-selected="true"] {
+    @apply bg-mawar-800 text-white shadow-sm hover:bg-mawar-700;
+}
+.tab-ket { @apply text-[10px] font-normal opacity-70; }
+
+/* ---------- PANEL ---------- */
+/* JANGAN pakai kelas display di sini — JS mengatur atribut [hidden] */
+.panel-tab { @apply space-y-5; }
+
+/* ---------- KARTU BAGIAN ---------- */
+.bagian-periksa {
+    @apply rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6;
+}
+
+/* ---------- ISIAN ---------- */
+.isian { @apply block; }
+.isian > label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+
+.isian input[type="text"],
+.isian input[type="number"],
+.isian input[type="date"],
+.isian select {
+    @apply block w-full rounded-lg border-0 px-3 py-2 text-sm text-slate-900 shadow-sm
+           ring-1 ring-inset ring-slate-300 placeholder:text-slate-400
+           focus:ring-2 focus:ring-inset focus:ring-mawar-600;
+}
+
+.isian.salah input,
+.isian.salah select { @apply !ring-rose-400; }
+.isian.salah > label { @apply text-rose-700; }
+
+/* ---------- BINTANG WAJIB ---------- */
+.wajib { @apply ml-0.5 font-bold text-rose-500; }
+
+/* ---------- BARIS CENTANG ---------- */
+.baris-centang {
+    @apply flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200
+           bg-white px-3.5 py-2.5 transition hover:border-mawar-300 hover:bg-mawar-50/50;
+}
+.baris-centang input[type="checkbox"] {
+    @apply h-4 w-4 shrink-0 rounded border-slate-300 text-mawar-600 focus:ring-mawar-500;
+}
+
+/* ---------- TEKANAN DARAH ---------- */
+.isian-td legend { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+.baris-td { @apply flex items-center gap-2; }
+.baris-td input { @apply w-full text-center; }
+.baris-td span { @apply shrink-0 text-slate-400; }
+
+/* ---------- GALAT ---------- */
+.galat-isian { @apply mt-1.5 text-[11px] font-medium text-rose-600; }
+
+/* ---------- IDENTITAS ---------- */
+.identitas-periksa {
+    @apply flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm;
+}
+.avatar {
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-full bg-mawar-100
+           text-sm font-bold uppercase text-mawar-700;
+}
+
+/* ---------- FIELDset HANYA-BACA ---------- */
+.bagian-baca { @apply space-y-4; }
+.bagian-baca input,
+.bagian-baca select { @apply bg-slate-50 text-slate-600; }
+
+/* ---------- INFO ---------- */
+.info {
+    @apply rounded-xl border border-slate-200 bg-white px-4 py-3 text-[12px] leading-relaxed text-slate-500;
+}
+
+/* ---------- TOMBOL DIALOG (native <dialog>) ---------- */
+dialog {
+    @apply m-auto w-[calc(100vw-2rem)] max-w-md rounded-2xl border-0 bg-white p-0 shadow-2xl
+           backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm;
+}
+dialog::backdrop { @apply bg-slate-900/50 backdrop-blur-sm; }
+dialog .kepala-dialog {
+    @apply flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-6 py-4;
+}
+dialog .dialog-tombol {
+    @apply flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4;
+}
+/* ===== FORMULIR PEMERIKSAAN — partial tambahan ===== */
+
+/* ---------- Keterangan (teks kecil di bawah judul) ---------- */
+.ket { @apply text-xs leading-relaxed text-slate-500; }
+
+/* ---------- Judul bagian di dalam kartu ---------- */
+.bagian-periksa h2,
+.bagian-periksa .judul-bagian {
+    @apply text-sm font-bold uppercase tracking-wide text-mawar-800;
+}
+.bagian-periksa .sub-kelompok {
+    @apply mt-3 text-[13px] font-semibold text-slate-700;
+}
+
+/* ---------- Grid AKS (10 item) ---------- */
+.kisi-aks { @apply mt-3 grid gap-3 sm:grid-cols-2; }
+
+/* ---------- Hasil otomatis (IMT / TD / LP / GDS / TBC / AKS / PUMA / SKILAS) ---------- */
+.hasil-otomatis {
+    @apply rounded-xl border border-mawar-200 bg-mawar-50/60 px-4 py-3 text-[13px] leading-relaxed text-mawar-800;
+}
+.hasil-otomatis strong { @apply font-semibold; }
+.hasil-otomatis dl {
+    @apply mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px];
+}
+.hasil-otomatis dt { @apply font-medium text-slate-500; }
+.hasil-otomatis dd { @apply font-bold text-mawar-800; }
+
+/* ---------- PUMA score (dl skor-otomatis) ---------- */
+.skor-otomatis { @apply mt-3 space-y-1 text-[12px] leading-relaxed text-slate-600; }
+.skor-otomatis dt { @apply font-semibold text-slate-700; }
+.skor-otomatis dd { @apply inline; }
+
+/* ---------- Aksi form (bawah kartu) ---------- */
+.aksi-form {
+    @apply mt-5 flex flex-wrap items-center gap-2.5 border-t border-slate-100 pt-4;
+}
+.aksi-pemeriksaan {
+    @apply mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-4;
+}
+.aksi-pemeriksaan p { @apply text-[13px] leading-relaxed text-slate-600; }
+.aksi-pemeriksaan p strong { @apply font-semibold text-slate-800; }
+
+/* ---------- Tombol 'tombol' (compat teammate) ---------- */
+.tombol {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+           text-sm font-semibold transition focus:outline-none focus:ring-2
+           focus:ring-mawar-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+.tombol.abu { @apply bg-mawar-700 text-white hover:bg-mawar-800; }
+.tombol.utama { @apply bg-mawar-800 text-white hover:bg-mawar-700; }
+.tombol.kecil { @apply px-3 py-1.5 text-[12px]; }
+.tombol.kecil.bahaya { @apply bg-rose-600 hover:bg-rose-700; }
+.tombol.nonaktif { @apply cursor-not-allowed text-slate-300; }
+
+/* ---------- Skor otomatis PUMA ---------- */
+.skor-otomatis { @apply mt-3 space-y-1 text-[12px] leading-relaxed text-slate-600; }
+
+/* ---------- Wrapper isian (max-width) ---------- */
+.isian { @apply block; }
