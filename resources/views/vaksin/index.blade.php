@@ -136,8 +136,9 @@
                                         <button type="button"
                                                 @click="$dispatch('konfirmasi-hapus', {
     judul: 'Yakin hapus vaksin?',
-    pesan: '{{ $vaksin->nama_vaksin }} akan hilang dari checklist semua balita.',
-    aksi: 'Ya, Hapus'
+    pesan: @js($vaksin->nama_vaksin.' akan hilang dari checklist semua balita.'),
+    aksi: 'Ya, Hapus',
+    url: @js(route('vaksin.destroy', $vaksin))
 })"
                                                 @disabled($vaksin->vaksinasi_count > 0)
                                                 title="{{ $vaksin->vaksinasi_count > 0 ? 'Sudah tercatat pada ' . $vaksin->vaksinasi_count . ' balita' : 'Hapus vaksin' }}"

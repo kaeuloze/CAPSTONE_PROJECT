@@ -155,8 +155,9 @@
                                         <button type="button"
                                                 @click="$dispatch('konfirmasi-hapus', {
     judul: 'Yakin hapus akun?',
-    pesan: 'Akun {{ $akun->nama_kader }} (@{{ $akun->username }}) tidak dapat masuk lagi setelah dihapus.',
-    aksi: 'Ya, Hapus'
+    pesan: @js('Akun '.$akun->nama_kader.' ('.$akun->username.') tidak dapat masuk lagi setelah dihapus.'.($akun->id_kader === auth()->id() ? ' Ini akun yang sedang Anda pakai — Anda akan langsung keluar.' : '')),
+    aksi: 'Ya, Hapus',
+    url: @js(route('pengguna.destroy', $akun))
 })"
                                                 title="Hapus akun"
                                                 class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px]
