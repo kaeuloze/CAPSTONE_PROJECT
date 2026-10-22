@@ -42,7 +42,7 @@
         @foreach ($menu as $item)
             @php $isActive = $active === $item['key']; @endphp
 
-            <a href="{{ route('pengguna') }}"
+            <a href="{{ route('pengguna.index') }}"
                @class([
                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition',
                    'bg-emerald-50 text-emerald-700'      => $isActive,

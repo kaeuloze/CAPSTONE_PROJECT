@@ -4,7 +4,9 @@
     $tercentang = array_map('intval', (array) old('penyakit', $penyakitDipilih ?? []));
 
     $warnaKategori = ['balita' => 'amber', 'remaja' => 'sky', 'dewasa' => 'mawar', 'lansia' => 'violet'];
-    $kategoriNow  = $warga->kategori_usia_terkini;
+     $kategoriNow  = $warga->tanggal_lahir
+        ? $warga->kategori_usia_terkini
+        : \App\Enums\KategoriUsia::Dewasa;
     $kondisiNow   = $warga->status_kondisi;
 @endphp
 

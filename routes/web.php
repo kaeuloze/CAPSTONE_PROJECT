@@ -13,15 +13,16 @@ use App\Http\Controllers\VaksinController;
 use App\Http\Controllers\VaksinasiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
+
 /*
-Route::get('/', function () {
-    return view('welcome');
-});
+|--------------------------------------------------------------------------
+| HALAMAN PUBLIK  (tanpa login)
+|--------------------------------------------------------------------------
 */
 
-<<<<<<< HEAD
-// Landing page publik (frontend Maura)
-Route::view('/', 'landing.index')->name('beranda');
+Route::get('/', [BerandaController::class, 'index'])
+    ->middleware('throttle:publik')
+    ->name('beranda');
 
 /*
 |--------------------------------------------------------------------------
@@ -29,19 +30,9 @@ Route::view('/', 'landing.index')->name('beranda');
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])
-        ->middleware('throttle:login')
-=======
-// Halaman publik / Profil Posyandu (SKF-01). Tanpa login; dibatasi jumlah permintaan per alamat IP.
-Route::get('/', [BerandaController::class, 'index'])->middleware('throttle:publik')->name('beranda');
-
-// Hanya untuk tamu (belum login). Alamat login bisa diganti lewat LOGIN_PATH di .env (tidak ditautkan dari beranda).
-Route::middleware('guest')->group(function () {
     Route::get(config('posyandu.login.path'), [LoginController::class, 'create'])->name('login');
     Route::post(config('posyandu.login.path'), [LoginController::class, 'store'])
-        ->middleware('throttle:login') // batas percobaan per alamat IP
->>>>>>> origin/main
+        ->middleware('throttle:login')
         ->name('login.store');
 });
 
@@ -51,25 +42,19 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-<<<<<<< HEAD
-=======
-    // Dashboard (SKF-03). ?tab=bulan_ini|arsip, ?bulan=&tahun= (arsip), ?kategori= (filter grafik IMT).
+
+    // Dashboard (SKF-03) - ?tab=bulan_ini|arsip, ?bulan=&tahun=, ?kategori=
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data'); // polling realtime
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
     Route::get('/dashboard/excel', [DashboardController::class, 'ekspor'])->name('dashboard.ekspor');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
->>>>>>> origin/main
 
-    Route::view('/dashboard', 'dashboard.index')->name('dashboard');
-    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-    Route::view('/pengguna', 'pengguna.index')->name('pengguna');
-
-    // ─── Data Warga (SKF-05) ───
+    // Data Warga (SKF-05). Parameter {warga} = NIK.
     Route::resource('warga', WargaController::class)
         ->parameters(['warga' => 'warga'])
         ->where(['warga' => '[0-9]{16}']);
 
-    // ─── Kegiatan & Presensi (SKF-06) ───
+    // Kegiatan & Presensi (SKF-06). Parameter {kegiatan} = id_kegiatan.
     Route::resource('kegiatan', KegiatanController::class)
         ->except(['show'])
         ->where(['kegiatan' => '[0-9]+']);
@@ -83,7 +68,7 @@ Route::middleware('auth')->group(function () {
             ->name('presensi.atur');
     });
 
-    // ─── Pemeriksaan (SKF-07 & SKF-08) ───
+    // Pemeriksaan (SKF-07 & SKF-08). Parameter {warga} = NIK.
     Route::prefix('pemeriksaan')->name('pemeriksaan.')->group(function () {
         Route::get('/', [PemeriksaanController::class, 'index'])->name('index');
         Route::get('status', [PemeriksaanController::class, 'status'])->name('status');
@@ -93,7 +78,7 @@ Route::middleware('auth')->group(function () {
             ->where('warga', '[0-9]{16}')->name('simpan');
     });
 
-    // ─── Riwayat Pemeriksaan (SKF-09) ───
+    // Riwayat Pemeriksaan (SKF-09). Parameter {warga} = NIK.
     Route::prefix('riwayat')->name('riwayat.')->group(function () {
         Route::get('/', [RiwayatController::class, 'index'])->name('index');
         Route::get('warga/{warga}', [RiwayatController::class, 'warga'])
@@ -107,7 +92,7 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // ─── Vaksinasi Balita (SKF-10) ───
+    // Vaksinasi Balita (SKF-10). Parameter {warga} = NIK balita.
     Route::prefix('vaksinasi')->name('vaksinasi.')->group(function () {
         Route::get('/', [VaksinasiController::class, 'index'])->name('index');
         Route::get('status', [VaksinasiController::class, 'status'])->name('status');
@@ -117,25 +102,21 @@ Route::middleware('auth')->group(function () {
             ->where('warga', '[0-9]{16}')->name('simpan');
     });
 
-    // ─── Master Vaksin ───
+    // Master Vaksin (pendukung SKF-10).
     Route::resource('vaksin', VaksinController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->where(['vaksin' => '[0-9]+']);
-<<<<<<< HEAD
-});
-=======
 
-    // Rekapitulasi + Ekspor Excel (SKF-12). {kategori} = remaja / ibu_hamil_nifas / dewasa_lansia; ?bulan=&tahun=.
+    // Rekapitulasi + Ekspor Excel (SKF-12).
     Route::prefix('rekapitulasi')->name('rekapitulasi.')->group(function () {
         Route::get('/', [RekapitulasiController::class, 'index'])->name('index');
         Route::get('{kategori}', [RekapitulasiController::class, 'show'])->name('show');
         Route::get('{kategori}/excel', [RekapitulasiController::class, 'ekspor'])->name('ekspor');
     });
 
-    // Manajemen Pengguna / akun kader (SKF-11). Parameter {pengguna} = id_kader. Tambah/Edit di halaman terpisah.
+    // Manajemen Pengguna / akun kader (SKF-11).
     Route::resource('pengguna', PenggunaController::class)
         ->except(['show'])
         ->parameters(['pengguna' => 'pengguna'])
         ->where(['pengguna' => '[0-9]+']);
 });
->>>>>>> origin/main
