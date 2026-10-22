@@ -9,12 +9,22 @@
           judul: 'Judul dialog',
           pesan: 'Keterangan tambahan.',
           aksi:  'Ya, Hapus', // teks tombol konfirmasi
-          tone:  'danger'                // danger | warning | success
+          tone:  'danger',               // danger | warning | success
+          url:   @js(route('warga.destroy', $warga)), // tujuan form saat dikonfirmasi (opsional)
+          metode: 'DELETE'               // opsional, bawaan DELETE
       })
+    Teks dari data (nama warga, dll.) WAJIB lewat @js(...) agar tanda petik tidak merusak kode JavaScript.
+    Bila `url` diisi, tombol konfirmasi mengirim form POST (+ _method & token CSRF) ke url tersebut.
 --}}
-<div x-data="{ open: false, judul: '', pesan: '', aksi: 'Ya, Lanjutkan', tone: 'danger' }"
-     @konfirmasi-hapus.window="open = true; judul = $event.detail.judul; pesan = $event.detail.pesan; aksi = $event.detail.aksi ?? 'Ya, Lanjutkan'; tone = $event.detail.tone ?? 'danger'"
+<div x-data="{ open: false, judul: '', pesan: '', aksi: 'Ya, Lanjutkan', tone: 'danger', url: '', metode: 'DELETE', mengirim: false }"
+     @konfirmasi-hapus.window="open = true; mengirim = false; judul = $event.detail.judul; pesan = $event.detail.pesan; aksi = $event.detail.aksi ?? 'Ya, Lanjutkan'; tone = $event.detail.tone ?? 'danger'; url = $event.detail.url ?? ''; metode = $event.detail.metode ?? 'DELETE'"
      @keydown.escape.window="open = false">
+
+    {{-- Form tersembunyi yang dikirim saat aksi dikonfirmasi (hapus data, dll.). --}}
+    <form method="POST" :action="url" x-ref="formKonfirmasi" class="hidden">
+        @csrf
+        <input type="hidden" name="_method" :value="metode">
+    </form>
 
     {{-- ============ ISI HALAMAN (slot) ============ --}}
     {{ $slot }}
@@ -61,13 +71,14 @@
                 <button type="button" @click="open = false" class="btn btn-secondary">
                     Batal
                 </button>
-                <button type="button" @click="open = false" class="btn"
+                <button type="button" class="btn disabled:opacity-60" :disabled="mengirim"
+                        @click="if (url) { mengirim = true; $refs.formKonfirmasi.submit(); } else { open = false }"
                         :class="{
                             'bg-rose-600 text-white hover:bg-rose-700'        : tone === 'danger',
                             'bg-amber-500 text-white hover:bg-amber-600'      : tone === 'warning',
                             'bg-emerald-600 text-white hover:bg-emerald-700' : tone === 'success',
                         }"
-                        x-text="aksi"></button>
+                        x-text="mengirim ? 'Memproses...' : aksi"></button>
             </div>
 
         </div>

@@ -219,8 +219,9 @@
                                         <button type="button"
                                                 @click="$dispatch('konfirmasi-hapus', {
     judul: 'Yakin hapus data warga?',
-    pesan: 'Data {{ $warga->nama_warga }} beserta seluruh riwayat pemeriksaan akan dihapus permanen.',
-    aksi: 'Ya, Hapus'
+    pesan: @js('Data '.$warga->nama_warga.' beserta seluruh riwayat pemeriksaan akan dihapus permanen.'),
+    aksi: 'Ya, Hapus',
+    url: @js(route('warga.destroy', $warga))
 })"
                                                 title="Hapus data"
                                                 class="rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600">
