@@ -1,52 +1,111 @@
-{{--
-    Edit Pemeriksaan (Figma 253:1732). Aturan sama dengan formulir (disetujui): isian * tetap wajib,
-    tab 6-Bulan/Tahunan boleh ditambah atau dikosongkan, hasil otomatis & jenis pemeriksaan dihitung ulang.
-    Simpan per bagian sehingga aman bila dua kader mengedit bersamaan.
---}}
-@extends('layouts.app')
+@php
+    $tabNonaktif ??= [];
+    $jenisDilakukan ??= null;
+    $namaTombol = 'Tombol Simpan Perubahan';
+    $peringatan = [];
+@endphp
 
-@section('judul', 'Edit Pemeriksaan — '.$pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y'))
-@section('subjudul', 'Koreksi hasil ukur & screening yang sudah di-Submit.')
-@section('aksi-kepala')
-    <a href="{{ route('riwayat.show', $pemeriksaan) }}" class="tombol" data-batal>Kembali</a>
-@endsection
 
-@section('isi')
-    @if ($errors->any())
-        <div class="pesan galat" role="alert">
-            {{ $errors->first('submit') ? 'Perubahan belum bisa disimpan: masih ada isian bertanda * yang kosong.' : 'Perubahan belum bisa disimpan. Periksa kembali isian yang ditandai merah.' }}
-        </div>
-    @endif
+<x-layouts.app :title="'Edit Pemeriksaan — ' . $pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y')" active="riwayat">
 
-    @include('pemeriksaan.partials.identitas', ['keterangan' => "Kegiatan: {$kegiatan->nama_kegiatan}"])
+    <div class="mx-auto max-w-5xl">
 
-    <form method="POST" action="{{ route('riwayat.update', $pemeriksaan) }}" id="form-pemeriksaan" novalidate>
-        @csrf
-        @method('PUT')
+        {{-- ═══════════ KEMBALI ═══════════ --}}
+        <a href="{{ route('riwayat.show', $pemeriksaan) }}"
+           class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-mawar-800">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.4" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Kembali ke detail
+        </a>
 
-        @include('pemeriksaan.partials.isi-form', ['namaTombol' => 'Tombol Simpan Perubahan'])
+        <h2 class="mt-2 text-xl font-extrabold tracking-tight text-slate-900">
+            Edit Pemeriksaan
+        </h2>
+        <p class="mt-1 text-sm text-slate-500">
+            Koreksi hasil ukur &amp; screening yang sudah di-Submit. Simpan per bagian.
+        </p>
 
-        <div class="aksi-pemeriksaan">
-            <p class="ket" id="catatan-aksi" data-bawaan="Tanda * wajib diisi. Tombol Simpan Perubahan aktif setelah semua isian bertanda * terisi.">Tanda <span class="wajib">*</span> wajib diisi. Tombol Simpan Perubahan aktif setelah semua isian bertanda <span class="wajib">*</span> terisi.</p>
-            <div class="aksi-form">
-                <button type="submit" name="aksi" value="simpan" class="tombol utama" id="tombol-submit">Simpan Perubahan</button>
-                <a href="{{ route('riwayat.show', $pemeriksaan) }}" class="tombol" data-batal>Batal</a>
+
+        {{-- ═══════════ ERROR ═══════════ --}}
+        @if ($errors->any())
+            <div class="mt-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3" role="alert">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div class="text-sm font-medium text-rose-900">
+                    {{ $errors->first('submit') ? 'Perubahan belum bisa disimpan: masih ada isian bertanda * yang kosong.' : 'Perubahan belum bisa disimpan. Periksa kembali isian yang ditandai merah.' }}
+                    @if ($errors->any() && ! $errors->first('submit'))
+                        <ul class="mt-1.5 list-inside list-disc space-y-0.5 text-[13px]">
+                            @foreach ($errors->all() as $pesan)
+                                <li>{{ $pesan }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
             </div>
+        @endif
+
+
+        {{-- ═══════════ IDENTITAS ═══════════ --}}
+        <div class="mt-4">
+            @include('pemeriksaan.partials.identitas', [
+                'keterangan' => "Kegiatan: {$kegiatan->nama_kegiatan}",
+            ])
         </div>
-    </form>
 
-    <div class="info">Catatan: koreksi data hasil pemeriksaan yang sudah berhasil disimpan dilakukan di sini — bukan di menu Pemeriksaan.</div>
 
-    <dialog id="dialog-batal" aria-labelledby="judul-batal">
-        <h3 id="judul-batal">Tinggalkan halaman tanpa menyimpan?</h3>
-        <p>Perubahan yang belum disimpan akan hilang.</p>
-        <div class="dialog-tombol">
-            <button type="button" class="tombol" data-tutup-dialog>Tidak</button>
-            <a href="{{ route('riwayat.show', $pemeriksaan) }}" class="tombol utama">Ya, Tinggalkan</a>
-        </div>
-    </dialog>
-@endsection
+        {{-- ═══════════ FORM ═══════════ --}}
+        <form method="POST" action="{{ route('riwayat.update', $pemeriksaan) }}" id="form-pemeriksaan" novalidate
+              class="mt-6 space-y-5">
 
-@push('skrip')
-    <script src="{{ asset('js/pemeriksaan-form.js') }}"></script>
-@endpush
+            @csrf
+            @method('PUT')
+
+            @include('pemeriksaan.partials.isi-form', [
+                'definisi'        => $definisi,
+                'nilai'           => $nilai,
+                'versi'           => $versi,
+                'tabNonaktif'     => $tabNonaktif,
+                'peringatan'      => [],
+                'hanyaBaca'       => false,
+                'jenisDilakukan'  => $jenisDilakukan,
+                'namaTombol'      => 'Tombol Simpan Perubahan',
+            ])
+
+            {{-- Aksi form --}}
+            <div class="aksi-pemeriksaan">
+                <p><strong>Tanda * wajib diisi. Tombol Simpan Perubahan aktif setelah semua isian bertanda * terisi.</strong></p>
+                <div class="aksi-form">
+                    <button type="submit" name="aksi" value="simpan" class="btn btn-primary py-2 text-[13px]" id="tombol-submit">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        Simpan Perubahan
+                    </button>
+
+                    <a href="{{ route('riwayat.show', $pemeriksaan) }}" class="btn btn-secondary py-2 text-[13px]" data-batal>
+                        Batal
+                    </a>
+                </div>
+            </div>
+        </form>
+
+
+        {{-- ═══════════ DIALOG BATAL ═══════════ --}}
+        <dialog id="dialog-batal" aria-labelledby="judul-batal">
+            <h3 id="judul-batal">Tinggalkan halaman tanpa menyimpan?</h3>
+            <p>Perubahan yang belum disimpan akan hilang.</p>
+            <div class="dialog-tombol">
+                <button type="button" class="tombol" onclick="this.closest('dialog').close()">Tidak</button>
+                <a href="{{ route('riwayat.show', $pemeriksaan) }}" class="tombol utama">Ya, Tinggalkan</a>
+            </div>
+        </dialog>
+    </div>
+
+
+    {{-- ═══════════ JS ═══════════ --}}
+    <script src="{{ asset('js/pemeriksaan-form.js') }}" defer></script>
+
+</x-layouts.app>

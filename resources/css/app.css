@@ -5,7 +5,399 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+
+/* ==========================================================
+   2. THEME
+   ========================================================== */
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@theme {
+    /* --------------------------------------------------------------
+ PALET "MAWAR" — Cyan / Aqua
+       --------------------------------------------------------------
+       Aksen utama  : #00FFFF  (mawar-300)
+       mawar-700 ke atas sengaja digelapkan supaya:
+         - teks putih di header & footer tetap terbaca
+         - tombol & teks di atas background putih tetap kontras
+       -------------------------------------------------------------- */
+
+    --color-mawar-50:  #ecfeff;   /* background paling muda */
+    --color-mawar-100: #cffafe;   /* badge, hover background          */
+    --color-mawar-200: #a5f3fc;   /* border, garis bawah             */
+    --color-mawar-300: #00ffff;   /* ← AKSEN UTAMA #00FFFF            */
+    --color-mawar-400: #22d3ee;   /* ikon, aksen sekunder            */
+    --color-mawar-500: #06b6d4;   /* batang grafik                   */
+    --color-mawar-600: #0891b2;   /* tombol, badge background        */
+    --color-mawar-700: #0e7490;   /* teks di atas background putih   */
+    --color-mawar-800: #155e75;   /* HEADER & FOOTER (gelap)         */
+    --color-mawar-900: #083344;   /* teks paling gelap */
+    --color-mawar-950: #04212e;   /* bayangan / gradient terdalam */
+
+    /* Radius & shadow */
+    --shadow-mawar: 0 4px 20px -4px rgb(8 51 68 / 0.18);
+}
+
+
+/* ==========================================================
+   3. KOMPONEN KELAS
+   ========================================================== */
+
+@layer components {
+
+    /* ---------- TOMBOL ---------- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+ text-sm font-semibold transition
+ focus:outline-none focus:ring-2 focus:ring-mawar-400 focus:ring-offset-2
+               disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .btn-primary {
+        @apply bg-mawar-700 text-white hover:bg-mawar-800 active:bg-mawar-900;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300
+               hover:bg-slate-50 hover:text-slate-900;
+    }
+
+    .btn-danger {
+        @apply bg-rose-600 text-white hover:bg-rose-700;
+    }
+
+    .btn-ghost {
+        @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    }
+
+    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .btn-lg { @apply px-6 py-3 text-base; }
+
+    /* ---------- KARTU ---------- */
+    .card {
+        @apply rounded-xl bg-white shadow-sm ring-1 ring-slate-200;
+    }
+
+    /* ---------- INPUT / SELECT / TEXTAREA ---------- */
+    .input {
+        @apply block w-full rounded-lg border-0 px-3 py-2
+               text-sm text-slate-900 shadow-sm
+               ring-1 ring-inset ring-slate-300
+               placeholder:text-slate-400
+               focus:ring-2 focus:ring-inset focus:ring-mawar-600;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-slate-700;
+    }
+
+    /* ---------- BADGE ---------- */
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5
+               text-xs font-medium;
+    }
+
+    /* ---------- TABEL ---------- */
+    .th {
+        @apply px-4 py-3 text-left text-xs font-semibold
+               uppercase tracking-wide text-slate-500;
+    }
+
+    .td {
+        @apply px-4 py-3 text-slate-700;
+    }
+
+    /* ---------- BADGE WARNA (dipakai lewat class, mis. .badge-ok) ---------- */
+    .badge-mawar   { @apply bg-mawar-100 text-mawar-800 ring-1 ring-mawar-200; }
+    .badge-success { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+    .badge-warning { @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200; }
+    .badge-danger  { @apply bg-rose-100 text-rose-700 ring-1 ring-rose-200; }
+    .badge-info    { @apply bg-sky-100 text-sky-700 ring-1 ring-sky-200; }
+    .badge-slate   { @apply bg-slate-100 text-slate-600 ring-1 ring-slate-200; }
+}
+
+
+/* ==========================================================
+   4. UTILITAS KECIL
+   ========================================================== */
+
+/* Sembunyikan elemen sebelum Alpine.js siap (anti-flicker) */
+[x-cloak] { display: none !important; }
+
+/* Scrollbar tipis bergaya website modern */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+    border: 2px solid #f1f5f9;
+}
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Teks panjang (mis. alamat) tidak bikin tabel melebar */
+.break-anywhere { overflow-wrap: anywhere; }
+
+
+/* ==========================================================
+   5. ANIMASI
+   ========================================================== */
+
+/* Batang grafik tumbuh dari bawah */
+@keyframes barGrow {
+    from { transform: scaleY(0); opacity: .4; }
+    to   { transform: scaleY(1); opacity: 1; }
+}
+.animate-bar {
+    transform-origin: bottom;
+    animation: barGrow .7s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Elemen muncul dari bawah */
+@keyframes fadeUp {
+    from { transform: translateY(14px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-fade-up {
+    animation: fadeUp .6s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Muncul dari kiri (untuk baris tabel / daftar) */
+@keyframes fadeRight {
+    from { transform: translateX(-12px); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
+}
+.animate-fade-right {
+    animation: fadeRight .5s cubic-bezier(.22, 1, .36, 1) both;
+}
+/* ===== HOOK LIVE-UPDATE (dikendalikan public/js/presensi.js) =====
+ JS menambah/menghapus kelas .hadir / .belum / .tidak / .abu / .mati,
+   sehingga warna harus berasal dari CSS, bukan utility Tailwind.
+   ============================================================ */
+
+.status-hadir { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+.status-hadir.hadir  { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+.status-hadir.belum  { @apply bg-slate-100 text-slate-500 ring-1 ring-slate-200; }
+.status-hadir.tidak  { @apply bg-rose-100 text-rose-600 ring-1 ring-rose-200; }
+
+.status-hadir::before { content: ''; width: .4rem; height: .4rem; border-radius: 9999px; background: currentColor; }
+
+.form-presensi button.abu { @apply bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50; }
+
+#indikator-langsung { @apply text-[11px] font-medium text-emerald-600; }
+#indikator-langsung.mati { @apply text-slate-400; }
+
+.pesan { @apply rounded-xl border px-4 py-3 text-sm font-medium; }
+.pesan.galat      { @apply border-rose-200 bg-rose-50 text-rose-900; }
+.pesan.sukses     { @apply border-emerald-200 bg-emerald-50 text-emerald-900; }
+.pesan.info-arsip { @apply border-sky-200 bg-sky-50 text-sky-900; }
+
+/* ===== HOOK LIVE-UPDATE (public/js/pemeriksaan-daftar.js) =====
+   JS membuat ulang <tr>/<td> TANPA class Tailwind, jadi warna
+   harus berasal dari CSS di bawah.
+   ============================================================ */
+
+#isi-antrean td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle text-[13px] text-slate-700;
+}
+#isi-antrean td:first-child { @apply w-14 text-slate-400; }
+#isi-antrean td:nth-child(2) { @apply font-semibold text-slate-900; }
+#isi-antrean td:nth-child(3) { @apply font-mono text-[12px] text-slate-500; }
+#isi-antrean td:last-child  { @apply text-right; }
+
+#isi-antrean td.kosong {
+    @apply py-16 text-center align-middle text-[13px] font-medium text-slate-400;
+}
+
+/* JS: tautan.className = 'tombol kecil ' + (draft ? 'draft' : 'abu') */
+.tombol.kecil {
+    @apply inline-flex items-center justify-center rounded-lg px-3.5 py-1.5
+ text-[12px] font-bold shadow-sm transition hover:-translate-y-px;
+}
+.tombol.kecil.abu {
+    @apply bg-mawar-700 text-white hover:bg-mawar-800;
+}
+.tombol.kecil.draft {
+    @apply bg-amber-100 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-200;
+}
+/* ===== HOOK LIVE-UPDATE (public/js/vaksinasi-daftar.js) ===== */
+
+#isi-balita td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle text-[13px] text-slate-700;
+}
+#isi-balita td:first-child { @apply font-semibold text-slate-900; }
+#isi-balita td:nth-child(2) { @apply font-mono text-[12px] text-slate-500; }
+#isi-balita td:last-child  { @apply text-right; }
+#isi-balita td.kosong { @apply py-16 text-center align-middle text-[13px] font-medium text-slate-400; }
+
+/* JS: badge.className = 'badge hadir' */
+.badge.hadir { @apply bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200; }
+.badge.hadir::before { content: ''; width: .4rem; height: .4rem; border-radius: 9999px; background: currentColor; }
+
+/* JS: tautan.className = 'tombol kecil abu' */
+.tombol.kecil.abu {
+    @apply inline-flex items-center justify-center rounded-lg bg-mawar-700 px-4 py-1.5
+ text-[12px] font-bold text-white shadow-sm transition hover:-translate-y-px hover:bg-mawar-800;
+}
+
+/* Baris vaksin: JS aktif/nonaktifkan input tanggal */
+[data-baris-vaksin] .galat-cell input[type="date"] { @apply ring-rose-400; }
+
+/* ==========================================================
+   FORMULIR PEMERIKSAAN (komponen bersama)
+   Dipakai oleh: pemeriksaan/form, riwayat/detail, riwayat/edit
+   ========================================================== */
+
+/* ---------- TAB ---------- */
+.tab-form {
+    @apply flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm;
+}
+.tab-form button {
+    @apply flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-semibold text-slate-600
+           transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
+}
+.tab-form button[aria-selected="true"] {
+    @apply bg-mawar-800 text-white shadow-sm hover:bg-mawar-700;
+}
+.tab-ket { @apply text-[10px] font-normal opacity-70; }
+
+/* ---------- PANEL ---------- */
+/* JANGAN pakai kelas display di sini — JS mengatur atribut [hidden] */
+.panel-tab { @apply space-y-5; }
+
+/* ---------- KARTU BAGIAN ---------- */
+.bagian-periksa {
+    @apply rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6;
+}
+
+/* ---------- ISIAN ---------- */
+.isian { @apply block; }
+.isian > label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+
+.isian input[type="text"],
+.isian input[type="number"],
+.isian input[type="date"],
+.isian select {
+    @apply block w-full rounded-lg border-0 px-3 py-2 text-sm text-slate-900 shadow-sm
+           ring-1 ring-inset ring-slate-300 placeholder:text-slate-400
+           focus:ring-2 focus:ring-inset focus:ring-mawar-600;
+}
+
+.isian.salah input,
+.isian.salah select { @apply !ring-rose-400; }
+.isian.salah > label { @apply text-rose-700; }
+
+/* ---------- BINTANG WAJIB ---------- */
+.wajib { @apply ml-0.5 font-bold text-rose-500; }
+
+/* ---------- BARIS CENTANG ---------- */
+.baris-centang {
+    @apply flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200
+           bg-white px-3.5 py-2.5 transition hover:border-mawar-300 hover:bg-mawar-50/50;
+}
+.baris-centang input[type="checkbox"] {
+    @apply h-4 w-4 shrink-0 rounded border-slate-300 text-mawar-600 focus:ring-mawar-500;
+}
+
+/* ---------- TEKANAN DARAH ---------- */
+.isian-td legend { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+.baris-td { @apply flex items-center gap-2; }
+.baris-td input { @apply w-full text-center; }
+.baris-td span { @apply shrink-0 text-slate-400; }
+
+/* ---------- GALAT ---------- */
+.galat-isian { @apply mt-1.5 text-[11px] font-medium text-rose-600; }
+
+/* ---------- IDENTITAS ---------- */
+.identitas-periksa {
+    @apply flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm;
+}
+.avatar {
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-full bg-mawar-100
+           text-sm font-bold uppercase text-mawar-700;
+}
+
+/* ---------- FIELDset HANYA-BACA ---------- */
+.bagian-baca { @apply space-y-4; }
+.bagian-baca input,
+.bagian-baca select { @apply bg-slate-50 text-slate-600; }
+
+/* ---------- INFO ---------- */
+.info {
+    @apply rounded-xl border border-slate-200 bg-white px-4 py-3 text-[12px] leading-relaxed text-slate-500;
+}
+
+/* ---------- TOMBOL DIALOG (native <dialog>) ---------- */
+dialog {
+    @apply m-auto w-[calc(100vw-2rem)] max-w-md rounded-2xl border-0 bg-white p-0 shadow-2xl
+           backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm;
+}
+dialog::backdrop { @apply bg-slate-900/50 backdrop-blur-sm; }
+dialog .kepala-dialog {
+    @apply flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-6 py-4;
+}
+dialog .dialog-tombol {
+    @apply flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4;
+}
+/* ===== FORMULIR PEMERIKSAAN — partial tambahan ===== */
+
+/* ---------- Keterangan (teks kecil di bawah judul) ---------- */
+.ket { @apply text-xs leading-relaxed text-slate-500; }
+
+/* ---------- Judul bagian di dalam kartu ---------- */
+.bagian-periksa h2,
+.bagian-periksa .judul-bagian {
+    @apply text-sm font-bold uppercase tracking-wide text-mawar-800;
+}
+.bagian-periksa .sub-kelompok {
+    @apply mt-3 text-[13px] font-semibold text-slate-700;
+}
+
+/* ---------- Grid AKS (10 item) ---------- */
+.kisi-aks { @apply mt-3 grid gap-3 sm:grid-cols-2; }
+
+/* ---------- Hasil otomatis (IMT / TD / LP / GDS / TBC / AKS / PUMA / SKILAS) ---------- */
+.hasil-otomatis {
+    @apply rounded-xl border border-mawar-200 bg-mawar-50/60 px-4 py-3 text-[13px] leading-relaxed text-mawar-800;
+}
+.hasil-otomatis strong { @apply font-semibold; }
+.hasil-otomatis dl {
+    @apply mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px];
+}
+.hasil-otomatis dt { @apply font-medium text-slate-500; }
+.hasil-otomatis dd { @apply font-bold text-mawar-800; }
+
+/* ---------- PUMA score (dl skor-otomatis) ---------- */
+.skor-otomatis { @apply mt-3 space-y-1 text-[12px] leading-relaxed text-slate-600; }
+.skor-otomatis dt { @apply font-semibold text-slate-700; }
+.skor-otomatis dd { @apply inline; }
+
+/* ---------- Aksi form (bawah kartu) ---------- */
+.aksi-form {
+    @apply mt-5 flex flex-wrap items-center gap-2.5 border-t border-slate-100 pt-4;
+}
+.aksi-pemeriksaan {
+    @apply mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-4;
+}
+.aksi-pemeriksaan p { @apply text-[13px] leading-relaxed text-slate-600; }
+.aksi-pemeriksaan p strong { @apply font-semibold text-slate-800; }
+
+/* ---------- Tombol 'tombol' (compat teammate) ---------- */
+.tombol {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+           text-sm font-semibold transition focus:outline-none focus:ring-2
+           focus:ring-mawar-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+.tombol.abu { @apply bg-mawar-700 text-white hover:bg-mawar-800; }
+.tombol.utama { @apply bg-mawar-800 text-white hover:bg-mawar-700; }
+.tombol.kecil { @apply px-3 py-1.5 text-[12px]; }
+.tombol.kecil.bahaya { @apply bg-rose-600 hover:bg-rose-700; }
+.tombol.nonaktif { @apply cursor-not-allowed text-slate-300; }
+
+/* ---------- Skor otomatis PUMA ---------- */
+.skor-otomatis { @apply mt-3 space-y-1 text-[12px] leading-relaxed text-slate-600; }
+
+/* ---------- Wrapper isian (max-width) ---------- */
+.isian { @apply block; }

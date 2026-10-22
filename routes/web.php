@@ -14,22 +14,38 @@ use App\Http\Controllers\VaksinasiController;
 use App\Http\Controllers\WargaController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman publik / Profil Posyandu (SKF-01). Tanpa login; dibatasi jumlah permintaan per alamat IP.
-Route::get('/', [BerandaController::class, 'index'])->middleware('throttle:publik')->name('beranda');
+/*
+|--------------------------------------------------------------------------
+| HALAMAN PUBLIK  (tanpa login)
+|--------------------------------------------------------------------------
+*/
 
-// Hanya untuk tamu (belum login). Alamat login bisa diganti lewat LOGIN_PATH di .env (tidak ditautkan dari beranda).
+Route::get('/', [BerandaController::class, 'index'])
+    ->middleware('throttle:publik')
+    ->name('beranda');
+
+/*
+|--------------------------------------------------------------------------
+| TAMU  (belum login)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     Route::get(config('posyandu.login.path'), [LoginController::class, 'create'])->name('login');
     Route::post(config('posyandu.login.path'), [LoginController::class, 'store'])
-        ->middleware('throttle:login') // batas percobaan per alamat IP
+        ->middleware('throttle:login')
         ->name('login.store');
 });
 
-// Hanya untuk kader yang sudah login.
+/*
+|--------------------------------------------------------------------------
+| KADER  (sudah login)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-    // Dashboard (SKF-03). ?tab=bulan_ini|arsip, ?bulan=&tahun= (arsip), ?kategori= (filter grafik IMT).
+
+    // Dashboard (SKF-03) - ?tab=bulan_ini|arsip, ?bulan=&tahun=, ?kategori=
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data'); // polling realtime
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
     Route::get('/dashboard/excel', [DashboardController::class, 'ekspor'])->name('dashboard.ekspor');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
@@ -42,27 +58,32 @@ Route::middleware('auth')->group(function () {
     Route::resource('kegiatan', KegiatanController::class)
         ->except(['show'])
         ->where(['kegiatan' => '[0-9]+']);
+
     Route::prefix('kegiatan/{kegiatan}')->whereNumber('kegiatan')->group(function () {
         Route::post('selesaikan', [KegiatanController::class, 'selesaikan'])->name('kegiatan.selesaikan');
         Route::get('presensi', [PresensiController::class, 'index'])->name('presensi.index');
-        Route::get('presensi/status', [PresensiController::class, 'status'])->name('presensi.status'); // polling realtime
+        Route::get('presensi/status', [PresensiController::class, 'status'])->name('presensi.status');
         Route::post('presensi/{warga}', [PresensiController::class, 'atur'])
             ->where('warga', '[0-9]{16}')
             ->name('presensi.atur');
     });
 
-    // Pemeriksaan (SKF-07 & SKF-08). Parameter {warga} = NIK; kegiatan = kegiatan yang sedang berlangsung.
+    // Pemeriksaan (SKF-07 & SKF-08). Parameter {warga} = NIK.
     Route::prefix('pemeriksaan')->name('pemeriksaan.')->group(function () {
         Route::get('/', [PemeriksaanController::class, 'index'])->name('index');
-        Route::get('status', [PemeriksaanController::class, 'status'])->name('status'); // polling realtime
-        Route::get('{warga}', [PemeriksaanController::class, 'form'])->where('warga', '[0-9]{16}')->name('form');
-        Route::post('{warga}', [PemeriksaanController::class, 'simpan'])->where('warga', '[0-9]{16}')->name('simpan');
+        Route::get('status', [PemeriksaanController::class, 'status'])->name('status');
+        Route::get('{warga}', [PemeriksaanController::class, 'form'])
+            ->where('warga', '[0-9]{16}')->name('form');
+        Route::post('{warga}', [PemeriksaanController::class, 'simpan'])
+            ->where('warga', '[0-9]{16}')->name('simpan');
     });
 
-    // Riwayat Pemeriksaan. {warga} = NIK; {pemeriksaan} = id_pemeriksaan (hanya yang sudah Submit).
+    // Riwayat Pemeriksaan (SKF-09). Parameter {warga} = NIK.
     Route::prefix('riwayat')->name('riwayat.')->group(function () {
         Route::get('/', [RiwayatController::class, 'index'])->name('index');
-        Route::get('warga/{warga}', [RiwayatController::class, 'warga'])->where('warga', '[0-9]{16}')->name('warga');
+        Route::get('warga/{warga}', [RiwayatController::class, 'warga'])
+            ->where('warga', '[0-9]{16}')->name('warga');
+
         Route::prefix('pemeriksaan/{pemeriksaan}')->whereNumber('pemeriksaan')->group(function () {
             Route::get('/', [RiwayatController::class, 'show'])->name('show');
             Route::get('edit', [RiwayatController::class, 'edit'])->name('edit');
@@ -71,27 +92,29 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // Vaksinasi Balita (SKF-10). {warga} = NIK balita yang Hadir pada kegiatan aktif.
+    // Vaksinasi Balita (SKF-10). Parameter {warga} = NIK balita.
     Route::prefix('vaksinasi')->name('vaksinasi.')->group(function () {
         Route::get('/', [VaksinasiController::class, 'index'])->name('index');
-        Route::get('status', [VaksinasiController::class, 'status'])->name('status'); // polling realtime
-        Route::get('{warga}', [VaksinasiController::class, 'form'])->where('warga', '[0-9]{16}')->name('form');
-        Route::post('{warga}', [VaksinasiController::class, 'simpan'])->where('warga', '[0-9]{16}')->name('simpan');
+        Route::get('status', [VaksinasiController::class, 'status'])->name('status');
+        Route::get('{warga}', [VaksinasiController::class, 'form'])
+            ->where('warga', '[0-9]{16}')->name('form');
+        Route::post('{warga}', [VaksinasiController::class, 'simpan'])
+            ->where('warga', '[0-9]{16}')->name('simpan');
     });
 
-    // Master Vaksin (pendukung SKF-10). Tambah/Edit lewat popup di halaman daftar.
+    // Master Vaksin (pendukung SKF-10).
     Route::resource('vaksin', VaksinController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->where(['vaksin' => '[0-9]+']);
 
-    // Rekapitulasi + Ekspor Excel (SKF-12). {kategori} = remaja / ibu_hamil_nifas / dewasa_lansia; ?bulan=&tahun=.
+    // Rekapitulasi + Ekspor Excel (SKF-12).
     Route::prefix('rekapitulasi')->name('rekapitulasi.')->group(function () {
         Route::get('/', [RekapitulasiController::class, 'index'])->name('index');
         Route::get('{kategori}', [RekapitulasiController::class, 'show'])->name('show');
         Route::get('{kategori}/excel', [RekapitulasiController::class, 'ekspor'])->name('ekspor');
     });
 
-    // Manajemen Pengguna / akun kader (SKF-11). Parameter {pengguna} = id_kader. Tambah/Edit di halaman terpisah.
+    // Manajemen Pengguna / akun kader (SKF-11).
     Route::resource('pengguna', PenggunaController::class)
         ->except(['show'])
         ->parameters(['pengguna' => 'pengguna'])
