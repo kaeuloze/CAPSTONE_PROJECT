@@ -83,14 +83,15 @@
             <h3 class="text-sm font-bold uppercase tracking-wide text-mawar-800">Identitas Warga</h3>
 
             <dl class="mt-5 grid gap-5 sm:grid-cols-2">
+                {{-- Kolom ke-3 = tampil dengan huruf mono (NIK). Setiap baris wajib berisi 3 nilai. --}}
                 @foreach ([
-                    ['Nama Lengkap',   $warga->nama_warga],
+                    ['Nama Lengkap',   $warga->nama_warga, false],
                     ['NIK',            $warga->nik, true],
-                    ['Tanggal Lahir',  $warga->tanggal_lahir->translatedFormat('d F Y')],
-                    ['Nomor HP',       $warga->no_hp ?: '-'],
-                    ['Jenis Kelamin',  $warga->jenis_kelamin ? 'Laki-laki' : 'Perempuan'],
-                    ['Kategori Usia',  $kategori->label() . ' (otomatis)'],
-                ] as [$label, $isi, $mono ?? false])
+                    ['Tanggal Lahir',  $warga->tanggal_lahir->translatedFormat('d F Y'), false],
+                    ['Nomor HP',       $warga->no_hp ?: '-', false],
+                    ['Jenis Kelamin',  $warga->jenis_kelamin ? 'Laki-laki' : 'Perempuan', false],
+                    ['Kategori Usia',  $kategori->label() . ' (otomatis)', false],
+                ] as [$label, $isi, $mono])
                     <div>
                         <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ $label }}</dt>
                         <dd @class([
