@@ -2,9 +2,11 @@
     $jeda = max(2, (int) config('posyandu.presensi.polling_detik'));
 
     $warnaKategori = [
-        'remaja' => 'sky',
-        'dewasa' => 'mawar',
-        'lansia' => 'violet',
+        'remaja'    => 'sky',
+        'dewasa'    => 'mawar',
+        'lansia'    => 'violet',
+        'ibu_hamil' => 'rose',
+        'ibu_nifas' => 'rose',
     ];
 @endphp
 

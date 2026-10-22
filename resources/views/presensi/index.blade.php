@@ -1,16 +1,3 @@
-{{--
-    ==========================================================
-    PRESENSI / DETAIL KEGIATAN  ·  SKF-06
-    Posyandu Mawar 1 - Capstone Project 2 (Frontend)
-    Gambar 2.45 (pencatatan presensi) & 2.47 (arsip, read-only)
-    ==========================================================
-    PENTIK: hook #presensi, #notifikasi, #indikator-langsung,
-    #jumlah-total, #jumlah-hadir, #jumlah-tidak, #pesan-selesai,
-    #label-status, #tombol-selesaikan, tr[data-nik],
-    .status-hadir, .form-presesi  ->  dipakai public/js/presensi.js
-    ==========================================================
---}}
-
 @php
     $berlangsung = (bool) $kegiatan->status_kegiatan;
     $jeda = max(2, (int) config('posyandu.presensi.polling_detik'));
@@ -68,14 +55,25 @@
 
 
         {{-- ═══════════ PESAN KEGIATAN SELESAI (hook #pesan-selesai) ═══════════ --}}
-        <div id="pesan-selesai" class="pesan mb-5" role="alert" @if ($berlangsung) hidden @endif>
-            @if ($berlangsung)
-                Kegiatan ini baru saja diselesaikan. Presensi tidak bisa diubah lagi.
-            @else
-                Kegiatan sudah selesai, sehingga status kehadiran hanya dapat<strong>dilihat</strong>.
-                Warga yang belum ditandai saat kegiatan diselesaikan tercatat                <strong>"Tidak Hadir"</strong>. Untuk koreksi, buka kembali kegiatan lewat tombol
-                <strong>Edit</strong> di tab Arsip Kegiatan (ubah status menjadi <strong>Berlangsung</strong>).
-            @endif
+        <div id="pesan-selesai" role="alert" @if ($berlangsung) hidden @endif
+             class="mb-5 flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
+            <svg class="mt-0.5 h-4 w-4 shrink-0 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+
+            <div class="text-[13px] leading-relaxed text-sky-900">
+                @if ($berlangsung)
+                    Kegiatan ini baru saja diselesaikan. Presensi tidak bisa diubah lagi.
+                @else
+                    Kegiatan sudah selesai, sehingga status kehadiran hanya dapat
+                    <strong class="font-semibold">dilihat</strong>. Warga yang belum ditandai saat kegiatan
+                    diselesaikan tercatat <strong class="font-semibold text-rose-700">"Tidak Hadir"</strong>.
+                    Untuk koreksi, buka kembali kegiatan lewat tombol
+                    <strong class="font-semibold">Edit</strong> di tab Arsip Kegiatan
+                    (ubah status menjadi <strong class="font-semibold">Berlangsung</strong>).
+                @endif
+            </div>
         </div>
 
 
@@ -148,7 +146,8 @@
                 </svg>
                 <span>
                     Salah pencet? Status presensi bisa di-toggle <strong>Hadir ↔ Belum</strong> selama kegiatan
-                    belum diselesaikan. Saat <strong>"Selesaikan Kegiatan"</strong> ditekan, sisa warga                    otomatis tercatat <strong>"Tidak Hadir"</strong>.
+                    belum diselesaikan. Saat <strong>"Selesaikan Kegiatan"</strong> ditekan, sisa warga
+                    otomatis tercatat <strong>"Tidak Hadir"</strong>.
                 </span>
             </p>
         @endif

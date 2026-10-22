@@ -190,7 +190,8 @@
 #indikator-langsung.mati { @apply text-slate-400; }
 
 .pesan { @apply rounded-xl border px-4 py-3 text-sm font-medium; }
-.pesan.galat      { @apply border-amber-200 bg-amber-50 text-amber-900; }
+.pesan.galat      { @apply border-rose-200 bg-rose-50 text-rose-900; }
+.pesan.sukses     { @apply border-emerald-200 bg-emerald-50 text-emerald-900; }
 .pesan.info-arsip { @apply border-sky-200 bg-sky-50 text-sky-900; }
 
 /* ===== HOOK LIVE-UPDATE (public/js/pemeriksaan-daftar.js) =====

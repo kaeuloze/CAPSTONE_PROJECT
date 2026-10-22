@@ -205,10 +205,12 @@
 
     {{-- ═══════════ 4 GRAFIK ═══════════ --}}
     <div id="grafik-dashboard"
-         @unless ($arsip) data-url="{{ route('dashboard.data', $kueri()) }}"
-         @unless ($arsip) data-jeda="{{ $jeda * 1000 }}" @endunless
          data-periode="{{ $periode->kode() }}"
-         class="mt-6 grid gap-5 xl:grid-cols-2">
+         class="mt-6 grid gap-5 xl:grid-cols-2"
+         @if (! $arsip)
+             data-url="{{ route('dashboard.data', $kueri()) }}"
+             data-jeda="{{ $jeda * 1000 }}"
+         @endif>
 
         @foreach ($urutanGrafik as $kunci)
             @if (isset($data['grafik'][$kunci]))
