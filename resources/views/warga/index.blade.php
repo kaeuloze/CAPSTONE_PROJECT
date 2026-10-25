@@ -163,7 +163,7 @@
                                         <div class="min-w-0">
                                             <p class="font-semibold text-slate-900">{{ $warga->nama_warga }}</p>
                                             <p class="text-[11px] text-slate-400">
-                                                {{ $warga->jenis_kelamin === 'perempuan' ? 'Perempuan' : 'Laki-laki' }}
+                                                {{ $warga->jenis_kelamin ? 'Laki-laki' : 'Perempuan' }}
                                             </p>
                                         </div>
                                     </div>
