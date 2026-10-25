@@ -4,8 +4,7 @@
 @endphp
 
 
-<x-layouts.app title="Detail Kegiatan" active="kegiatan"
- x-data="{ hapus: false }">
+<x-layouts.app title="Detail Kegiatan" active="kegiatan">
 
     <div class="mx-auto max-w-2xl">
 
@@ -155,7 +154,14 @@
                 diperiksa, atau divaksin.
             </p>
 
-            <button type="button" @click="hapus = true"
+            <button type="button"
+                    @click="$dispatch('konfirmasi-hapus', {
+                        judul: 'Yakin hapus kegiatan?',
+                        pesan: 'Kegiatan {{ $kegiatan->nama_kegiatan }} yang sudah dihapus tidak bisa dikembalikan.',
+                        aksi: 'Ya, Hapus',
+                        url: '{{ route('kegiatan.destroy', $kegiatan) }}',
+                        metode: 'DELETE'
+                    })"
                     class="btn bg-rose-600 py-2.5 text-white shadow-sm hover:bg-rose-700">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.9" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -164,60 +170,10 @@
                 Hapus Kegiatan Ini
             </button>
         </div>
-    </div>
+    
 
 
-    {{-- ═══════════ DIALOG KONFIRMASI HAPUS ═══════════ --}}
-    <div x-show="hapus" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         role="dialog" aria-modal="true">
-
-        <div x-show="hapus" x-transition.opacity @click="hapus = false"
-             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-
-        <div x-show="hapus" x-transition.scale.origin.center
-             class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-
-            <div class="flex items-start gap-4 border-b border-slate-100 p-6">
-                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.9" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />
-                    </svg>
-                </span>
-
-                <div class="min-w-0 flex-1">
-                    <h3 class="text-base font-semibold text-slate-900">Yakin hapus kegiatan?</h3>
-                    <p class="mt-1 break-words text-sm font-semibold text-rose-700">{{ $kegiatan->nama_kegiatan }}</p>
-                </div>
-
-                <button type="button" @click="hapus = false"
-                        class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="px-6 py-5">
-                <p class="text-sm leading-relaxed text-slate-600">
-                    Kegiatan yang sudah dihapus <strong class="font-semibold text-slate-900">tidak bisa
-                    dikembalikan</strong>. Tindakan ini tidak dapat dibatalkan.
-                </p>
-            </div>
-
-            <form method="POST" action="{{ route('kegiatan.destroy', $kegiatan) }}"
-                  class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4">
-                @csrf
-                @method('DELETE')
-
-                <button type="button" @click="hapus = false" class="btn btn-secondary py-2 text-[13px]">
-                    Tidak
-                </button>
-                <button type="submit" class="btn bg-rose-600 py-2 text-[13px] text-white shadow-sm hover:bg-rose-700">
-                    Ya, Hapus
-                </button>
-            </form>
-        </div>
+    
     </div>
 
 </x-layouts.app>

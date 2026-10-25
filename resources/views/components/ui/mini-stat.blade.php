@@ -20,7 +20,9 @@
 @endphp
 
 <div class="text-center">
-    <p class="text-2xl font-extrabold tabular-nums leading-none tracking-tight {{ $warnaMap[$warna] ?? $warnaMap['mawar'] }}">
+    <p {{ $attributes->class([
+    'text-2xl font-extrabold tabular-nums leading-none tracking-tight',
+    ]) }}>
         {{ $nilai }}<span class="text-sm font-semibold text-slate-400">{{ $suffix }}</span>
     </p>
     <p class="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">{{ $label }}</p>

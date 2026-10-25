@@ -1,5 +1,4 @@
-<x-layouts.app title="Kelola Kegiatan" active="kegiatan"
-             x-data="{ selesai: false }">
+<x-layouts.app title="Kelola Kegiatan" active="kegiatan">
 
     {{-- ═══════════════ FLASH PESAN ═══════════════ --}}
     @if (session('sukses'))
@@ -104,9 +103,9 @@
 
                         {{-- Statistik kehadiran --}}
                         <div class="mt-6 grid grid-cols-3 gap-3 rounded-xl bg-white/[.07] p-4 ring-1 ring-white/10 backdrop-blur-sm">
-                            <x-ui.mini-stat label="Total Warga" :nilai="$ringkasan['total']" warna="mawar" class="!text-white" />
-                            <x-ui.mini-stat label="Hadir" :nilai="$ringkasan['hadir']" warna="emerald" class="!text-emerald-300" />
-                            <x-ui.mini-stat label="Belum Hadir" :nilai="$ringkasan['tidak_hadir']" warna="amber" class="!text-amber-300" />
+                            <x-ui.mini-stat label="Total Warga" :nilai="$ringkasan['total']" class="text-white" />
+                            <x-ui.mini-stat label="Hadir" :nilai="$ringkasan['hadir']" class="text-emerald-300" />
+                            <x-ui.mini-stat label="Belum Hadir" :nilai="$ringkasan['tidak_hadir']" class="text-amber-300" />
                         </div>
 
                         {{-- Progress --}}
@@ -143,19 +142,15 @@
                                 Presensi
                             </a>
 
-                            <button type="button" @click="selesai = true"
- class="inline-flex items-center gap-2 rounded-xl border-2 border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur transition
-                                           hover:-translate-y-0.5 hover:border-white/50 hover:bg-white/20">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                                Selesaikan Kegiatan
-                            </button>
-
                             <a href="{{ route('kegiatan.edit', $aktif) }}"
-                               class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm
-                                      font-semibold text-mawar-200 transition hover:bg-white/10 hover:text-white">
-                                Edit
+                            class="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm
+                                    font-bold text-white ring-1 ring-white/25 backdrop-blur transition
+                                    hover:-translate-y-0.5 hover:bg-white/25 hover:shadow-lg">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                                </svg>
+                                Edit Kegiatan
                             </a>
                         </div>
                     </div>
@@ -328,12 +323,6 @@
                 @endif
             @endif
         </div>
-    @endif
-
-
-    {{-- — DIALOG SELESAIKAN KEGIATAN--}}
-    @if ($tab === 'berlangsung' && $aktif)
-        @include('kegiatan.partials.dialog-selesaikan', ['kegiatan' => $aktif, 'belumSubmit' => $belumSubmit])
     @endif
 
 </x-layouts.app>

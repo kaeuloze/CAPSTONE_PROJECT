@@ -40,19 +40,7 @@
                     {{ $kegiatan->tanggalLengkap() }}
                 </p>
             </div>
-
-            @if ($berlangsung)
-                <button type="button" id="tombol-selesaikan"
-                        @click="$dispatch('konfirmasi-selesaikan')"
-                        class="btn bg-amber-500 py-2.5 text-[13px] text-white shadow-sm hover:bg-amber-600">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    Selesaikan Kegiatan
-                </button>
-            @endif
         </div>
-
 
         {{-- ═══════════ PESAN KEGIATAN SELESAI (hook #pesan-selesai) ═══════════ --}}
         <div id="pesan-selesai" role="alert" @if ($berlangsung) hidden @endif
@@ -146,7 +134,8 @@
                 </svg>
                 <span>
                     Salah pencet? Status presensi bisa di-toggle <strong>Hadir ↔ Belum</strong> selama kegiatan
-                    belum diselesaikan. Saat <strong>"Selesaikan Kegiatan"</strong> ditekan, sisa warga
+                    belum diselesaikan. Kegiatan diselesaikan lewat menu <strong>Edit Kegiatan</strong>
+                    (ubah status menjadi <strong>Selesai</strong>); sisa warga yang belum hadir
                     otomatis tercatat <strong>"Tidak Hadir"</strong>.
                 </span>
             </p>
@@ -282,18 +271,6 @@
 
     {{-- ═══════════ KONTAINER NOTIFIKASI (hook #notifikasi) ═══════════ --}}
     <div id="notifikasi" aria-live="assertive"></div>
-
-
-    {{-- ═══════════ DIALOG SELESAIKAN ═══════════ --}}
-    @if ($berlangsung)
-        <div x-data="{ selesai: false }"
-             @konfirmasi-selesaikan.window="selesai = true">
-            @include('kegiatan.partials.dialog-selesaikan', [
-                'kegiatan'    => $kegiatan,
-                'belumSubmit' => $belumSubmit,
-            ])
-        </div>
-    @endif
 
     {{-- ═══════════ JS LIVE-UPDATE ═══════════ --}}
     <script src="{{ asset('js/presensi.js') }}" defer></script>
