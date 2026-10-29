@@ -36,39 +36,38 @@
 
     {{-- ============ MODAL ============ --}}
     <div x-show="open" x-cloak x-transition.scale
-         class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         role="dialog" aria-modal="true">
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        role="dialog" aria-modal="true">
 
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div class="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80
+                    bg-white shadow-2xl shadow-mawar-900/10">
 
-            <div class="flex items-start gap-4">
-
-                {{-- Ikon --}}
-                <div class="grid h-11 w-11 shrink-0 place-items-center rounded-full"
-                     :class="{
+            {{-- Header --}}
+            <div class="flex items-start gap-4 border-b border-slate-200 bg-slate-50/70 px-6 py-4">
+                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full"
+                    :class="{
                         'bg-rose-100 text-rose-600'       : tone === 'danger',
                         'bg-amber-100 text-amber-600'     : tone === 'warning',
                         'bg-emerald-100 text-emerald-600' : tone === 'success',
-                     }">
+                    }">
                     <svg x-show="tone !== 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                     </svg>
                     <svg x-show="tone === 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                </div>
+                </span>
 
-                {{-- Teks --}}
                 <div class="min-w-0 flex-1">
                     <h3 class="text-base font-semibold text-slate-900" x-text="judul"></h3>
                     <p class="mt-1.5 text-sm leading-relaxed text-slate-500" x-text="pesan"></p>
                 </div>
             </div>
 
-            {{-- Tombol --}}
-            <div class="mt-6 flex justify-end gap-3">
-                <button type="button" @click="open = false" class="btn btn-secondary">
+            {{-- Footer --}}
+            <div class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4">
+                <button type="button" @click="open = false" class="btn btn-secondary py-2 text-[13px]">
                     Batal
                 </button>
                 <button type="button" class="btn disabled:opacity-60" :disabled="mengirim"
@@ -80,7 +79,6 @@
                         }"
                         x-text="mengirim ? 'Memproses...' : aksi"></button>
             </div>
-
         </div>
     </div>
 </div>

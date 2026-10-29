@@ -84,9 +84,15 @@
                         </svg>
                         Edit
                     </a>
-
+                    
                     <button type="button"
-                            onclick="if (confirm('Yakin hapus data pemeriksaan {{ $pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y') }}? Tidak bisa dikembalikan.')) { document.getElementById('form-hapus').submit(); }"
+                            @click="$dispatch('konfirmasi-hapus', {
+                                judul: 'Yakin hapus data pemeriksaan?',
+                                pesan: 'Pemeriksaan tanggal {{ $pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y') }} akan dihapus permanen.',
+                                aksi: 'Ya, Hapus',
+                                url: '{{ route('riwayat.destroy', $pemeriksaan) }}',
+                                metode: 'DELETE'
+                            })"
                             class="btn bg-rose-600 py-2 text-[13px] text-white shadow-sm hover:bg-rose-700">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.9" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -220,7 +226,6 @@
                 Koreksi data hasil pemeriksaan yang sudah tersimpan dilakukan                <strong>di halaman ini</strong> — bukan di menu Pemeriksaan.
             </span>
         </p>
-    </div>
     </div>
 
 </x-layouts.app>
