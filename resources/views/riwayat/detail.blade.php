@@ -85,11 +85,12 @@
                         Edit
                     </a>
 
-                    <button type="button" @click="hapus = true"
+                    <button type="button"
+                            onclick="if (confirm('Yakin hapus data pemeriksaan {{ $pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y') }}? Tidak bisa dikembalikan.')) { document.getElementById('form-hapus').submit(); }"
                             class="btn bg-rose-600 py-2 text-[13px] text-white shadow-sm hover:bg-rose-700">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.9" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />
+                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />
                         </svg>
                         Hapus
                     </button>
@@ -220,79 +221,6 @@
             </span>
         </p>
     </div>
-
-
-    {{-- ══════════════════════════════════════════════════════
-         DIALOG HAPUS (Gambar 2.82)
-         ══════════════════════════════════════════════════════ --}}
-    <div x-show="hapus" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         role="dialog" aria-modal="true">
-
-        <div x-show="hapus" x-transition.opacity @click="hapus = false"
-             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-
-        <div x-show="hapus" x-transition.scale.origin.center
-             class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-
-            <div class="flex items-start gap-4 border-b border-slate-100 p-6">
-                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-600">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.9" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />
-                    </svg>
-                </span>
-
-                <div class="min-w-0 flex-1">
-                    <h3 class="text-base font-semibold text-slate-900">Hapus data pemeriksaan ini?</h3>
-                    <p class="mt-1 text-sm text-slate-600">
-                        <strong class="font-semibold text-slate-900">{{ $warga->nama_warga }}</strong>
-                        — {{ $pemeriksaan->tanggal_pemeriksaan->translatedFormat('j F Y') }}
-                    </p>
-                </div>
-
-                <button type="button" @click="hapus = false"
-                        class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="px-6 py-5">
-                <p class="text-sm leading-relaxed text-slate-600">
-                    Seluruh isian pemeriksaan ini akan dihapus dan
-                    <strong class="font-semibold text-rose-600">tidak bisa dikembalikan</strong>.
-                </p>
-
-                @if ($kegiatan->status_kegiatan)
-                    <p class="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3
-                              text-[13px] leading-relaxed text-amber-900">
-                        <svg class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                        </svg>
-                        <span>
-                            Karena kegiatannya masih berlangsung, warga akan muncul kembali
-                            di menu <strong>Pemeriksaan</strong>.
-                        </span>
-                    </p>
-                @endif
-            </div>
-
-            <form method="POST" action="{{ route('riwayat.destroy', $pemeriksaan) }}"
-                  onsubmit="this.querySelector('[type=submit]').disabled = true; this.querySelector('[type=submit]').textContent = 'Menghapus...';"
-                  class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4">
-                @csrf
-                @method('DELETE')
-
-                <button type="button" @click="hapus = false" class="btn btn-secondary py-2 text-[13px]">
-                    Batal
-                </button>
-                <button type="submit" class="btn bg-rose-600 py-2 text-[13px] text-white shadow-sm hover:bg-rose-700">
-                    Ya, Hapus
-                </button>
-            </form>
-        </div>
     </div>
 
 </x-layouts.app>

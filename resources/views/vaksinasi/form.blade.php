@@ -110,16 +110,18 @@
                                     </td>
 
                                     <td class="td text-center">
-                                        <label class="inline-flex cursor-pointer items-center gap-2">
+                                        <label class="inline-flex cursor-pointer items-center justify-center gap-3">
                                             <input type="hidden" name="vaksin[{{ $v->id_vaksin }}][sudah]" value="0">
                                             <input type="checkbox" name="vaksin[{{ $v->id_vaksin }}][sudah]" value="1"
-                                                   @checked($sudah)
-                                                   class="peer sr-only">
+                                                @checked($sudah)
+                                                class="h-5 w-5 rounded border-slate-300 text-emerald-600 transition
+                                                        focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1
+                                                        checked:bg-emerald-600 checked:border-emerald-600"
+                                                data-hook-checkbox />
 
                                             {{-- HOOK [data-label-status] — JS mengganti teksnya --}}
                                             <span data-label-status
-                                                  class="rounded-full px-3 py-1 text-[12px] font-bold ring-1 transition peer-checked:bg-emerald-100 peer-checked:text-emerald-700 peer-checked:ring-emerald-200
-                                                         peer-focus-visible:ring-2 peer-focus-visible:ring-mawar-500                                                         bg-slate-100 text-slate-500 ring-slate-200">
+                                                class="text-[12px] font-bold {{ $sudah ? 'text-emerald-700' : 'text-slate-400' }}">
                                                 {{ $sudah ? 'Sudah' : 'Belum' }}
                                             </span>
                                         </label>
