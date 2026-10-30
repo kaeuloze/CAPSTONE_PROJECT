@@ -5,7 +5,20 @@
     $id = "isian-{$kunci}-{$kolom}";
     $tipe = $tipe ?? 'number';
     $wajib = $wajib ?? false;
+    $modeBaca ??= false;
 @endphp
+
+@if ($modeBaca)
+    @php
+        $isiBaca = $isi[$kolom] ?? null;
+        if ($isiBaca !== null && $tipe === 'select') {
+            $isiBaca = $pilihan[$isiBaca] ?? $isiBaca;
+        } elseif ($isiBaca !== null && $tipe === 'number') {
+            $isiBaca = \App\Services\Pemeriksaan\HasilOtomatis::angka($isiBaca);
+        }
+    @endphp
+    @include('pemeriksaan.partials.baris-baca', ['teks' => $isiBaca])
+@else
 
 <div @class(['isian', 'salah' => $errors->has($kunciGalat)])>
     <label for="{{ $id }}">
@@ -37,3 +50,4 @@
         <p class="galat-isian">{{ $message }}</p>
     @enderror
 </div>
+@endif

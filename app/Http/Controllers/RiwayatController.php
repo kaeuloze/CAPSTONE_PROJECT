@@ -8,6 +8,7 @@ use App\Exceptions\AksiDitolakException;
 use App\Exceptions\DataSudahBerubahException;
 use App\Models\Pemeriksaan;
 use App\Models\Warga;
+use App\Services\Pemeriksaan\HasilOtomatis;
 use App\Services\Pemeriksaan\KatalogForm;
 use App\Services\Pemeriksaan\PemeriksaanService;
 use App\Services\Pemeriksaan\RiwayatService;
@@ -63,7 +64,9 @@ class RiwayatController extends Controller
     /** Detail Pemeriksaan (hanya-baca) + tombol Edit & Hapus. */
     public function show(Pemeriksaan $pemeriksaan): View
     {
-        return view('riwayat.detail', $this->dataFormulir($pemeriksaan));
+        return view('riwayat.detail', $this->dataFormulir($pemeriksaan) + [
+            'hasilOtomatis' => HasilOtomatis::dari($pemeriksaan),
+        ]);
     }
 
     public function edit(Pemeriksaan $pemeriksaan): View|RedirectResponse
