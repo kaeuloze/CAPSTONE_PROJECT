@@ -2,47 +2,10 @@
     $warnaKategori = ['remaja' => 'sky', 'dewasa' => 'mawar', 'lansia' => 'violet',
                       'ibu_hamil' => 'rose', 'ibu_nifas' => 'rose'];
 
-    // Label kolom → bahasa manusia + satuan.
-    $labelKolom = [
-        'berat_badan' => ['Berat Badan', 'kg'],
-        'tinggi_badan' => ['Tinggi Badan', 'cm'],
-        'lingkar_perut' => ['Lingkar Perut', 'cm'],
-        'lila' => ['LILA (Lingkar Lengan Atas)', 'cm'],
-        'tekanan_darah' => ['Tekanan Darah', 'mmHg'],
-        'kadar_gula_darah' => ['Gula Darah', 'mg/dL'],
-        'kadar_hb' => ['Kadar HB', 'g/dL'],
-        'status_imt' => ['Status Gizi (IMT)', null],
-        'status_tekanan_darah' => ['Status Tekanan Darah', null],
-        'status_lingkar_perut' => ['Status Lingkar Perut', null],
-        'status_lila' => ['Status LILA', null],
-        'indikator_perilaku' => ['Indikator Perilaku', null],
-        'kemampuan_motorik_kognitif' => ['Kemampuan Motorik & Kognitif', null],
-        'skor_kebiasaan_merokok' => ['Skor Kebiasaan Merokok', null],
-        'gejala_pernapasan' => ['Gejala Pernapasan', null],
-        'total_skor_risiko_paru' => ['Total Skor Risiko Paru (PUMA)', null],
-        'usia_kehamilan' => ['Usia Kehamilan', 'minggu'],
-        'pelayanan_ttd_mms' => ['Pelayanan TTD / MMS', null],
-        'mt_bumil_kek' => ['Makanan Tambahan Bumil KEK', null],
-        'pemberian_vitamin_a' => ['Pemberian Vitamin A', null],
-        'status_menyusui' => ['Status Menyusui', null],
-        'kb_pasca_persalinan' => ['KB Pasca Persalinan', null],
-        'topik_penyuluhan' => ['Topik Penyuluhan', null],
-        'rujukan' => ['Rujukan', null],
-    ];
-
-    $labelUntuk = function (string $kolom) use ($labelKolom) {
-        if (isset($labelKolom[$kolom])) {
-            return $labelKolom[$kolom];
-        }
-        return [\Illuminate\Support\Str::headline($kolom), null];
-    };
-
-    $formatNilai = function ($nilai) {
-        if ($nilai === null || $nilai === '') return '—';
-        if (is_bool($nilai)) return $nilai ? 'Ya' : 'Tidak';
-        if (is_array($nilai)) return collect($nilai)->filter()->join(', ') ?: '—';
-        return (string) $nilai;
-    };
+    // Status "tidak diperiksa" per tab: jenis tab (Rutin / 6 Bulan / Tahunan) tidak ada di jenis yang dilakukan.
+    $tidakDiperiksa = fn (array $tab) => ! in_array(
+        ($tab['jenis'] ?? \App\Enums\JenisPemeriksaan::Rutin)->value, $jenisDilakukan, true);
+    $berlaku = fn (string $kunci) => $definisi->bagian()[$kunci]->berlakuUntuk($warga, $pemeriksaan->tanggal_pemeriksaan);
 @endphp
 
 
@@ -163,55 +126,70 @@
                 </div>
             @endif
 
-            {{-- Kartu per bagian --}}
-            @php
-                $bagianTampil = collect($definisi->bagian())
-                    ->filter(fn ($b) => $b->berlakuUntuk($warga, $pemeriksaan->tanggal_pemeriksaan));
-            @endphp
-
-            @forelse ($bagianTampil as $bagian)
-                @php $isi = $nilai[$bagian->kunci] ?? []; @endphp
-
+            {{-- ═══════════ HASIL OTOMATIS ═══════════
+                 Status yang dihitung sistem saat data disimpan (App\Services\Pemeriksaan\HasilOtomatis). --}}
+            @if ($hasilOtomatis)
                 <div class="mt-4 card overflow-hidden">
-
-                    {{-- Judul bagian --}}
                     <div class="border-b border-slate-200 bg-slate-50/70 px-6 py-3.5">
-                        <h3 class="text-sm font-bold uppercase tracking-wide text-mawar-800">
-                            {{ $bagian->judul }}
-                        </h3>
+                        <h3 class="text-sm font-bold uppercase tracking-wide text-mawar-800">Hasil Otomatis</h3>
+                        <p class="mt-0.5 text-[11px] text-slate-500">Dihitung sistem dari isian pemeriksaan di bawah.</p>
                     </div>
-
-                    {{-- Isi key-value --}}
                     <dl class="grid gap-x-6 gap-y-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($bagian->kolom() as $kolom)
-                            @php
-                                [$label, $satuan] = $labelUntuk($kolom);
-                                $nilaiTampil = $formatNilai($isi[$kolom] ?? null);
-                            @endphp
-
+                        @foreach ($hasilOtomatis as $hasil)
                             <div class="min-w-0">
-                                <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                                    {{ $label }}
-                                </dt>
-                                <dd @class([
-                                        'mt-1 text-[14px] text-slate-800',
-                                        'text-slate-400 italic' => $nilaiTampil === '—',
-                                    ])>
-                                    {{ $nilaiTampil }}
-                                    @if ($satuan && $nilaiTampil !== '—')
-                                        <span class="ml-1 text-[11px] font-medium text-slate-400">{{ $satuan }}</span>
-                                    @endif
+                                <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ $hasil['label'] }}</dt>
+                                <dd class="mt-1">
+                                    <x-ui.badge :warna="$hasil['risiko'] ? 'rose' : 'emerald'">{{ $hasil['teks'] }}</x-ui.badge>
                                 </dd>
                             </div>
                         @endforeach
                     </dl>
                 </div>
-            @empty
-                <div class="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-10 text-center">
-                    <p class="text-sm font-semibold text-slate-900">Tidak ada data pemeriksaan</p>
-                    <p class="mt-1 text-sm text-slate-400">Belum ada hasil yang tercatat pada kunjungan ini.</p>
-                </div>
-            @endforelse
+            @endif
+
+            {{-- ═══════════ KARTU PER BAGIAN ═══════════
+                 Dikelompokkan per tab formulir. Isi kartu memakai tampilan formulir pemeriksaan dalam mode baca
+                 ($modeBaca), sehingga label dan pilihan jawaban sama persis dengan formulir (0/1 → Tidak/Ya, kode → teks). --}}
+            <style>
+                .rincian-baca h2, .rincian-baca .ket, .rincian-baca .hasil-otomatis, .rincian-baca .skor-otomatis { display: none; }
+                .rincian-baca .kisi-aks, .rincian-baca div.isian, .rincian-baca [data-kelompok-skilas] { display: contents; }
+                .rincian-baca h3.sub-kelompok { grid-column: 1 / -1; margin-top: .25rem; font-size: 11px; font-weight: 700;
+                    text-transform: uppercase; letter-spacing: .05em; color: rgb(100 116 139); }
+            </style>
+
+            @php
+                $kartu = function (string $kunciBagian) use ($definisi, $nilai) {
+                    return ['bagian' => $definisi->bagian()[$kunciBagian], 'kunci' => $kunciBagian, 'isi' => $nilai[$kunciBagian] ?? []];
+                };
+            @endphp
+
+            @foreach ($definisi->tab() as $kunciTab => $tab)
+                @continue(isset($tabNonaktif[$kunciTab]))
+                @php $daftarBagian = array_values(array_filter($tab['bagian'], $berlaku)); @endphp
+                @continue($daftarBagian === [])
+
+                @if (count($definisi->tab()) > 1)
+                    <h3 class="mt-6 px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        {{ $tab['label'] }}
+                    </h3>
+                @endif
+
+                @if ($tidakDiperiksa($tab))
+                    <div class="mt-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-[13px] italic text-slate-500">
+                        {{ \Illuminate\Support\Str::start($tab['label'], 'Pemeriksaan ') }} tidak dilakukan pada kunjungan ini.
+                    </div>
+                @else
+                    @foreach ($daftarBagian as $kunciBagian)
+                        @include('riwayat.partials.kartu-bagian', $kartu($kunciBagian))
+                    @endforeach
+                @endif
+            @endforeach
+
+            {{-- Bagian di bawah semua tab (mis. Penyuluhan & Rujukan). --}}
+            @php $bagianUmum = array_values(array_filter($definisi->bagianUmum(), $berlaku)); @endphp
+            @foreach ($bagianUmum as $kunciBagian)
+                @include('riwayat.partials.kartu-bagian', $kartu($kunciBagian))
+            @endforeach
         @endif
 
 

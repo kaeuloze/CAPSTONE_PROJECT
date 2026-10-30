@@ -1,7 +1,16 @@
 @php
     $wajib = $wajib ?? false;
     $galat = $errors->first("bagian.{$kunci}.td_sistolik") ?: $errors->first("bagian.{$kunci}.td_diastolik");
+    $modeBaca ??= false;
 @endphp
+
+@if ($modeBaca)
+    @include('pemeriksaan.partials.baris-baca', [
+        'label' => 'Tekanan Darah',
+        'teks' => isset($isi['td_sistolik'], $isi['td_diastolik']) ? $isi['td_sistolik'].'/'.$isi['td_diastolik'] : null,
+        'satuan' => 'mmHg',
+    ])
+@else
 
 <fieldset @class(['isian', 'isian-td', 'salah' => $galat])>
     <legend class="label">
@@ -35,3 +44,4 @@
         <p class="galat-isian">{{ $galat }}</p>
     @endif
 </fieldset>
+@endif
