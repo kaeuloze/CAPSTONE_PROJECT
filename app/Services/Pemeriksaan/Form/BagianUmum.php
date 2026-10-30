@@ -102,6 +102,7 @@ class BagianUmum
             boolean: $kolom,
             jenis: JenisPemeriksaan::Rutin,
             hitung: fn (array $n) => ['status_gejala_tbc' => Kalkulator::statusTbc($n)],
+            catatBilaKosong: true, // semua gejala "Tidak" tetap tercatat Normal (Dashboard "Tidak Bergejala")
         );
     }
 

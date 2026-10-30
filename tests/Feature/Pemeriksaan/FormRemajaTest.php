@@ -149,6 +149,22 @@ class FormRemajaTest extends TestCase
         $this->assertSame(StatusRisiko::Berisiko, Pemeriksaan::sole()->skriningTbc->status_gejala_tbc);
     }
 
+    public function test_submit_rutin_tanpa_gejala_tbc_tercatat_normal(): void
+    {
+        $warga = $this->remaja();
+
+        // Simpan (draft) dengan semua gejala "Tidak": bagian kosong belum tercatat.
+        $this->kirim($warga, ['pengukuran' => $this->rutinLengkap(), 'tbc' => ['batuk_terus_menerus' => '0', 'demam_2_minggu' => '0', 'bb_tidak_stabil' => '0', 'kontak_pasien_tbc' => '0']]);
+        $this->assertNull(Pemeriksaan::sole()->skriningTbc);
+
+        // Submit: tab Rutin dilakukan → Skrining TBC tercatat Normal (0 gejala), agar terhitung "Tidak Bergejala".
+        $this->kirim($warga, [], 'submit');
+        $tbc = Pemeriksaan::sole()->skriningTbc;
+        $this->assertNotNull($tbc);
+        $this->assertSame(StatusRisiko::Normal, $tbc->status_gejala_tbc);
+        $this->assertFalse($tbc->batuk_terus_menerus);
+    }
+
     public function test_form_dibuka_ulang_menampilkan_isian_tersimpan(): void
     {
         $warga = $this->remaja();
