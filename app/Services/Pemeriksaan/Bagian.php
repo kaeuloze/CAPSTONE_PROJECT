@@ -38,6 +38,9 @@ final class Bagian
      * @param  Closure|null  $turunan  fn(array $nilai, Warga, Kegiatan): array<relasi, array kolom> — kolom otomatis yang
      *                                 disimpan di tabel detail LAIN (mis. ploting LILA/TD ibu hamil di pemeriksaan_bumil
      *                                 dihitung dari isian pengukuran di pengukuran_dasar)
+     * @param  bool  $catatBilaKosong  saat Submit / Edit Riwayat, bila tab bagian ini dilakukan tetapi semua centangnya
+     *                                 "Tidak" (bagian kosong tidak tersimpan), tetap dicatat sebagai hasil "Tidak"
+     *                                 (mis. Skrining TBC tanpa gejala = Normal, agar ikut terhitung di Dashboard)
      */
     public function __construct(
         public readonly string $kunci,
@@ -53,6 +56,7 @@ final class Bagian
         public readonly ?Closure $berlaku = null,
         public readonly array $wajibBilaTerisi = [],
         public readonly ?Closure $turunan = null,
+        public readonly bool $catatBilaKosong = false,
     ) {
     }
 

@@ -251,6 +251,19 @@ class PemeriksaanService
             );
         }
 
+        // Bagian centang yang semua jawabannya "Tidak" tidak tersimpan saat Simpan. Bila tab-nya dilakukan,
+        // catat sebagai hasil "Tidak" (mis. Skrining TBC tanpa gejala = Normal) agar ikut terhitung di laporan.
+        foreach ($form->bagian() as $bagian) {
+            if (! $bagian->catatBilaKosong || ! isset($jenis[$bagian->jenis->value])
+                || ! $bagian->berlakuUntuk($warga, $pemeriksaan->tanggal_pemeriksaan)
+                || $pemeriksaan->{$bagian->relasi}()->exists()) {
+                continue;
+            }
+            $kosong = $bagian->nilaiIsian([]);
+            $pemeriksaan->{$bagian->relasi}()->create($bagian->keDatabase($kosong)
+                + ($bagian->hitung ? ($bagian->hitung)($kosong, $warga, $pemeriksaan->kegiatan) : []));
+        }
+
         $pemeriksaan->update([
             'status_pemeriksaan' => StatusPemeriksaan::Selesai,
             'jenis_pemeriksaan' => array_values($jenis),
