@@ -1,25 +1,5 @@
 <x-layouts.app title="Kelola Kegiatan" active="kegiatan">
 
-    {{-- ═══════════════ FLASH PESAN ═══════════════ --}}
-    @if (session('sukses'))
-        <div class="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p class="text-sm font-medium text-emerald-800">{{ session('sukses') }}</p>
-        </div>
-    @endif
-
-    @if (session('galat'))
-        <div class="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-            <svg class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
- d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-            <p class="text-sm font-medium text-rose-800">{{ session('galat') }}</p>
-        </div>
-    @endif
-
 
     {{-- ═══════════════ TAB ═══════════════ --}}
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200">
@@ -141,6 +121,28 @@
                                 </svg>
                                 Presensi
                             </a>
+
+                            {{-- Selesaikan Kegiatan (revisi): sisa warga otomatis "Tidak Hadir". Dialog: x-confirm-dialog. --}}
+                            <button type="button"
+                                    @click="$dispatch('konfirmasi-hapus', {
+                                        judul: @js('Selesaikan kegiatan '.$aktif->nama_kegiatan.'?'),
+                                        pesan: 'Warga yang belum presensi akan otomatis tercatat &quot;Tidak Hadir&quot;, dan kegiatan ini pindah ke tab Arsip Kegiatan.',
+                                        peringatan: @js($belumSubmit > 0
+                                            ? 'Masih ada '.$belumSubmit.' pemeriksaan yang belum di-Submit. Datanya tetap tersimpan dan dapat dilanjutkan dengan membuka kembali kegiatan dari Arsip.'
+                                            : ''),
+                                        aksi: 'Ya, Selesaikan',
+                                        tone: 'warning',
+                                        url: @js(route('kegiatan.selesaikan', $aktif)),
+                                        metode: 'POST'
+                                    })"
+                                    class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm
+                                           font-bold text-white shadow-lg transition
+                                           hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-xl">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                Selesaikan Kegiatan
+                            </button>
 
                             <a href="{{ route('kegiatan.edit', $aktif) }}"
                             class="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm

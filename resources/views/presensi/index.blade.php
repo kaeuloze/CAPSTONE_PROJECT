@@ -134,8 +134,7 @@
                 </svg>
                 <span>
                     Salah pencet? Status presensi bisa di-toggle <strong>Hadir ↔ Belum</strong> selama kegiatan
-                    belum diselesaikan. Kegiatan diselesaikan lewat menu <strong>Edit Kegiatan</strong>
-                    (ubah status menjadi <strong>Selesai</strong>); sisa warga yang belum hadir
+                    belum diselesaikan. Saat <strong>"Selesaikan Kegiatan"</strong> ditekan, sisa warga
                     otomatis tercatat <strong>"Tidak Hadir"</strong>.
                 </span>
             </p>
