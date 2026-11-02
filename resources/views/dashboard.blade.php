@@ -24,31 +24,22 @@
         $tambahan,
     ), fn ($v) => $v !== null);
 
-    // Ringkasan angka dari grafik (data asli).
-    $nilaiGrafik = fn (string $kunci) => collect($data['grafik'][$kunci]['batang'] ?? [])->pluck('nilai', 'kunci');
-    $imt = $nilaiGrafik('imt');
-    $ptm = $nilaiGrafik('ptm');
-    $td  = $nilaiGrafik('td');
-    $tbc = $nilaiGrafik('tbc');
-
-    $totalDiperiksa = $imt->sum();
-    $giziNormal     = (int) ($imt['normal'] ?? 0);
-    $perluRujukan   = (int) ($tbc['bergejala'] ?? 0) + (int) ($td['risiko'] ?? 0)
-                    + (int) (collect($ptm)->except('normal')->sum());
-    $bergejalaTbc   = (int) ($tbc['bergejala'] ?? 0);
+    // Kotak ringkasan: dihitung di DashboardService::ringkasan() (tiap warga sekali) dan ikut diperbarui
+    // otomatis lewat polling (data-ringkasan). Tahap b2, disetujui 2 Nov 2026.
+    $ringkasan = $data['ringkasan'];
 
     $kartu = [
-        ['label' => 'Warga Diperiksa', 'nilai' => $totalDiperiksa, 'suffix' => 'orang',
-         'warna' => 'mawar',   'keterangan' => 'Total warga yang sudah diperiksa',
+        ['kunci' => 'diperiksa', 'label' => 'Warga Diperiksa', 'nilai' => $ringkasan['diperiksa'], 'suffix' => 'orang',
+         'warna' => 'mawar',   'keterangan' => 'Pemeriksaan sudah Submit, semua kategori',
          'icon' => 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM12 9.75h.008v.008H12V9.75z'],
-        ['label' => 'Perlu Rujukan',   'nilai' => $perluRujukan, 'suffix' => 'orang',
-         'warna' => 'rose',    'keterangan' => 'PTM, TD tinggi, atau gejala TBC',
+        ['kunci' => 'dirujuk', 'label' => 'Dirujuk ke Puskesmas', 'nilai' => $ringkasan['dirujuk'], 'suffix' => 'orang',
+         'warna' => 'rose',    'keterangan' => 'Dicentang "Rujukan ke Puskesmas" saat pemeriksaan',
          'icon' => 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z'],
-        ['label' => 'Status Gizi Normal', 'nilai' => $giziNormal, 'suffix' => 'orang',
+        ['kunci' => 'gizi_normal', 'label' => 'Status Gizi Normal', 'nilai' => $ringkasan['gizi_normal'], 'suffix' => 'orang',
          'warna' => 'emerald', 'keterangan' => 'IMT dalam rentang normal',
          'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-        ['label' => 'Bergejala TBC',   'nilai' => $bergejalaTbc, 'suffix' => 'orang',
-         'warna' => 'amber',   'keterangan' => 'Perlu dirujuk ke Puskesmas',
+        ['kunci' => 'bergejala_tbc', 'label' => 'Bergejala TBC',   'nilai' => $ringkasan['bergejala_tbc'], 'suffix' => 'orang',
+         'warna' => 'amber',   'keterangan' => 'Disarankan dirujuk ke Puskesmas',
          'icon' => 'M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0l1.518-1.14a1.587 1.587 0 012.06 0l.217.217c.52.521.372.52 1.893 0l.217-.217'],
     ];
 
@@ -156,6 +147,7 @@
         @foreach ($kartu as $i => $k)
             <div class="animate-fade-up" style="animation-delay: {{ $i * 70 }}ms">
                 <x-ui.stat-card
+                    :kunci="$k['kunci']"
                     :label="$k['label']"
                     :nilai="$k['nilai']"
                     :suffix="$k['suffix']"

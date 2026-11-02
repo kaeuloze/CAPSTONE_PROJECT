@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\KategoriPemeriksaan;
 use App\Enums\StatusImt;
 use App\Enums\StatusRisiko;
+use App\Enums\StatusRujukan;
 use App\Enums\StatusTekananDarah;
 use App\Models\Pemeriksaan;
 use App\Models\Penyakit;
@@ -53,23 +54,49 @@ class DashboardService
     }
 
     /**
-     * @return array{periode: Periode, kegiatan: \Illuminate\Support\Collection, filter_imt: string, grafik: array<string, array{judul: string, keterangan: string, batang: list<array{kunci: string, label: string, nilai: int}>}>}
+     * @return array{periode: Periode, kegiatan: \Illuminate\Support\Collection, filter_imt: string, grafik: array<string, array{judul: string, keterangan: string, batang: list<array{kunci: string, label: string, nilai: int}>}>, ringkasan: array<string, int>}
      */
     public function data(Periode $periode, string $filterImt = 'semua'): array
     {
         $filterImt = array_key_exists($filterImt, self::FILTER_IMT) ? $filterImt : 'semua';
         $semua = $this->penghitung->pemeriksaan($periode, KategoriPemeriksaan::cases());
 
+        $grafik = [
+            'imt' => $this->grafikImt($semua, $filterImt),
+            'ptm' => $this->grafikPtm($semua),
+            'td' => $this->grafikTekananDarah($semua),
+            'tbc' => $this->grafikTbc($semua),
+        ];
+
         return [
             'periode' => $periode,
             'kegiatan' => $this->penghitung->kegiatanDalam($periode),
             'filter_imt' => $filterImt,
-            'grafik' => [
-                'imt' => $this->grafikImt($semua, $filterImt),
-                'ptm' => $this->grafikPtm($semua),
-                'td' => $this->grafikTekananDarah($semua),
-                'tbc' => $this->grafikTbc($semua),
-            ],
+            'grafik' => $grafik,
+            'ringkasan' => $this->ringkasan($semua, $grafik),
+        ];
+    }
+
+    /**
+     * Angka kotak ringkasan di atas grafik (tahap b2, disetujui 2 Nov 2026). Tiap warga dihitung sekali:
+     * - diperiksa: warga yang pemeriksaannya Submit pada bulan itu, semua kategori (tidak ikut filter IMT);
+     * - dirujuk: warga yang dicentang "Rujukan ke Puskesmas" (sama dengan baris "Dirujuk" di Rekapitulasi),
+     *   menggantikan "Perlu Rujukan" lama yang menjumlahkan TD + TBC + PTM sehingga satu warga terhitung berkali-kali;
+     * - gizi_normal & bergejala_tbc: sama dengan batang grafik IMT (ikut filter) dan TBC.
+     *
+     * @return array{diperiksa: int, dirujuk: int, gizi_normal: int, bergejala_tbc: int}
+     */
+    private function ringkasan($semua, array $grafik): array
+    {
+        $nilai = fn (string $g, string $kunci) => (int) (array_column($grafik[$g]['batang'], 'nilai', 'kunci')[$kunci] ?? 0);
+
+        return [
+            'diperiksa' => $semua->count(),
+            'dirujuk' => $this->penghitung->hitungWarga($semua,
+                fn (Pemeriksaan $p) => $p->penyuluhanRujukan?->status_rujukan === StatusRujukan::RujukPuskesmas ? true : null,
+                fn ($v) => $v),
+            'gizi_normal' => $nilai('imt', 'normal'),
+            'bergejala_tbc' => $nilai('tbc', 'bergejala'),
         ];
     }
 

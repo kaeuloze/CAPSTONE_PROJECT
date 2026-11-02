@@ -119,6 +119,25 @@ class DashboardTest extends TestCase
         ], $this->angka());
     }
 
+    public function test_kotak_ringkasan_tiap_warga_sekali(): void
+    {
+        $this->isiData();
+        // Dewasa (TD tinggi + TBC + 2 PTM) dicentang Rujukan; lansia tidak dirujuk.
+        foreach (['3404000000000002' => 'rujuk_puskesmas', '3404000000000003' => 'tidak_dirujuk'] as $nik => $rujukan) {
+            \App\Models\Pemeriksaan::where('nik', $nik)->sole()->penyuluhanRujukan()->create(['status_rujukan' => $rujukan]);
+        }
+
+        $ringkasan = ['diperiksa' => 4, 'dirujuk' => 1, 'gizi_normal' => 1, 'bergejala_tbc' => 1];
+        $this->actingAs($this->kader)->getJson(route('dashboard.data'))->assertJsonPath('ringkasan', $ringkasan);
+        // Filter IMT hanya mengubah "Status Gizi Normal", bukan jumlah warga diperiksa.
+        $this->actingAs($this->kader)->getJson(route('dashboard.data', ['kategori' => 'remaja']))
+            ->assertJsonPath('ringkasan', array_merge($ringkasan, ['gizi_normal' => 0]));
+
+        $this->actingAs($this->kader)->get(route('dashboard'))
+            ->assertSee('Dirujuk ke Puskesmas')->assertDontSee('Perlu Rujukan')
+            ->assertSee('data-ringkasan="dirujuk"', false);
+    }
+
     public function test_filter_kategori_imt(): void
     {
         $this->isiData();

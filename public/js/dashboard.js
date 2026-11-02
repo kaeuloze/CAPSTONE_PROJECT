@@ -39,6 +39,11 @@
                 // Bulan berganti (mis. halaman dibiarkan terbuka melewati tengah malam akhir bulan) → muat ulang.
                 if (data.periode !== periode) { window.location.reload(); return; }
                 gambar(data.grafik);
+                // Kotak ringkasan di atas grafik (Warga Diperiksa, Dirujuk, Gizi Normal, Bergejala TBC).
+                Object.keys(data.ringkasan || {}).forEach(function (kunci) {
+                    var el = document.querySelector('[data-ringkasan="' + kunci + '"]');
+                    if (el) { el.textContent = String(data.ringkasan[kunci]); }
+                });
                 if (indikator) {
                     indikator.classList.remove('mati');
                     indikator.textContent = 'Diperbarui otomatis setiap ' + (jeda / 1000) + ' detik';
