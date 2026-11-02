@@ -179,8 +179,8 @@ class PresensiTest extends TestCase
 
     public function test_kategori_di_arsip_dihitung_per_tanggal_kegiatan(): void
     {
-        // Saat kegiatan (10-10-2026) masih 4 tahun → Balita; pada 1-11-2026 sudah 5 tahun → Remaja.
-        $warga = $this->buatWarga('3404000000000001', ['nama_warga' => 'Dika', 'tanggal_lahir' => '2021-10-20']);
+        // Saat kegiatan (10-10-2026) masih 5 tahun → Balita; pada 1-11-2026 sudah 6 tahun → Remaja.
+        $warga = $this->buatWarga('3404000000000001', ['nama_warga' => 'Dika', 'tanggal_lahir' => '2020-10-20']);
         $this->actingAs($this->kader)->post(route('kegiatan.selesaikan', $this->kegiatan));
         $this->travelTo(CarbonImmutable::parse('2026-11-01 08:00:00'));
 

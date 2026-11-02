@@ -10,7 +10,7 @@ use Tests\Concerns\MembuatDataUji;
 use Tests\TestCase;
 
 /**
- * Penentuan kategori usia otomatis (SKF-05). Batas disetujui: Balita < 5, Remaja 5–17,
+ * Penentuan kategori usia otomatis (SKF-05). Batas disetujui: Balita < 6, Remaja 6–17,
  * Dewasa 18–59, Lansia >= 60.
  */
 class KategoriUsiaTest extends TestCase
@@ -22,8 +22,8 @@ class KategoriUsiaTest extends TestCase
         // acuan 10-10-2026
         return [
             'baru lahir' => ['2026-10-10', KategoriUsia::Balita],
-            'sehari sebelum 5 tahun' => ['2021-10-11', KategoriUsia::Balita],
-            'tepat 5 tahun' => ['2021-10-10', KategoriUsia::Remaja],
+            'sehari sebelum 6 tahun' => ['2020-10-11', KategoriUsia::Balita],
+            'tepat 6 tahun' => ['2020-10-10', KategoriUsia::Remaja],
             'usia 17' => ['2008-10-11', KategoriUsia::Remaja],
             'tepat 18 tahun' => ['2008-10-10', KategoriUsia::Dewasa],
             'usia 59' => ['1966-10-11', KategoriUsia::Dewasa],
@@ -42,8 +42,8 @@ class KategoriUsiaTest extends TestCase
 
     public function test_lahir_29_februari_bertambah_usia_pada_1_maret(): void
     {
-        $this->assertSame(KategoriUsia::Balita, KategoriUsia::dariTanggalLahir('2024-02-29', CarbonImmutable::parse('2029-02-28')));
-        $this->assertSame(KategoriUsia::Remaja, KategoriUsia::dariTanggalLahir('2024-02-29', CarbonImmutable::parse('2029-03-01')));
+        $this->assertSame(KategoriUsia::Balita, KategoriUsia::dariTanggalLahir('2024-02-29', CarbonImmutable::parse('2030-02-28')));
+        $this->assertSame(KategoriUsia::Remaja, KategoriUsia::dariTanggalLahir('2024-02-29', CarbonImmutable::parse('2030-03-01')));
     }
 
     public function test_filter_database_cocok_dengan_perhitungan_badge(): void
@@ -78,7 +78,7 @@ class KategoriUsiaTest extends TestCase
     public function test_perintah_harian_memperbarui_kategori_tanpa_mengubah_updated_at(): void
     {
         $this->travelTo(CarbonImmutable::parse('2026-10-10 09:00'));
-        $warga = $this->buatWarga('3404000000000099', ['tanggal_lahir' => '2021-10-11']); // besok berusia 5 tahun
+        $warga = $this->buatWarga('3404000000000099', ['tanggal_lahir' => '2020-10-11']); // besok berusia 6 tahun
         $this->assertSame(KategoriUsia::Balita, $warga->fresh()->kategori_usia);
         $updatedAtLama = $warga->fresh()->updated_at->toDateTimeString();
 

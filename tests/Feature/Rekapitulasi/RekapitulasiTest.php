@@ -171,9 +171,9 @@ class RekapitulasiTest extends TestCase
         $this->actingAs($this->kader)->get(route('rekapitulasi.show', 'remaja'))->assertOk()
             ->assertSee('Rekapitulasi — Anak Usia Sekolah &amp; Remaja', false)
             ->assertSee('Oktober 2026')->assertSee('Ekspor ke Excel (.xlsx)')
-            ->assertSeeInOrder(['Jumlah Remaja 5–17 Tahun', 'Jumlah Remaja 5–17 Tahun Datang', 'IMT Normal (18,5 – 24,9)', 'IMT Risiko (&lt; 18,5 / ≥ 25)',
+            ->assertSeeInOrder(['Jumlah Remaja 6–17 Tahun', 'Jumlah Remaja 6–17 Tahun Datang', 'IMT Normal (18,5 – 24,9)', 'IMT Risiko (&lt; 18,5 / ≥ 25)',
                 'LP Remaja Normal', 'TD Remaja Normal (&lt; 130/85 mmHg)', 'Bergejala TBC (memenuhi 2 gejala)', 'Kadar HB Normal Remaja Putri (≥ 12 g/dL)',
-                'Tes Penglihatan Normal', 'Tes Pendengaran Risiko', 'Sasaran Mendapat Edukasi / Penyuluhan', 'Jumlah Remaja 5–17 Tahun Dirujuk'], false);
+                'Tes Penglihatan Normal', 'Tes Pendengaran Risiko', 'Sasaran Mendapat Edukasi / Penyuluhan', 'Jumlah Remaja 6–17 Tahun Dirujuk'], false);
 
         $this->assertSame([
             'SASARAN_REMAJA' => 3, 'DATANG_REMAJA' => 2,
@@ -275,8 +275,8 @@ class RekapitulasiTest extends TestCase
         $this->assertSame(': Banyuraden', $lembar->getCell('B5')->getValue());
         $this->assertSame(': Oktober 2026', $lembar->getCell('B7')->getValue());
         $this->assertSame('Bulan dan Tahun: Oktober 2026', $lembar->getCell('C9')->getValue());
-        $this->assertSame(['Jumlah Remaja 5–17 Tahun', 3], [$lembar->getCell('B10')->getValue(), $lembar->getCell('C10')->getValue()]);
-        $this->assertSame(['Jumlah Remaja 5–17 Tahun Dirujuk', 1], [$lembar->getCell('B26')->getValue(), $lembar->getCell('C26')->getValue()]);
+        $this->assertSame(['Jumlah Remaja 6–17 Tahun', 3], [$lembar->getCell('B10')->getValue(), $lembar->getCell('C10')->getValue()]);
+        $this->assertSame(['Jumlah Remaja 6–17 Tahun Dirujuk', 1], [$lembar->getCell('B26')->getValue(), $lembar->getCell('C26')->getValue()]);
         $this->assertSame(1, Rekapitulasi::count()); // ekspor juga menyimpan rekap
     }
 }

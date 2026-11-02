@@ -86,7 +86,7 @@ class FormRemajaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Remaja (5 - 17 Tahun)')->assertSee('Remaja · 16 th')
+            ->assertSee('Pemeriksaan — Remaja (6 - 17 Tahun)')->assertSee('Remaja · 16 th')
             ->assertSeeInOrder(['Rutin Bulanan', 'Screening 6-Bulan', 'Tahunan Remaja Putri'])
             ->assertSee('Skrining Penimbangan dan Pengukuran')->assertSee('Tekanan darah (mmHg)')
             ->assertSee('name="bagian[pengukuran][td_sistolik]"', false)->assertSee('name="bagian[pengukuran][td_diastolik]"', false)
