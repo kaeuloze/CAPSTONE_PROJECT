@@ -61,7 +61,7 @@ class FormIbuNifas extends FormIbuHamil
     {
         return [
             $this->bagianRentang('waktu', 'Waktu ke Posyandu Setelah Bersalin', self::WAKTU_NIFAS),
-            $this->bagianPengukuran(['berat_badan' => BagianUmum::angka(1, 300)]),
+            $this->bagianPengukuran(['berat_badan' => BagianUmum::angka(1, 300), ...self::aturanTinggiLingkarPerut()]),
             $this->bagianPlotingImt(),
             BagianUmum::tbc(),
             $this->bagianBumil('pelayanan', 'Pelayanan Kesehatan', [

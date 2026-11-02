@@ -79,7 +79,7 @@ class FormIbuHamil extends DefinisiForm
     {
         return [
             $this->bagianRentang('kehamilan', 'Pemeriksaan Sesuai Umur Kehamilan', self::USIA_KEHAMILAN),
-            $this->bagianPengukuran(['berat_badan' => BagianUmum::angka(1, 300), 'lila' => BagianUmum::angka(5, 60)]),
+            $this->bagianPengukuran(['berat_badan' => BagianUmum::angka(1, 300), ...self::aturanTinggiLingkarPerut(), 'lila' => BagianUmum::angka(5, 60)]),
             $this->bagianPlotingImt(),
             BagianUmum::tbc(),
             $this->bagianBumil('pelayanan', 'Pelayanan Kesehatan', [
@@ -91,6 +91,15 @@ class FormIbuHamil extends DefinisiForm
             $this->bagianBumil('kelas', 'Kelas Ibu Hamil', ['ikut_kelas_ibu_hamil' => ['nullable', 'boolean']], ['ikut_kelas_ibu_hamil']),
             BagianUmum::penyuluhan(),
         ];
+    }
+
+    /**
+     * Tinggi badan & lingkar perut ibu hamil/nifas (pengecekan kader 31 Okt 2026): wajib, hanya dicatat
+     * angkanya — tanpa IMT & status lingkar perut (IMT ibu memakai ploting kurva Buku KIA).
+     */
+    protected static function aturanTinggiLingkarPerut(): array
+    {
+        return ['tinggi_badan' => BagianUmum::angka(40, 250), 'lingkar_perut' => BagianUmum::angka(20, 200)];
     }
 
     /** Jenis ibu yang dicatat di pemeriksaan_bumil.jenis_ibu. */
@@ -128,7 +137,7 @@ class FormIbuHamil extends DefinisiForm
     }
 
     /**
-     * BB (+ LILA untuk ibu hamil) & TD, semuanya wajib. Ploting LILA & TD dihitung otomatis (disetujui) dan
+     * BB, TB, lingkar perut (+ LILA untuk ibu hamil) & TD, semuanya wajib. Ploting LILA & TD dihitung otomatis (disetujui) dan
      * disimpan di pemeriksaan_bumil lewat turunan; status TD juga di pengukuran_dasar.
      */
     protected function bagianPengukuran(array $aturanAngka): Bagian

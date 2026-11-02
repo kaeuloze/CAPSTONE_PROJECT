@@ -73,7 +73,7 @@ class FormIbuHamilTest extends TestCase
     {
         return [
             'kehamilan' => ['usia_kehamilan_minggu' => '20-24'],
-            'pengukuran' => array_merge(['berat_badan' => '58', 'lila' => '24', 'td_sistolik' => '110', 'td_diastolik' => '70'], $ukur),
+            'pengukuran' => array_merge(['berat_badan' => '58', 'tinggi_badan' => '155', 'lingkar_perut' => '92', 'lila' => '24', 'td_sistolik' => '110', 'td_diastolik' => '70'], $ukur),
         ];
     }
 
@@ -89,8 +89,8 @@ class FormIbuHamilTest extends TestCase
             ->assertSeeInOrder(['Ibu Hamil', 'Ibu Nifas'])
             ->assertSee('disabled title="Status ibu saat ini: Ibu Hamil"', false)
             ->assertSee('Pemeriksaan Sesuai Umur Kehamilan')->assertSee('&lt; 4 minggu', false)->assertSee('36 - 40 minggu')
-            ->assertSeeInOrder(['Berat badan (kg)', 'LILA (cm)', 'Tekanan darah (mmHg)'])
-            ->assertDontSee('Tinggi Badan (cm)')
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan darah (mmHg)'])
+            ->assertSee('Tinggi badan dan lingkar perut hanya dicatat.')
             ->assertSee('Ploting IMT sesuai kurva Buku KIA')->assertSee('Risiko (IMT sebelum hamil &gt; 25 kg/m²)', false)
             ->assertSee('Demam ≥ 2 minggu') // 4 gejala TBC sesuai kertas
             ->assertSee('Jumlah TTD/MMS yang diberikan nakes (butir)')->assertSee('name="bagian[pelayanan][jumlah_ttd_mms]"', false)
@@ -119,8 +119,11 @@ class FormIbuHamilTest extends TestCase
         $ukur = PengukuranDasar::sole();
         $this->assertSame('140/80', $ukur->tekanan_darah);
         $this->assertSame('22.0', $ukur->getRawOriginal('lila'));
-        $this->assertNull($ukur->tinggi_badan);
+        // TB & lingkar perut hanya dicatat: tanpa IMT & status lingkar perut.
+        $this->assertEquals(155, (float) $ukur->tinggi_badan);
+        $this->assertEquals(92, (float) $ukur->lingkar_perut);
         $this->assertNull($ukur->status_imt);
+        $this->assertNull($ukur->status_lingkar_perut);
     }
 
     public function test_ploting_imt_pelayanan_dan_kelas_tersimpan(): void
@@ -146,12 +149,13 @@ class FormIbuHamilTest extends TestCase
         $this->assertEquals([JenisPemeriksaan::Rutin], Pemeriksaan::sole()->jenis_pemeriksaan);
     }
 
-    public function test_submit_butuh_usia_kehamilan_bb_lila_td(): void
+    public function test_submit_butuh_usia_kehamilan_bb_tb_lingkar_perut_lila_td(): void
     {
         $warga = $this->bumil();
 
-        $this->kirim($warga, ['pengukuran' => ['berat_badan' => '58', 'lila' => null, 'td_sistolik' => '110', 'td_diastolik' => '70']], 'submit')
-            ->assertSessionHasErrors(['submit', 'bagian.kehamilan.usia_kehamilan_minggu', 'bagian.pengukuran.lila']);
+        $this->kirim($warga, ['pengukuran' => ['berat_badan' => '58', 'tinggi_badan' => null, 'lingkar_perut' => null, 'lila' => null, 'td_sistolik' => '110', 'td_diastolik' => '70']], 'submit')
+            ->assertSessionHasErrors(['submit', 'bagian.kehamilan.usia_kehamilan_minggu', 'bagian.pengukuran.tinggi_badan',
+                'bagian.pengukuran.lingkar_perut', 'bagian.pengukuran.lila']);
     }
 
     public function test_validasi_pilihan_dan_teks(): void
@@ -194,7 +198,7 @@ class FormIbuHamilTest extends TestCase
 
         // Edit: LILA dikoreksi → ploting ikut berubah.
         $this->actingAs($this->kader)->put(route('riwayat.update', $p), [
-            'bagian' => ['pengukuran' => ['berat_badan' => '58', 'lila' => '25', 'td_sistolik' => '110', 'td_diastolik' => '70']],
+            'bagian' => ['pengukuran' => $this->wajib(['lila' => '25'])['pengukuran']],
             'versi' => $this->versi($warga), 'diubah' => ['pengukuran'],
         ])->assertSessionHas('sukses');
         $this->assertSame(StatusLila::Normal, PemeriksaanBumil::sole()->status_ploting_lila);
