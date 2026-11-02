@@ -124,8 +124,7 @@ class DashboardService
     /** Hanya Dewasa & Lansia (Figma: "dari form pemeriksaan dewasa/lansia"). */
     private function grafikTekananDarah($semua): array
     {
-        $td = config('posyandu.ambang.tekanan_darah');
-        $batas = "{$td['sistolik_tinggi']}/{$td['diastolik_tinggi']}";
+        $batas = \App\Services\Pemeriksaan\Kalkulator::labelTekananDarah('dewasa');
         $data = $semua->map(fn ($daftar) => $daftar->filter(fn (Pemeriksaan $p) => in_array($p->kategori_usia_saat_periksa, [KategoriPemeriksaan::Dewasa, KategoriPemeriksaan::Lansia], true))->values())
             ->filter->isNotEmpty();
         $status = fn (Pemeriksaan $p) => $p->pengukuranDasar?->status_tekanan_darah;
@@ -134,8 +133,9 @@ class DashboardService
             'judul' => 'Distribusi Tekanan Darah',
             'keterangan' => 'Jumlah warga per ploting TD (dari form pemeriksaan dewasa/lansia)',
             'batang' => [
-                ['kunci' => 'normal', 'label' => "Normal (<{$batas})", 'nilai' => $this->penghitung->hitungWarga($data, $status, fn ($s) => $s !== StatusTekananDarah::Tinggi)],
-                ['kunci' => 'risiko', 'label' => "Risiko (≥{$batas})", 'nilai' => $this->penghitung->hitungWarga($data, $status, fn ($s) => $s === StatusTekananDarah::Tinggi)],
+                // Rendah dan Tinggi sama-sama Risiko (pengecekan bersama kader, 31 Okt 2026).
+                ['kunci' => 'normal', 'label' => "Normal ({$batas['normal']})", 'nilai' => $this->penghitung->hitungWarga($data, $status, fn ($s) => $s === StatusTekananDarah::Normal)],
+                ['kunci' => 'risiko', 'label' => "Risiko ({$batas['risiko']})", 'nilai' => $this->penghitung->hitungWarga($data, $status, fn ($s) => in_array($s, [StatusTekananDarah::Tinggi, StatusTekananDarah::Rendah], true))],
             ],
         ];
     }

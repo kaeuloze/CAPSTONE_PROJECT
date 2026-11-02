@@ -43,17 +43,48 @@ class Kalkulator
         };
     }
 
-    /** Tinggi bila sistolik ≥ 130 atau diastolik ≥ 85; selain itu Normal (keputusan: tanpa status "rendah"). */
-    public static function statusTekananDarah(?string $sistolik, ?string $diastolik): ?StatusTekananDarah
+    /**
+     * Status tekanan darah per kelompok batas ('remaja' atau 'dewasa', lihat config ambang.tekanan_darah):
+     * Tinggi bila melewati batas atas Normal; Rendah bila sistolik < 90 atau diastolik < 70; selain itu Normal.
+     * Bila sekaligus tinggi dan rendah (mis. 150/60), tercatat Tinggi.
+     */
+    public static function statusTekananDarah(?string $sistolik, ?string $diastolik, string $kelompok = 'dewasa'): ?StatusTekananDarah
     {
         if (! is_numeric($sistolik) || ! is_numeric($diastolik)) {
             return null;
         }
-        $batas = config('posyandu.ambang.tekanan_darah');
+        $td = config('posyandu.ambang.tekanan_darah');
+        $batas = $td[$kelompok] ?? $td['dewasa'];
+        [$sis, $dia] = [(int) $sistolik, (int) $diastolik];
 
-        return ((int) $sistolik >= $batas['sistolik_tinggi'] || (int) $diastolik >= $batas['diastolik_tinggi'])
-            ? StatusTekananDarah::Tinggi
-            : StatusTekananDarah::Normal;
+        return match (true) {
+            $sis > $batas['sistolik_normal_sampai'] || $dia > $batas['diastolik_normal_sampai'] => StatusTekananDarah::Tinggi,
+            $sis < $td['rendah']['sistolik_di_bawah'] || $dia < $td['rendah']['diastolik_di_bawah'] => StatusTekananDarah::Rendah,
+            default => StatusTekananDarah::Normal,
+        };
+    }
+
+    /** Kelompok batas tekanan darah untuk kategori pemeriksaan: Remaja → 'remaja', lainnya → 'dewasa'. */
+    public static function kelompokTekananDarah(?\App\Enums\KategoriPemeriksaan $kategori): string
+    {
+        return $kategori === \App\Enums\KategoriPemeriksaan::Remaja ? 'remaja' : 'dewasa';
+    }
+
+    /**
+     * Teks batas untuk label Rekapitulasi/Dashboard, mis. ['normal' => '90–139 / 70–89', 'risiko' => '< 90/70 atau ≥ 140/90'].
+     *
+     * @return array{normal: string, risiko: string}
+     */
+    public static function labelTekananDarah(string $kelompok = 'dewasa'): array
+    {
+        $td = config('posyandu.ambang.tekanan_darah');
+        $b = $td[$kelompok] ?? $td['dewasa'];
+        $r = $td['rendah'];
+
+        return [
+            'normal' => "{$r['sistolik_di_bawah']}–{$b['sistolik_normal_sampai']} / {$r['diastolik_di_bawah']}–{$b['diastolik_normal_sampai']}",
+            'risiko' => "< {$r['sistolik_di_bawah']}/{$r['diastolik_di_bawah']} atau ≥ ".($b['sistolik_normal_sampai'] + 1).'/'.($b['diastolik_normal_sampai'] + 1),
+        ];
     }
 
     /** Berisiko bila lingkar perut > 80 cm (perempuan) / > 90 cm (laki-laki). */

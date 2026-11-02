@@ -56,8 +56,16 @@ return [
     'ambang' => [
         // IMT: Kurus < 18,5 ≤ Normal < 25,0 ≤ Gemuk ≤ 27,0 < Obesitas (rekap: Normal 18,5–24,9 / Risiko).
         'imt' => ['normal_mulai' => 18.5, 'gemuk_mulai' => 25.0, 'gemuk_sampai' => 27.0],
-        // Tekanan darah Tinggi bila sistolik ≥ 130 atau diastolik ≥ 85 (rekap: Normal < 130/85).
-        'tekanan_darah' => ['sistolik_tinggi' => 130, 'diastolik_tinggi' => 85],
+        // Tekanan darah (pengecekan bersama kader, 31 Okt 2026). Angka "normal_sampai" = batas atas yang masih Normal:
+        // - remaja: Tinggi bila sistolik > 130 (130 masih Normal) atau diastolik ≥ 85;
+        // - dewasa (juga lansia, ibu hamil, ibu nifas): Tinggi bila sistolik ≥ 140 atau diastolik ≥ 90;
+        // - semua kategori: Rendah bila sistolik < 90 atau diastolik < 70.
+        // Rekapitulasi & Dashboard: Rendah dan Tinggi sama-sama dihitung Risiko.
+        'tekanan_darah' => [
+            'remaja' => ['sistolik_normal_sampai' => 130, 'diastolik_normal_sampai' => 84],
+            'dewasa' => ['sistolik_normal_sampai' => 139, 'diastolik_normal_sampai' => 89],
+            'rendah' => ['sistolik_di_bawah' => 90, 'diastolik_di_bawah' => 70],
+        ],
         // Lingkar perut berisiko bila lebih dari batas (cm).
         'lingkar_perut' => ['perempuan' => 80, 'laki_laki' => 90],
         // Kadar HB remaja putri normal bila ≥ 12 g/dL.

@@ -172,7 +172,7 @@ class RekapitulasiTest extends TestCase
             ->assertSee('Rekapitulasi — Anak Usia Sekolah &amp; Remaja', false)
             ->assertSee('Oktober 2026')->assertSee('Ekspor ke Excel (.xlsx)')
             ->assertSeeInOrder(['Jumlah Remaja 6–17 Tahun', 'Jumlah Remaja 6–17 Tahun Datang', 'IMT Normal (18,5 – 24,9)', 'IMT Risiko (&lt; 18,5 / ≥ 25)',
-                'LP Remaja Normal', 'TD Remaja Normal (&lt; 130/85 mmHg)', 'Bergejala TBC (memenuhi 2 gejala)', 'Kadar HB Normal Remaja Putri (≥ 12 g/dL)',
+                'LP Remaja Normal', 'TD Remaja Normal (90–130 / 70–84 mmHg)', 'Bergejala TBC (memenuhi 2 gejala)', 'Kadar HB Normal Remaja Putri (≥ 12 g/dL)',
                 'Tes Penglihatan Normal', 'Tes Pendengaran Risiko', 'Sasaran Mendapat Edukasi / Penyuluhan', 'Jumlah Remaja 6–17 Tahun Dirujuk'], false);
 
         $this->assertSame([

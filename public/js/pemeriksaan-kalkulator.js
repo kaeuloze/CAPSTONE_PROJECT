@@ -29,8 +29,12 @@
         } else { tulis('hasil-imt', 'Isi berat & tinggi badan'); }
 
         if (sis !== null && dia !== null) {
-            var tinggi = sis >= batas.tekanan_darah.sistolik_tinggi || dia >= batas.tekanan_darah.diastolik_tinggi;
-            tulis('hasil-td', sis + '/' + dia + ' mmHg — ' + (tinggi ? 'Tinggi (Risiko)' : 'Normal'));
+            // Sama dengan Kalkulator::statusTekananDarah(): Tinggi lebih dulu, lalu Rendah, selain itu Normal.
+            var td = batas.tekanan_darah;
+            var atas = td[kotak.getAttribute('data-kelompok-td')] || td.dewasa;
+            var statusTd = (sis > atas.sistolik_normal_sampai || dia > atas.diastolik_normal_sampai) ? 'Tinggi (Risiko)'
+                : (sis < td.rendah.sistolik_di_bawah || dia < td.rendah.diastolik_di_bawah) ? 'Rendah (Risiko)' : 'Normal';
+            tulis('hasil-td', sis + '/' + dia + ' mmHg — ' + statusTd);
         } else { tulis('hasil-td', 'Isi tekanan darah'); }
 
         if (lp !== null) {

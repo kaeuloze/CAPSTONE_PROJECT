@@ -133,15 +133,15 @@ class FormDewasaTest extends TestCase
     {
         $warga = $this->dewasa(lakiLaki: true);
 
-        $this->kirim($warga, ['pengukuran' => $this->rutin(['berat_badan' => '75', 'lingkar_perut' => '91', 'td_sistolik' => '128', 'td_diastolik' => '86', 'kadar_gula_darah' => '145'])])
+        $this->kirim($warga, ['pengukuran' => $this->rutin(['berat_badan' => '75', 'lingkar_perut' => '91', 'td_sistolik' => '128', 'td_diastolik' => '90', 'kadar_gula_darah' => '145'])])
             ->assertSessionHas('sukses');
 
         $ukur = Pemeriksaan::sole()->pengukuranDasar;
         $this->assertSame('26.5', $ukur->getRawOriginal('lila'));
         $this->assertSame('145.0', $ukur->getRawOriginal('kadar_gula_darah'));
-        $this->assertSame('128/86', $ukur->tekanan_darah);
+        $this->assertSame('128/90', $ukur->tekanan_darah);
         $this->assertSame(StatusImt::Obesitas, $ukur->status_imt);                // 75 / 1,6² = 29,3
-        $this->assertSame(StatusTekananDarah::Tinggi, $ukur->status_tekanan_darah); // diastolik ≥ 85
+        $this->assertSame(StatusTekananDarah::Tinggi, $ukur->status_tekanan_darah); // dewasa: diastolik ≥ 90
         $this->assertSame(StatusRisiko::Berisiko, $ukur->status_lingkar_perut);     // laki-laki > 90
     }
 

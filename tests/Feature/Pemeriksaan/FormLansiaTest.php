@@ -70,7 +70,7 @@ class FormLansiaTest extends TestCase
     private function rutin(): array
     {
         return ['berat_badan' => '55', 'tinggi_badan' => '150', 'lingkar_perut' => '79', 'lila' => '24',
-            'td_sistolik' => '135', 'td_diastolik' => '80', 'kadar_gula_darah' => '150'];
+            'td_sistolik' => '145', 'td_diastolik' => '80', 'kadar_gula_darah' => '150'];
     }
 
     /** Skor AKS lengkap; default semua mandiri (total 20). */
