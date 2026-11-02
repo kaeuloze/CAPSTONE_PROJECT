@@ -121,7 +121,7 @@ class RekapitulasiTest extends TestCase
         $lansia = $this->warga('3404000000000007', '1956-06-06');
         $this->hadir($lansia, $this->akhirOkt);
         $this->periksa($lansia, $this->akhirOkt, 'lansia', [
-            'pengukuranDasar' => ['status_imt' => 'kurus', 'status_lingkar_perut' => 'normal', 'status_tekanan_darah' => 'tinggi', 'kadar_gula_darah' => 150],
+            'pengukuranDasar' => ['status_imt' => 'kurus', 'status_lingkar_perut' => 'normal', 'status_tekanan_darah' => 'tinggi', 'kadar_gula_darah' => 140],
             'skriningPuma' => ['skor_puma_total' => 3, 'status_ppok' => 'tidak_berisiko'],
             'skriningSensorik' => ['status_penglihatan' => 'gangguan', 'status_pendengaran' => 'normal'],
         ]);
@@ -172,7 +172,7 @@ class RekapitulasiTest extends TestCase
             ->assertSee('Rekapitulasi — Anak Usia Sekolah &amp; Remaja', false)
             ->assertSee('Oktober 2026')->assertSee('Ekspor ke Excel (.xlsx)')
             ->assertSeeInOrder(['Jumlah Remaja 6–17 Tahun', 'Jumlah Remaja 6–17 Tahun Datang', 'IMT Normal (18,5 – 24,9)', 'IMT Risiko (&lt; 18,5 / ≥ 25)',
-                'LP Remaja Normal', 'TD Remaja Normal (90–130 / 70–84 mmHg)', 'Bergejala TBC (memenuhi 2 gejala)', 'Kadar HB Normal Remaja Putri (≥ 12 g/dL)',
+                'LP Remaja Normal', 'TD Remaja Normal (90–130 / 70–84 mmHg)', 'GDS Remaja ≥ 15 Tahun Normal (&lt; 150 mg/dl)', 'Bergejala TBC (memenuhi 2 gejala)', 'Kadar HB Normal Remaja Putri (≥ 12 g/dL)',
                 'Tes Penglihatan Normal', 'Tes Pendengaran Risiko', 'Sasaran Mendapat Edukasi / Penyuluhan', 'Jumlah Remaja 6–17 Tahun Dirujuk'], false);
 
         $this->assertSame([
@@ -180,6 +180,7 @@ class RekapitulasiTest extends TestCase
             'IMT_NORMAL' => 0, 'IMT_RISIKO' => 1,           // pemeriksaan terbaru: gemuk
             'LP_NORMAL' => 1, 'LP_RISIKO' => 0,
             'TD_NORMAL' => 0, 'TD_RISIKO' => 1,
+            'GDS_NORMAL' => 0, 'GDS_BERISIKO' => 0,         // tambahan: GDS remaja ≥ 15 tahun
             'TBC_BERGEJALA' => 1,
             'HB_NORMAL' => 0, 'HB_RISIKO' => 1,             // HB dari pemeriksaan awal bulan (terakhir yang memuat HB)
             'PENGLIHATAN_NORMAL' => 1, 'PENGLIHATAN_RISIKO' => 0, 'PENDENGARAN_NORMAL' => 0, 'PENDENGARAN_RISIKO' => 1,
@@ -198,11 +199,12 @@ class RekapitulasiTest extends TestCase
             'GDS_NORMAL' => 1, 'GDS_BERISIKO' => 1, 'TBC_BERGEJALA' => 0,
             'PENGLIHATAN_NORMAL' => 0, 'PENGLIHATAN_RISIKO' => 1, 'PENDENGARAN_NORMAL' => 1, 'PENDENGARAN_RISIKO' => 0,
             'PUMA_NORMAL' => 1, 'PUMA_BERISIKO' => 1,
+            'HB_NORMAL' => 0, 'HB_RISIKO' => 0,             // tambahan: HB lansia perempuan
         ], $nilai);
 
         $this->actingAs($this->kader)->get(route('rekapitulasi.show', ['dewasa_lansia', 'bulan' => 10, 'tahun' => 2026]))
-            ->assertSee('Jumlah Sasaran Lansia (≥ 60 Tahun)')->assertSee('GDS Berisiko (≥ 200 mg/dl)')
-            ->assertSee('Skrining PPOK PUMA Berisiko (≥ 6)')->assertDontSee('Kadar HB');
+            ->assertSee('Jumlah Sasaran Lansia (≥ 60 Tahun)')->assertSee('GDS Berisiko (≥ 150 mg/dl)')
+            ->assertSee('Skrining PPOK PUMA Berisiko (≥ 6)')->assertSee('Kadar HB Normal Lansia Perempuan (≥ 12 g/dL)');
 
         // September: hanya warga yang diperiksa di September.
         $sept = $this->nilaiDiLayar('dewasa_lansia', ['bulan' => 9, 'tahun' => 2026]);
@@ -233,7 +235,7 @@ class RekapitulasiTest extends TestCase
         $rekap = Rekapitulasi::where(['kategori_rekap' => 'remaja', 'periode_bulan' => 10, 'periode_tahun' => 2026])->sole();
         $this->assertSame('2026-10-21', $rekap->tanggal_dibuat->toDateString());
         $this->assertStringContainsString('Posyandu 2026-10-19', $rekap->catatan);
-        $this->assertSame(17, $rekap->detail()->count());
+        $this->assertSame(19, $rekap->detail()->count()); // 17 baris format + 2 baris GDS remaja
         $this->assertSame(['SASARAN_REMAJA', 3, 1], [$rekap->detail->first()->kode_item, $rekap->detail->first()->nilai, $rekap->detail->first()->urutan]);
 
         // Data berubah → angka tersimpan ikut diperbarui saat dibuka lagi.
@@ -276,7 +278,7 @@ class RekapitulasiTest extends TestCase
         $this->assertSame(': Oktober 2026', $lembar->getCell('B7')->getValue());
         $this->assertSame('Bulan dan Tahun: Oktober 2026', $lembar->getCell('C9')->getValue());
         $this->assertSame(['Jumlah Remaja 6–17 Tahun', 3], [$lembar->getCell('B10')->getValue(), $lembar->getCell('C10')->getValue()]);
-        $this->assertSame(['Jumlah Remaja 6–17 Tahun Dirujuk', 1], [$lembar->getCell('B26')->getValue(), $lembar->getCell('C26')->getValue()]);
+        $this->assertSame(['Jumlah Remaja 6–17 Tahun Dirujuk', 1], [$lembar->getCell('B28')->getValue(), $lembar->getCell('C28')->getValue()]);
         $this->assertSame(1, Rekapitulasi::count()); // ekspor juga menyimpan rekap
     }
 }

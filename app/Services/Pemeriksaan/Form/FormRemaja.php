@@ -33,7 +33,7 @@ class FormRemaja extends DefinisiForm
         $tidakWajib = 'Isian di tab ini tidak wajib (diisi bila pemeriksaan dilakukan). Tombol Submit aktif setelah semua isian bertanda * di tab Rutin Bulanan terisi.';
 
         return [
-            'rutin' => ['label' => 'Rutin Bulanan', 'bagian' => ['pengukuran', 'tbc']],
+            'rutin' => ['label' => 'Rutin Bulanan', 'bagian' => ['pengukuran', 'gds', 'tbc']], // gds: usia ≥ 15
             'enam_bulan' => ['label' => 'Screening 6-Bulan', 'bagian' => ['sensorik'], 'jenis' => JenisPemeriksaan::EnamBulanan, 'catatan' => $tidakWajib],
             'tahunan' => ['label' => 'Tahunan Remaja Putri', 'bagian' => ['hb'], 'jenis' => JenisPemeriksaan::Tahunan, 'catatan' => $tidakWajib],
         ];
@@ -64,15 +64,9 @@ class FormRemaja extends DefinisiForm
         return [
             BagianUmum::penimbangan(kelompokTd: 'remaja'),
             BagianUmum::tbc(),
+            BagianUmum::gds(),
             BagianUmum::sensorik(),
-            new Bagian(
-                kunci: 'hb',
-                judul: 'Pemeriksaan Kadar HB',
-                relasi: 'pengukuranDasar',
-                aturan: ['kadar_hb' => BagianUmum::angka(1, 25)],
-                jenis: JenisPemeriksaan::Tahunan,
-                berlaku: fn (Warga $w) => ! $w->jenis_kelamin, // hanya remaja putri
-            ),
+            BagianUmum::hb(), // hanya remaja putri
             BagianUmum::penyuluhan(),
         ];
     }

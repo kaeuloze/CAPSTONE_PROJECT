@@ -85,9 +85,7 @@ class PenghitungRekap
         $datang = $this->datang($periode);
         $data = $this->pemeriksaan($periode, [KategoriPemeriksaan::Remaja]);
         $rentang = $this->rentangUsia(KategoriUsia::Remaja);
-        $hbBatas = $this->angka((float) config('posyandu.ambang.hb_remaja_putri'));
-        $hb = fn ($p) => ! $p->warga->jenis_kelamin && $p->pengukuranDasar?->kadar_hb !== null ? (float) $p->pengukuranDasar->kadar_hb : null;
-        $hbNormal = (float) config('posyandu.ambang.hb_remaja_putri');
+        $gdsMulai = (int) config('posyandu.ambang.gula_darah_usia_minimal');
 
         return [
             new ItemRekap('SASARAN_REMAJA', "Jumlah Remaja {$rentang} Tahun", $sasaran['remaja']),
@@ -95,9 +93,10 @@ class PenghitungRekap
             ...$this->barisImt($data),
             ...$this->barisLingkarPerut($data, 'LP Remaja'),
             ...$this->barisTekananDarah($data, 'TD Remaja', 'remaja'),
+            // Tambahan di luar format kertas (pengecekan bersama kader 31 Okt 2026): GDS remaja usia ≥ 15 tahun.
+            ...$this->barisGds($data, "GDS Remaja ≥ {$gdsMulai} Tahun"),
             $this->barisTbc($data),
-            new ItemRekap('HB_NORMAL', "Kadar HB Normal Remaja Putri (≥ {$hbBatas} g/dL)", $this->hitungWarga($data, $hb, fn ($v) => $v >= $hbNormal)),
-            new ItemRekap('HB_RISIKO', "Kadar HB Risiko Remaja Putri (< {$hbBatas} g/dL)", $this->hitungWarga($data, $hb, fn ($v) => $v < $hbNormal)),
+            ...$this->barisHb($data, 'Remaja Putri'),
             ...$this->barisSensorik($data),
             new ItemRekap('EDUKASI', 'Sasaran Mendapat Edukasi / Penyuluhan',
                 $this->hitungWarga($data, fn ($p) => filled($p->penyuluhanRujukan?->topik_penyuluhan) ? true : null, fn ($v) => $v)),
@@ -114,8 +113,6 @@ class PenghitungRekap
         $data = $this->pemeriksaan($periode, [KategoriPemeriksaan::Dewasa, KategoriPemeriksaan::Lansia]);
         $dewasa = $this->rentangUsia(KategoriUsia::Dewasa);
         $lansia = KategoriUsia::Lansia->usiaMulai();
-        $gdsBatas = (float) config('posyandu.ambang.gula_darah_berisiko');
-        $gds = fn ($p) => Kalkulator::statusGulaDarah($p->pengukuranDasar?->kadar_gula_darah);
         $pumaBatas = (int) config('posyandu.ambang.puma.berisiko_mulai');
         $puma = fn ($p) => $p->skriningPuma?->status_ppok;
 
@@ -127,12 +124,13 @@ class PenghitungRekap
             ...$this->barisImt($data),
             ...$this->barisLingkarPerut($data, 'LP'),
             ...$this->barisTekananDarah($data, 'TD'),
-            new ItemRekap('GDS_NORMAL', 'GDS Normal (< '.$this->angka($gdsBatas).' mg/dl)', $this->hitungWarga($data, $gds, fn ($s) => $s === StatusRisiko::Normal)),
-            new ItemRekap('GDS_BERISIKO', 'GDS Berisiko (≥ '.$this->angka($gdsBatas).' mg/dl)', $this->hitungWarga($data, $gds, fn ($s) => $s === StatusRisiko::Berisiko)),
+            ...$this->barisGds($data, 'GDS'),
             $this->barisTbc($data),
             ...$this->barisSensorik($data),
             new ItemRekap('PUMA_NORMAL', "Skrining PPOK PUMA Normal (< {$pumaBatas})", $this->hitungWarga($data, $puma, fn ($s) => $s === StatusPpok::TidakBerisiko)),
             new ItemRekap('PUMA_BERISIKO', "Skrining PPOK PUMA Berisiko (≥ {$pumaBatas})", $this->hitungWarga($data, $puma, fn ($s) => $s === StatusPpok::Berisiko)),
+            // Tambahan di luar format kertas (pengecekan bersama kader 31 Okt 2026): HB lansia perempuan (tab Tahunan).
+            ...$this->barisHb($data, 'Lansia Perempuan'),
         ];
     }
 
@@ -215,6 +213,30 @@ class PenghitungRekap
         return [
             new ItemRekap('TD_NORMAL', "{$awalan} Normal ({$batas['normal']} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusTekananDarah::Normal)),
             new ItemRekap('TD_RISIKO', "{$awalan} Risiko ({$batas['risiko']} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $this->tdRisiko($s))),
+        ];
+    }
+
+    /** GDS Normal / Berisiko (batas config ambang.gula_darah_berisiko). @return list<ItemRekap> */
+    private function barisGds(Collection $data, string $awalan): array
+    {
+        $batas = $this->angka((float) config('posyandu.ambang.gula_darah_berisiko'));
+        $status = fn ($p) => Kalkulator::statusGulaDarah($p->pengukuranDasar?->kadar_gula_darah);
+
+        return [
+            new ItemRekap('GDS_NORMAL', "{$awalan} Normal (< {$batas} mg/dl)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusRisiko::Normal)),
+            new ItemRekap('GDS_BERISIKO', "{$awalan} Berisiko (≥ {$batas} mg/dl)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusRisiko::Berisiko)),
+        ];
+    }
+
+    /** Kadar HB perempuan Normal / Risiko (batas config ambang.hb_normal_mulai). @return list<ItemRekap> */
+    private function barisHb(Collection $data, string $sasaran): array
+    {
+        $batas = $this->angka((float) config('posyandu.ambang.hb_normal_mulai'));
+        $status = fn ($p) => ! $p->warga->jenis_kelamin ? Kalkulator::statusHb($p->pengukuranDasar?->kadar_hb) : null;
+
+        return [
+            new ItemRekap('HB_NORMAL', "Kadar HB Normal {$sasaran} (≥ {$batas} g/dL)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusRisiko::Normal)),
+            new ItemRekap('HB_RISIKO', "Kadar HB Risiko {$sasaran} (< {$batas} g/dL)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusRisiko::Berisiko)),
         ];
     }
 

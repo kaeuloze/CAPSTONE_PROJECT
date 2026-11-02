@@ -153,7 +153,7 @@ class DataDummySeeder extends Seeder
         $hariUsia = match ($jenis) {
             'bayi' => $this->faker->numberBetween(10, 170),          // 0–5 bulan → ASI tampil
             'balita' => $this->faker->numberBetween(190, 4 * 365 + 300),
-            'remaja' => $this->faker->numberBetween(5 * 365 + 20, 17 * 365 + 300),
+            'remaja' => $this->faker->numberBetween(6 * 365 + 20, 17 * 365 + 300),
             'dewasa' => $this->faker->numberBetween(18 * 365 + 20, 59 * 365 + 300),
             'hamil', 'nifas', 'menyusui' => $this->faker->numberBetween(20 * 365, 38 * 365),
             'lansia' => $this->faker->numberBetween(60 * 365 + 20, 85 * 365),
@@ -285,6 +285,7 @@ class DataDummySeeder extends Seeder
         return match ($kategori) {
             KategoriPemeriksaan::Remaja => array_filter([
                 'pengukuran' => $this->ukur($lakiLaki, 105 + min($usia - 5, 12) * 5, 8, false, false),
+                'gds' => $usia >= 15 ? ['kadar_gula_darah' => $this->gds()] : null, // wajib mulai 15 tahun
                 'tbc' => $this->tbc(),
                 'sensorik' => $urutan === 1 ? $this->sensorik() : null,
                 'hb' => $urutan === 3 && ! $lakiLaki ? ['kadar_hb' => (string) $this->faker->randomFloat(1, 10.5, 14.5)] : null,
@@ -304,6 +305,7 @@ class DataDummySeeder extends Seeder
                 'puma' => $urutan === 3 ? $this->puma($lakiLaki) : null,
                 'aks' => $urutan === 3 ? $this->aks($usia) : null,
                 'skilas' => $urutan === 3 ? $this->skilas() : null,
+                'hb' => $urutan === 3 && ! $lakiLaki ? ['kadar_hb' => (string) $this->faker->randomFloat(1, 10.5, 14.5)] : null,
                 'penyuluhan' => $penyuluhan,
             ]),
             KategoriPemeriksaan::IbuHamil => $this->ibuHamil(($data['jenis'] === 'nifas' ? 26 : $data['mulai']) + $urutan * 4, $penyuluhan),
@@ -327,18 +329,22 @@ class DataDummySeeder extends Seeder
             'tinggi_badan' => (string) $tb,
             'lingkar_perut' => (string) round($imt * 3.3 + $this->faker->numberBetween(-4, 6), 1),
             'td_sistolik' => (string) ($tinggi ? $this->faker->numberBetween(130, 165) : $this->faker->numberBetween(100, 128)),
-            'td_diastolik' => (string) ($tinggi ? $this->faker->numberBetween(82, 100) : $this->faker->numberBetween(65, 83)),
+            'td_diastolik' => (string) ($tinggi ? $this->faker->numberBetween(82, 100) : $this->faker->numberBetween(70, 83)),
         ];
         if ($lila) {
             $hasil['lila'] = (string) $this->faker->randomFloat(1, 22.5, 33);
         }
         if ($gds) {
-            $hasil['kadar_gula_darah'] = $this->faker->boolean(45)
-                ? (string) ($this->faker->boolean(15) ? $this->faker->numberBetween(200, 320) : $this->faker->numberBetween(80, 190))
-                : null;
+            $hasil['kadar_gula_darah'] = $this->gds(); // wajib (pengecekan bersama kader 31 Okt 2026)
         }
 
         return $hasil;
+    }
+
+    /** Gula darah sewaktu (mg/dl): ±15% berisiko (>= 150). */
+    private function gds(): string
+    {
+        return (string) ($this->faker->boolean(15) ? $this->faker->numberBetween(150, 320) : $this->faker->numberBetween(80, 149));
     }
 
     private function tbc(): array

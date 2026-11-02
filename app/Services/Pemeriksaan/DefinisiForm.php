@@ -80,8 +80,12 @@ abstract class DefinisiForm
                 ? 'Setelah bersalin '.$bumil->usia_kehamilan_minggu
                 : 'Usia kehamilan '.str_replace('-', '–', $bumil->usia_kehamilan_minggu).' minggu';
         }
-        if ($bumil?->status_ploting_lila === \App\Enums\StatusLila::Kek) {
+        if ($bumil?->status_ploting_lila === \App\Enums\StatusLila::Kek
+            || (! $bumil && \App\Services\Pemeriksaan\Kalkulator::statusLila($ukur?->lila) === \App\Enums\StatusLila::Kek)) {
             $hasil[] = 'LILA KEK';
+        }
+        if (\App\Services\Pemeriksaan\Kalkulator::statusHb($ukur?->kadar_hb) === \App\Enums\StatusRisiko::Berisiko) {
+            $hasil[] = 'HB Rendah';
         }
         if ($pemeriksaan->skriningAks?->status_aks && $pemeriksaan->skriningAks->status_aks !== \App\Enums\StatusAks::Mandiri) {
             $hasil[] = 'AKS '.$pemeriksaan->skriningAks->status_aks->label();

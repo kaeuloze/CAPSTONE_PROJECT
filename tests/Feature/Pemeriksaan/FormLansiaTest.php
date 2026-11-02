@@ -97,7 +97,7 @@ class FormLansiaTest extends TestCase
             ->assertOk()
             ->assertSee('Pemeriksaan — Lansia (&gt;= 60 Tahun)', false)->assertSee('Lansia · 67 th')
             ->assertSeeInOrder(['Pemeriksaan Rutin Bulanan', 'Pemeriksaan 6 Bulan Sekali', 'Pemeriksaan Tahunan'])
-            ->assertSee('LILA (cm)')->assertSee('Kadar gula darah (mg/dl) (Nakes)')->assertSee('Gula darah (GDS)')
+            ->assertSee('LILA (cm)')->assertSee('Kadar gula darah sewaktu (mg/dl)')->assertSee('Gula darah (GDS)')
             ->assertSee('Tes Penglihatan (Hitung Jari)')
             ->assertSeeInOrder(['Skrining PPOK PUMA', 'Skrining Aktivitas Kehidupan Sehari-hari (AKS)', 'Pemeriksaan Tahunan SKILAS'])
             ->assertSee('Perempuan → skor 0')->assertSee('67 tahun → skor 2')
@@ -212,6 +212,30 @@ class FormLansiaTest extends TestCase
         $this->assertSame(2, $puma->skor_usia);
         $this->assertSame(6, $puma->skor_puma_total); // 1 + 2 + 1 + 2
         $this->assertSame(StatusPpok::Berisiko, $puma->status_ppok);
+    }
+
+    public function test_hb_lansia_perempuan_dan_status_lila_otomatis(): void
+    {
+        // Lansia perempuan: kartu Kadar HB di tab Tahunan; Normal bila ≥ 12 g/dL.
+        $warga = $this->lansia();
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))->assertSee('Pemeriksaan Kadar HB')->assertSee('LILA');
+        $this->kirim($warga, ['pengukuran' => array_merge($this->rutin(), ['lila' => '22']), 'hb' => ['kadar_hb' => '11.5']], 'submit')->assertSessionHas('sukses');
+
+        $p = Pemeriksaan::sole();
+        $this->assertSame('11.5', $p->pengukuranDasar->kadar_hb);
+        $this->assertContains(\App\Enums\JenisPemeriksaan::Tahunan, $p->jenis_pemeriksaan);
+        $this->assertSame(\App\Enums\StatusRisiko::Berisiko, Kalkulator::statusHb('11.9'));
+        $this->assertSame(\App\Enums\StatusRisiko::Normal, Kalkulator::statusHb('12'));
+        $this->actingAs($this->kader)->get(route('riwayat.warga', $warga->nik))->assertSee('LILA KEK')->assertSee('HB Rendah');
+        $this->actingAs($this->kader)->get(route('riwayat.show', $p))->assertSee('22 cm — KEK')->assertSee('11,5 g/dL — Berisiko');
+    }
+
+    public function test_hb_tidak_untuk_lansia_laki_laki(): void
+    {
+        $warga = $this->lansia(true);
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))->assertDontSee('Pemeriksaan Kadar HB');
+        $this->kirim($warga, ['pengukuran' => $this->rutin(), 'hb' => ['kadar_hb' => '11']], 'submit')->assertSessionHas('sukses');
+        $this->assertNull(Pemeriksaan::sole()->pengukuranDasar->kadar_hb);
     }
 
     public function test_riwayat_lansia_ringkasan_detail_dan_edit(): void

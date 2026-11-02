@@ -53,6 +53,13 @@ final class HasilOtomatis
             if (($gds = Kalkulator::statusGulaDarah($ukur->kadar_gula_darah)) !== null) {
                 $tambah('Gula darah (GDS)', self::angka($ukur->kadar_gula_darah).' mg/dl — '.$gds->label(), $gds === StatusRisiko::Berisiko);
             }
+            // LILA dewasa & lansia (ibu hamil memakai Ploting LILA di bawah).
+            if (! $pemeriksaan->pemeriksaanBumil && ($lila = Kalkulator::statusLila($ukur->lila)) !== null) {
+                $tambah('LILA', self::angka($ukur->lila).' cm — '.$lila->label(), $lila === StatusLila::Kek);
+            }
+            if (($hb = Kalkulator::statusHb($ukur->kadar_hb)) !== null) {
+                $tambah('Kadar HB', self::angka($ukur->kadar_hb).' g/dL — '.$hb->label(), $hb === StatusRisiko::Berisiko);
+            }
         }
 
         if ($tbc = $pemeriksaan->skriningTbc) {

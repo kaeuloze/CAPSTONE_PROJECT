@@ -49,7 +49,7 @@ class FormRemajaTest extends TestCase
 
     private function remaja(string $nik = '3404000000000001', bool $lakiLaki = false, array $ubah = []): Warga
     {
-        $warga = $this->buatWarga($nik, array_merge(['nama_warga' => 'Rina', 'tanggal_lahir' => '2010-03-01', 'jenis_kelamin' => $lakiLaki], $ubah));
+        $warga = $this->buatWarga($nik, array_merge(['nama_warga' => 'Rina', 'tanggal_lahir' => '2012-03-01', 'jenis_kelamin' => $lakiLaki], $ubah));
         $this->kegiatan->kehadiran()->create(['nik' => $warga->nik, 'status_kehadiran' => true, 'waktu_kehadiran' => now()]);
 
         return $warga;
@@ -86,7 +86,7 @@ class FormRemajaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Remaja (6 - 17 Tahun)')->assertSee('Remaja · 16 th')
+            ->assertSee('Pemeriksaan — Remaja (6 - 17 Tahun)')->assertSee('Remaja · 14 th')
             ->assertSeeInOrder(['Rutin Bulanan', 'Screening 6-Bulan', 'Tahunan Remaja Putri'])
             ->assertSee('Skrining Penimbangan dan Pengukuran')->assertSee('Tekanan darah (mmHg)')
             ->assertSee('name="bagian[pengukuran][td_sistolik]"', false)->assertSee('name="bagian[pengukuran][td_diastolik]"', false)
@@ -207,6 +207,25 @@ class FormRemajaTest extends TestCase
         $this->assertSame('Anemia remaja', $r->topik_penyuluhan);
         $this->assertSame(StatusRujukan::RujukPuskesmas, $r->status_rujukan);
         $this->assertSame('2026-10-16', $r->tanggal_rujukan->toDateString());
+    }
+
+    public function test_gds_wajib_untuk_remaja_mulai_15_tahun(): void
+    {
+        // 14 tahun: kartu GDS tidak tampil dan Submit tidak membutuhkannya.
+        $muda = $this->remaja();
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $muda->nik))->assertDontSee('Pemeriksaan Gula Darah Sewaktu');
+        $this->kirim($muda, ['pengukuran' => $this->rutinLengkap()], 'submit')->assertSessionHas('sukses');
+
+        // 15 tahun: kartu GDS tampil, wajib diisi; ≥ 150 mg/dl berisiko.
+        $remaja = $this->remaja('3404000000000002', false, ['tanggal_lahir' => '2011-03-01']);
+        $this->actingAs($this->kader)->get(route('pemeriksaan.form', $remaja->nik))
+            ->assertSee('Pemeriksaan Gula Darah Sewaktu')->assertSee('Gula darah (GDS)');
+        $this->kirim($remaja, ['pengukuran' => $this->rutinLengkap()], 'submit')->assertSessionHasErrors('bagian.gds.kadar_gula_darah');
+        // Submit yang gagal membatalkan seluruh isian, jadi dikirim ulang lengkap.
+        $this->kirim($remaja, ['pengukuran' => $this->rutinLengkap(), 'gds' => ['kadar_gula_darah' => '160']], 'submit')->assertSessionHas('sukses');
+
+        $this->assertSame('160.0', Pemeriksaan::where('nik', $remaja->nik)->sole()->pengukuranDasar->getRawOriginal('kadar_gula_darah'));
+        $this->actingAs($this->kader)->get(route('riwayat.warga', $remaja->nik))->assertSee('GDS Berisiko');
     }
 
     public function test_validasi_tekanan_darah_harus_berpasangan(): void

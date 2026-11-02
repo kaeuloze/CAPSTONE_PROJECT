@@ -68,17 +68,21 @@ return [
         ],
         // Lingkar perut berisiko bila lebih dari batas (cm).
         'lingkar_perut' => ['perempuan' => 80, 'laki_laki' => 90],
-        // Kadar HB remaja putri normal bila ≥ 12 g/dL.
-        'hb_remaja_putri' => 12,
+        // Kadar HB normal bila ≥ 12 g/dL: remaja putri (tab Tahunan) dan lansia perempuan (tab Tahunan,
+        // ditambahkan setelah pengecekan bersama kader 31 Okt 2026). Dewasa tidak diperiksa HB.
+        'hb_normal_mulai' => 12,
         // Skrining TBC berisiko bila jumlah gejala "Ya" minimal sekian (disetujui: 2).
         'tbc_minimal_gejala' => 2,
         // Peringatan interval pemeriksaan (Activity Diagram 2.17 & 2.18), dalam bulan.
         'interval_bulan' => ['enam_bulanan' => 6, 'tahunan' => 12],
-        // Ploting LILA ibu hamil (Kartu Bantu Ibu Hamil): KEK bila LILA < 23,5 cm (disetujui: otomatis dari angka).
+        // LILA: KEK bila LILA < 23,5 cm (otomatis dari angka). Dipakai ploting ibu hamil dan, setelah pengecekan
+        // bersama kader (31 Okt 2026), juga status LILA dewasa & lansia (dihitung dari angka, tanpa kolom status).
         'lila_kek_di_bawah' => 23.5,
-        // Gula Darah Sewaktu (GDS, rekap Dewasa & Lansia): berisiko bila >= 200 mg/dl (disetujui 17 Okt 2026).
-        // Status tidak disimpan di database; dihitung dari angka kadar_gula_darah.
-        'gula_darah_berisiko' => 200,
+        // Gula Darah Sewaktu (GDS): berisiko bila >= 150 mg/dl; diperiksa dan WAJIB mulai usia 15 tahun
+        // (remaja 15–17, dewasa, lansia), boleh diisi nakes atau kader berpengalaman (pengecekan bersama kader
+        // 31 Okt 2026; sebelumnya >= 200). Status tidak disimpan di database; dihitung dari angka kadar_gula_darah.
+        'gula_darah_berisiko' => 150,
+        'gula_darah_usia_minimal' => 15,
         // AKS (Indeks Barthel skala 20, Kartu Bantu Pemeriksaan Lansia): total 20 = Mandiri, 12-19 Ringan,
         // 9-11 Sedang, 5-8 Berat, 0-4 Total; skor < 20 dirujuk ke Pustu/Puskesmas.
         'aks' => ['mandiri' => 20, 'ringan_mulai' => 12, 'sedang_mulai' => 9, 'berat_mulai' => 5],

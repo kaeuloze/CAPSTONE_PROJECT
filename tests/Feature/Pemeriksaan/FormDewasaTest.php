@@ -74,7 +74,7 @@ class FormDewasaTest extends TestCase
     private function rutin(array $ubah = []): array
     {
         return array_merge(['berat_badan' => '60', 'tinggi_badan' => '160', 'lingkar_perut' => '78', 'lila' => '26.5',
-            'td_sistolik' => '120', 'td_diastolik' => '80', 'kadar_gula_darah' => null], $ubah);
+            'td_sistolik' => '120', 'td_diastolik' => '80', 'kadar_gula_darah' => '120'], $ubah);
     }
 
     private function puma(string $merokok = '0', array $ya = []): array
@@ -97,7 +97,7 @@ class FormDewasaTest extends TestCase
             ->assertOk()
             ->assertSee('Pemeriksaan — Dewasa (18 - 59 Tahun)')->assertSee('Dewasa · 45 th')
             ->assertSeeInOrder(['Pemeriksaan Rutin Bulanan', 'Pemeriksaan 6 Bulan Sekali', 'Pemeriksaan Tahunan'])
-            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan darah (mmHg)', 'Kadar gula darah (mg/dl) (Nakes)'])
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan darah (mmHg)', 'Kadar gula darah sewaktu (mg/dl)'])
             ->assertSee('id="isian-pengukuran-lila"', false)
             ->assertSee('Skrining Gejala TBC')
             ->assertSee('Tes Penglihatan (Hitung Jari)')->assertSee('Tes Pendengaran (Berbisik)')
@@ -108,12 +108,12 @@ class FormDewasaTest extends TestCase
             ->assertSee('Hasil dihitung otomatis (Kalkulator IMT)');
     }
 
-    public function test_lila_wajib_tetapi_gula_darah_tidak(): void
+    public function test_lila_dan_gula_darah_wajib(): void
     {
         $html = $this->actingAs($this->kader)->get(route('pemeriksaan.form', $this->dewasa()->nik))->getContent();
 
         $this->assertMatchesRegularExpression('/id="isian-pengukuran-lila"[^>]*data-wajib/s', $html);
-        $this->assertDoesNotMatchRegularExpression('/id="isian-pengukuran-kadar_gula_darah"[^>]*data-wajib/s', $html);
+        $this->assertMatchesRegularExpression('/id="isian-pengukuran-kadar_gula_darah"[^>]*data-wajib/s', $html); // wajib sejak 31 Okt 2026
     }
 
     public function test_tab_tahunan_nonaktif_di_bawah_40_tahun_dan_aktif_tepat_40(): void
@@ -239,22 +239,22 @@ class FormDewasaTest extends TestCase
 
     // ---------- Gula Darah Sewaktu (GDS) ----------
 
-    public function test_status_gds_dihitung_dari_angka_dengan_batas_200(): void
+    public function test_status_gds_dihitung_dari_angka_dengan_batas_150(): void
     {
         $this->assertNull(\App\Services\Pemeriksaan\Kalkulator::statusGulaDarah(null));
-        $this->assertSame(StatusRisiko::Normal, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('199.9'));
-        $this->assertSame(StatusRisiko::Berisiko, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('200'));
+        $this->assertSame(StatusRisiko::Normal, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('149.9'));
+        $this->assertSame(StatusRisiko::Berisiko, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('150'));
 
         $warga = $this->dewasa();
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))->assertSee('Gula darah (GDS)');
-        $this->kirim($warga, ['pengukuran' => $this->rutin(['kadar_gula_darah' => '200'])], 'submit')->assertSessionHas('sukses');
+        $this->kirim($warga, ['pengukuran' => $this->rutin(['kadar_gula_darah' => '150'])], 'submit')->assertSessionHas('sukses');
 
         $this->actingAs($this->kader)->get(route('riwayat.warga', $warga->nik))->assertSee('TD Normal · GDS Berisiko');
     }
 
     public function test_kotak_hasil_remaja_tanpa_gula_darah(): void
     {
-        $remaja = $this->buatWarga('3404000000000009', ['tanggal_lahir' => '2010-01-01']);
+        $remaja = $this->buatWarga('3404000000000009', ['tanggal_lahir' => '2013-01-01']); // 13 th: belum diperiksa GDS
         $this->kegiatan->kehadiran()->create(['nik' => $remaja->nik, 'status_kehadiran' => true, 'waktu_kehadiran' => now()]);
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $remaja->nik))

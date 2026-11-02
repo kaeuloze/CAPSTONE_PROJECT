@@ -9,7 +9,11 @@
             <dt>IMT</dt><dd id="hasil-imt">-</dd>
             <dt>Tekanan darah</dt><dd id="hasil-td">-</dd>
             <dt>Lingkar perut</dt><dd id="hasil-lp">-</dd>
-            @if (in_array('kadar_gula_darah', $definisi->bagian()['pengukuran']->kolom()))
+            @if (in_array('lila', $definisi->bagian()['pengukuran']->kolom()))
+                <dt>LILA</dt><dd id="hasil-lila">-</dd>
+            @endif
+            @if (in_array('kadar_gula_darah', $definisi->bagian()['pengukuran']->kolom())
+                || (isset($definisi->bagian()['gds']) && $definisi->bagian()['gds']->berlakuUntuk($warga, $kegiatan->tanggal_kegiatan)))
                 <dt>Gula darah (GDS)</dt><dd id="hasil-gds">-</dd>
             @endif
             <dt>Gejala TBC</dt><dd id="hasil-tbc">-</dd>

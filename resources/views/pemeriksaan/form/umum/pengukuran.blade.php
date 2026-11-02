@@ -8,5 +8,5 @@
 @endif
 @include('pemeriksaan.partials.tekanan-darah', ['wajib' => in_array('td_sistolik', $bagian->wajib)])
 @if (in_array('kadar_gula_darah', $bagian->kolom()))
-    @include('pemeriksaan.partials.isian', ['kolom' => 'kadar_gula_darah', 'label' => 'Kadar gula darah (mg/dl) (Nakes)', 'wajib' => in_array('kadar_gula_darah', $bagian->wajib), 'min' => 20, 'max' => 600, 'step' => '0.1'])
+    @include('pemeriksaan.partials.isian', ['kolom' => 'kadar_gula_darah', 'label' => 'Kadar gula darah sewaktu (mg/dl)', 'wajib' => in_array('kadar_gula_darah', $bagian->wajib), 'min' => 20, 'max' => 600, 'step' => '0.1'])
 @endif
