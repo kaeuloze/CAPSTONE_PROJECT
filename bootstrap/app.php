@@ -15,6 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // kader yang sudah login dan membuka halaman login diarahkan ke Dashboard.
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('dashboard'));
+
+        // SOP poin 4: batas ukuran request (±10 KB). Di grup web, dijalankan tepat setelah sesi dimulai
+        // (agar pesan galat bisa ditampilkan di halaman sebelumnya) dan sebelum data lain diproses.
+        $middleware->web(append: [\App\Http\Middleware\BatasiUkuranRequest::class]);
+        $middleware->appendToPriorityList(
+            \Illuminate\Session\Middleware\StartSession::class,
+            \App\Http\Middleware\BatasiUkuranRequest::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

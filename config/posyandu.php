@@ -127,6 +127,12 @@ return [
         'telepon' => env('POSYANDU_TELEPON', ''),
     ],
 
+    // SOP Pengumpulan Capstone poin 4: batas ukuran isi kiriman & parameter alamat per request (KB).
+    // Form terbesar ±5,7 KB (pemeriksaan lansia diisi penuh). Middleware BatasiUkuranRequest.
+    'request' => [
+        'maks_kb' => (int) env('REQUEST_MAKS_KB', 10),
+    ],
+
     // Halaman publik: angka grafik disimpan sementara (detik) & batas permintaan per menit per alamat IP.
     'publik' => [
         'cache_detik' => (int) env('PUBLIK_CACHE_DETIK', 600),
