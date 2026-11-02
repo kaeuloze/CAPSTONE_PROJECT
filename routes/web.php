@@ -63,6 +63,9 @@ Route::middleware('auth')->group(function () {
         Route::post('selesaikan', [KegiatanController::class, 'selesaikan'])->name('kegiatan.selesaikan');
         Route::get('presensi', [PresensiController::class, 'index'])->name('presensi.index');
         Route::get('presensi/status', [PresensiController::class, 'status'])->name('presensi.status');
+        // Ekspor daftar hadir (permintaan kader 31 Okt 2026).
+        Route::get('presensi/excel', [PresensiController::class, 'excel'])->name('presensi.excel');
+        Route::get('presensi/cetak', [PresensiController::class, 'cetak'])->name('presensi.cetak');
         Route::post('presensi/{warga}', [PresensiController::class, 'atur'])
             ->where('warga', '[0-9]{16}')
             ->name('presensi.atur');
