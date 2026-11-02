@@ -108,7 +108,7 @@ class FormIbuHamilTest extends TestCase
         $this->assertSame(StatusLila::Normal, Kalkulator::statusLila('23.5'));
 
         $warga = $this->bumil();
-        $this->kirim($warga, $this->wajib(['lila' => '22', 'td_sistolik' => '130', 'td_diastolik' => '80']))->assertSessionHas('sukses');
+        $this->kirim($warga, $this->wajib(['lila' => '22', 'td_sistolik' => '140', 'td_diastolik' => '80']))->assertSessionHas('sukses');
 
         $bumil = PemeriksaanBumil::sole();
         $this->assertSame(JenisIbu::Hamil, $bumil->jenis_ibu);
@@ -117,7 +117,7 @@ class FormIbuHamilTest extends TestCase
         $this->assertSame(StatusTekananDarah::Tinggi, $bumil->status_ploting_tekanan_darah);
 
         $ukur = PengukuranDasar::sole();
-        $this->assertSame('130/80', $ukur->tekanan_darah);
+        $this->assertSame('140/80', $ukur->tekanan_darah);
         $this->assertSame('22.0', $ukur->getRawOriginal('lila'));
         $this->assertNull($ukur->tinggi_badan);
         $this->assertNull($ukur->status_imt);

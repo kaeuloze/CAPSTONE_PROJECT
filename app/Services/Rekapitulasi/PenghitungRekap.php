@@ -94,7 +94,7 @@ class PenghitungRekap
             new ItemRekap('DATANG_REMAJA', "Jumlah Remaja {$rentang} Tahun Datang", $datang['remaja']),
             ...$this->barisImt($data),
             ...$this->barisLingkarPerut($data, 'LP Remaja'),
-            ...$this->barisTekananDarah($data, 'TD Remaja'),
+            ...$this->barisTekananDarah($data, 'TD Remaja', 'remaja'),
             $this->barisTbc($data),
             new ItemRekap('HB_NORMAL', "Kadar HB Normal Remaja Putri (≥ {$hbBatas} g/dL)", $this->hitungWarga($data, $hb, fn ($v) => $v >= $hbNormal)),
             new ItemRekap('HB_RISIKO', "Kadar HB Risiko Remaja Putri (< {$hbBatas} g/dL)", $this->hitungWarga($data, $hb, fn ($v) => $v < $hbNormal)),
@@ -162,8 +162,8 @@ class PenghitungRekap
             new ItemRekap('DATANG_NIFAS', 'Jumlah Ibu Nifas / Menyusui Datang', $datang['nifas']),
             new ItemRekap('IMT_KIA', 'Jumlah Bumil/Bufas IMT Sesuai KIA',
                 $this->hitungWarga($data, fn ($p) => $p->pemeriksaanBumil?->status_ploting_imt, fn ($s) => $s === StatusImt::Normal)),
-            new ItemRekap('TD_NORMAL', "TD Normal (< {$tdTinggi})", $this->hitungWarga($data, $td, fn ($s) => $s !== StatusTekananDarah::Tinggi)),
-            new ItemRekap('TD_RISIKO', "TD Risiko (≥ {$tdTinggi})", $this->hitungWarga($data, $td, fn ($s) => $s === StatusTekananDarah::Tinggi)),
+            new ItemRekap('TD_NORMAL', "TD Normal ({$tdTinggi['normal']} mmHg)", $this->hitungWarga($data, $td, fn ($s) => $s === StatusTekananDarah::Normal)),
+            new ItemRekap('TD_RISIKO', "TD Risiko ({$tdTinggi['risiko']} mmHg)", $this->hitungWarga($data, $td, fn ($s) => $this->tdRisiko($s))),
             new ItemRekap('LILA_NORMAL', "LILA Normal (≥ {$lilaBatas} cm)", $this->hitungWarga($hamil, $lila, fn ($s) => $s === StatusLila::Normal)),
             new ItemRekap('LILA_KEK', "LILA KEK (< {$lilaBatas} cm)", $this->hitungWarga($hamil, $lila, fn ($s) => $s === StatusLila::Kek)),
             $this->barisTbc($data),
@@ -207,14 +207,14 @@ class PenghitungRekap
     }
 
     /** @return list<ItemRekap> */
-    private function barisTekananDarah(Collection $data, string $awalan): array
+    private function barisTekananDarah(Collection $data, string $awalan, string $kelompok = 'dewasa'): array
     {
-        $batas = $this->batasTd();
+        $batas = $this->batasTd($kelompok);
         $status = fn ($p) => $p->pengukuranDasar?->status_tekanan_darah;
 
         return [
-            new ItemRekap('TD_NORMAL', "{$awalan} Normal (< {$batas} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $s !== StatusTekananDarah::Tinggi)),
-            new ItemRekap('TD_RISIKO', "{$awalan} Risiko (≥ {$batas} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusTekananDarah::Tinggi)),
+            new ItemRekap('TD_NORMAL', "{$awalan} Normal ({$batas['normal']} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $s === StatusTekananDarah::Normal)),
+            new ItemRekap('TD_RISIKO', "{$awalan} Risiko ({$batas['risiko']} mmHg)", $this->hitungWarga($data, $status, fn ($s) => $this->tdRisiko($s))),
         ];
     }
 
@@ -377,11 +377,16 @@ class PenghitungRekap
         return $kategori->usiaMulai().'–'.($kategori->berikutnya()->usiaMulai() - 1);
     }
 
-    private function batasTd(): string
+    /** Teks batas TD untuk label rekap (Kalkulator::labelTekananDarah). @return array{normal: string, risiko: string} */
+    private function batasTd(string $kelompok = 'dewasa'): array
     {
-        $td = config('posyandu.ambang.tekanan_darah');
+        return Kalkulator::labelTekananDarah($kelompok);
+    }
 
-        return "{$td['sistolik_tinggi']}/{$td['diastolik_tinggi']}";
+    /** Rendah dan Tinggi sama-sama dihitung Risiko (pengecekan bersama kader, 31 Okt 2026). */
+    private function tdRisiko(?StatusTekananDarah $status): bool
+    {
+        return in_array($status, [StatusTekananDarah::Tinggi, StatusTekananDarah::Rendah], true);
     }
 
     /** Angka gaya Indonesia: 18.5 → "18,5", 200.0 → "200". */

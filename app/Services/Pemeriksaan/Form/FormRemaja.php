@@ -62,7 +62,7 @@ class FormRemaja extends DefinisiForm
     protected function daftarBagian(): array
     {
         return [
-            BagianUmum::penimbangan(),
+            BagianUmum::penimbangan(kelompokTd: 'remaja'),
             BagianUmum::tbc(),
             BagianUmum::sensorik(),
             new Bagian(

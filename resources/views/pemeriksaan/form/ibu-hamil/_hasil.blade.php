@@ -1,6 +1,6 @@
 {{-- Hasil otomatis ibu hamil: ploting LILA & TD (disetujui otomatis) dan gejala TBC. --}}
 <section class="info hasil-otomatis" id="hasil-otomatis" data-hanya-tab="hamil" aria-live="polite"
-         data-ambang="{{ json_encode(\App\Services\Pemeriksaan\Kalkulator::untukLayar()) }}" data-laki-laki="0">
+         data-ambang="{{ json_encode(\App\Services\Pemeriksaan\Kalkulator::untukLayar()) }}" data-laki-laki="0" data-kelompok-td="dewasa">
     <div>
         <strong>Hasil dihitung otomatis</strong>
         <dl>

@@ -100,7 +100,7 @@ class FormIbuNifasTest extends TestCase
     {
         $warga = $this->ibu();
 
-        $this->kirim($warga, $this->wajib(['td_sistolik' => '135']) + [
+        $this->kirim($warga, $this->wajib(['td_sistolik' => '140']) + [
             'ploting_imt' => ['status_ploting_imt' => 'normal'],
             'pelayanan' => ['jumlah_kapsul_vit_a' => '2', 'status_rutin_vit_a' => '1', 'status_menyusui' => '1', 'status_kb_pascasalin' => '0'],
         ], 'submit')->assertSessionHas('sukses');

@@ -30,8 +30,9 @@ class BagianUmum
      *
      * @param  array<int, string>  $wajib  kolom bertanda * (berbeda per kategori)
      * @param  array<int, string>  $tambahan  kolom tambahan: 'lila', 'kadar_gula_darah'
+     * @param  string  $kelompokTd  batas tekanan darah: 'remaja' atau 'dewasa' (config ambang.tekanan_darah)
      */
-    public static function penimbangan(array $wajib = ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'td_sistolik', 'td_diastolik'], array $tambahan = []): Bagian
+    public static function penimbangan(array $wajib = ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'td_sistolik', 'td_diastolik'], array $tambahan = [], string $kelompokTd = 'dewasa'): Bagian
     {
         $aturanTambahan = array_intersect_key([
             'lila' => self::angka(5, 60),               // cm
@@ -49,12 +50,12 @@ class BagianUmum
             ] + self::aturanTekananDarah() + $aturanTambahan,
             wajib: $wajib,
             jenis: JenisPemeriksaan::Rutin,
-            hitung: function (array $n, Warga $warga) {
+            hitung: function (array $n, Warga $warga) use ($kelompokTd) {
                 $imt = Kalkulator::imt($n['berat_badan'], $n['tinggi_badan']);
 
                 return [
                     'status_imt' => Kalkulator::statusImt($imt),
-                    'status_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik']),
+                    'status_tekanan_darah' => Kalkulator::statusTekananDarah($n['td_sistolik'], $n['td_diastolik'], $kelompokTd),
                     'status_lingkar_perut' => Kalkulator::statusLingkarPerut($n['lingkar_perut'], (bool) $warga->jenis_kelamin),
                 ];
             },

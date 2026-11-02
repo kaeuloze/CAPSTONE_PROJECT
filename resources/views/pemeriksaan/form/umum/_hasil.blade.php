@@ -1,7 +1,8 @@
 {{-- "Hasil dihitung otomatis (Kalkulator IMT)" (Figma Remaja 418:65, Dewasa 430:65) — tampil di tab Rutin Bulanan. --}}
 <section class="info hasil-otomatis" id="hasil-otomatis" data-hanya-tab="rutin" aria-live="polite"
          data-ambang="{{ json_encode(\App\Services\Pemeriksaan\Kalkulator::untukLayar()) }}"
-         data-laki-laki="{{ $warga->jenis_kelamin ? '1' : '0' }}">
+         data-laki-laki="{{ $warga->jenis_kelamin ? '1' : '0' }}"
+         data-kelompok-td="{{ \App\Services\Pemeriksaan\Kalkulator::kelompokTekananDarah($definisi->kategori()) }}">
     <div>
         <strong>Hasil dihitung otomatis (Kalkulator IMT)</strong>
         <dl>

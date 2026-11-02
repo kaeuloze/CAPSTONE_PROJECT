@@ -127,15 +127,15 @@ class FormRemajaTest extends TestCase
         $warga = $this->remaja();
 
         $this->kirim($warga, [
-            'pengukuran' => $this->rutinLengkap(['berat_badan' => '45', 'tinggi_badan' => '160', 'lingkar_perut' => '81', 'td_sistolik' => '130', 'td_diastolik' => '80']),
+            'pengukuran' => $this->rutinLengkap(['berat_badan' => '45', 'tinggi_badan' => '160', 'lingkar_perut' => '81', 'td_sistolik' => '131', 'td_diastolik' => '80']),
             'tbc' => ['batuk_terus_menerus' => '1', 'demam_2_minggu' => '0', 'bb_tidak_stabil' => '0', 'kontak_pasien_tbc' => '0'],
         ])->assertSessionHas('sukses');
 
         $p = Pemeriksaan::sole();
         $ukur = $p->pengukuranDasar;
-        $this->assertSame('130/80', $ukur->tekanan_darah); // 2 kotak → "120/80" (keputusan 4)
+        $this->assertSame('131/80', $ukur->tekanan_darah); // 2 kotak → "120/80" (keputusan 4)
         $this->assertSame(StatusImt::Kurus, $ukur->status_imt);   // 45 / 1,6² = 17,6
-        $this->assertSame(StatusTekananDarah::Tinggi, $ukur->status_tekanan_darah); // sistolik ≥ 130
+        $this->assertSame(StatusTekananDarah::Tinggi, $ukur->status_tekanan_darah); // remaja: sistolik > 130
         $this->assertSame(StatusRisiko::Berisiko, $ukur->status_lingkar_perut);     // perempuan > 80
         $this->assertSame(StatusRisiko::Normal, $p->skriningTbc->status_gejala_tbc); // baru 1 gejala
         $this->assertTrue($p->skriningTbc->batuk_terus_menerus);
@@ -273,8 +273,19 @@ class FormRemajaTest extends TestCase
         $this->assertSame(StatusImt::Normal, Kalkulator::statusImt(24.9));
         $this->assertSame(StatusImt::Gemuk, Kalkulator::statusImt(25.0));
         $this->assertSame(StatusImt::Obesitas, Kalkulator::statusImt(27.1));
-        $this->assertSame(StatusTekananDarah::Normal, Kalkulator::statusTekananDarah('129', '84'));
-        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('120', '85'));
+        // Remaja: Tinggi bila sistolik > 130 atau diastolik ≥ 85.
+        $this->assertSame(StatusTekananDarah::Normal, Kalkulator::statusTekananDarah('130', '84', 'remaja'));
+        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('131', '80', 'remaja'));
+        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('120', '85', 'remaja'));
+        // Dewasa, lansia, ibu hamil/nifas: Tinggi bila sistolik ≥ 140 atau diastolik ≥ 90.
+        $this->assertSame(StatusTekananDarah::Normal, Kalkulator::statusTekananDarah('139', '89', 'dewasa'));
+        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('140', '80', 'dewasa'));
+        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('120', '90', 'dewasa'));
+        // Semua kategori: Rendah bila sistolik < 90 atau diastolik < 70; Tinggi didahulukan.
+        $this->assertSame(StatusTekananDarah::Rendah, Kalkulator::statusTekananDarah('89', '75', 'remaja'));
+        $this->assertSame(StatusTekananDarah::Rendah, Kalkulator::statusTekananDarah('100', '69', 'dewasa'));
+        $this->assertSame(StatusTekananDarah::Normal, Kalkulator::statusTekananDarah('90', '70', 'dewasa'));
+        $this->assertSame(StatusTekananDarah::Tinggi, Kalkulator::statusTekananDarah('150', '60', 'dewasa'));
         $this->assertSame(StatusRisiko::Normal, Kalkulator::statusLingkarPerut('80', false));
         $this->assertSame(StatusRisiko::Berisiko, Kalkulator::statusLingkarPerut('80.5', false));
         $this->assertSame(StatusRisiko::Normal, Kalkulator::statusLingkarPerut('90', true));
