@@ -47,7 +47,8 @@ class DataDummySeeder extends Seeder
     /** Jadwal imunisasi dasar: nama vaksin => usia pemberian (bulan). */
     private const JADWAL_VAKSIN = [
         'Hepatitis B (HB-0)' => 0, 'BCG' => 1, 'Polio 1' => 1, 'DPT-HB-Hib 1' => 2, 'Polio 2' => 2,
-        'DPT-HB-Hib 2' => 3, 'Polio 3' => 3, 'DPT-HB-Hib 3' => 4, 'Polio 4' => 4, 'IPV' => 4, 'Campak / MR' => 9,
+        'DPT-HB-Hib 2' => 3, 'Polio 3' => 3, 'DPT-HB-Hib 3' => 4, 'IPV' => 4, 'Campak / MR' => 9,
+        'JE (Japanese Encephalitis)' => 10,
     ];
 
     private const TOPIK = [
