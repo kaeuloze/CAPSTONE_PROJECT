@@ -430,7 +430,7 @@ class DataDummySeeder extends Seeder
         return [
             'kehamilan' => ['usia_kehamilan_minggu' => $rentang],
             'pengukuran' => [
-                'berat_badan' => (string) $this->faker->randomFloat(1, 48, 75), 'lila' => (string) $lila,
+                'berat_badan' => (string) $this->faker->randomFloat(1, 48, 75), ...$this->tinggiLingkarPerutIbu(), 'lila' => (string) $lila,
                 'td_sistolik' => (string) ($tinggi ? $this->faker->numberBetween(130, 150) : $this->faker->numberBetween(100, 125)),
                 'td_diastolik' => (string) ($tinggi ? $this->faker->numberBetween(85, 95) : $this->faker->numberBetween(65, 80)),
             ],
@@ -447,6 +447,15 @@ class DataDummySeeder extends Seeder
         ];
     }
 
+    /** Tinggi badan & lingkar perut ibu hamil/nifas (wajib, hanya dicatat). */
+    private function tinggiLingkarPerutIbu(): array
+    {
+        return [
+            'tinggi_badan' => (string) $this->faker->randomFloat(1, 145, 168),
+            'lingkar_perut' => (string) $this->faker->randomFloat(1, 75, 105),
+        ];
+    }
+
     private function ibuNifas(int $kunjungan, array $penyuluhan): array
     {
         $waktu = array_keys(FormIbuNifas::WAKTU_NIFAS);
@@ -455,7 +464,7 @@ class DataDummySeeder extends Seeder
         return [
             'waktu' => ['usia_kehamilan_minggu' => $waktu[max(0, min($kunjungan, count($waktu) - 1))]],
             'pengukuran' => [
-                'berat_badan' => (string) $this->faker->randomFloat(1, 46, 70),
+                'berat_badan' => (string) $this->faker->randomFloat(1, 46, 70), ...$this->tinggiLingkarPerutIbu(),
                 'td_sistolik' => (string) ($tinggi ? $this->faker->numberBetween(130, 150) : $this->faker->numberBetween(100, 125)),
                 'td_diastolik' => (string) ($tinggi ? $this->faker->numberBetween(85, 95) : $this->faker->numberBetween(65, 80)),
             ],

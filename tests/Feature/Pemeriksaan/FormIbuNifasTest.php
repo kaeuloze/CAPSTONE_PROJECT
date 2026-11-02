@@ -63,7 +63,7 @@ class FormIbuNifasTest extends TestCase
     {
         return [
             'waktu' => ['usia_kehamilan_minggu' => '7-28 hari'],
-            'pengukuran' => array_merge(['berat_badan' => '55', 'td_sistolik' => '115', 'td_diastolik' => '75'], $ukur),
+            'pengukuran' => array_merge(['berat_badan' => '55', 'tinggi_badan' => '152', 'lingkar_perut' => '85', 'td_sistolik' => '115', 'td_diastolik' => '75'], $ukur),
         ];
     }
 
@@ -78,8 +78,9 @@ class FormIbuNifasTest extends TestCase
             ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Nifas · 30 th')
             ->assertSee('disabled title="Status ibu saat ini: Ibu Nifas"', false)
             ->assertSee('Waktu ke Posyandu Setelah Bersalin')->assertSee('&lt; 7 hari', false)->assertSee('Bulan 24')
-            ->assertSee('Berat badan (kg)')->assertSee('Tekanan darah (mmHg)')
-            ->assertDontSee('LILA (cm)')->assertDontSee('Tinggi Badan (cm)')
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'Tekanan darah (mmHg)'])
+            ->assertSee('Tinggi badan dan lingkar perut hanya dicatat.')
+            ->assertDontSee('LILA (cm)')
             ->assertSee('Ploting IMT sesuai kurva Buku KIA')
             ->assertSee('Demam ≥ 2 minggu')
             ->assertSee('Jika nakes memberikan vitamin A, tuliskan jumlah kapsul')->assertSee('name="bagian[pelayanan][jumlah_kapsul_vit_a]"', false)
@@ -116,12 +117,20 @@ class FormIbuNifasTest extends TestCase
         $this->assertTrue($bumil->status_menyusui);
         $this->assertFalse($bumil->status_kb_pascasalin);
         $this->assertSame('ibu_nifas', Pemeriksaan::sole()->getRawOriginal('kategori_usia_saat_periksa'));
+
+        // TB & lingkar perut hanya dicatat: tanpa IMT & status lingkar perut.
+        $ukur = \App\Models\PengukuranDasar::sole();
+        $this->assertEquals(152, (float) $ukur->tinggi_badan);
+        $this->assertEquals(85, (float) $ukur->lingkar_perut);
+        $this->assertNull($ukur->status_imt);
+        $this->assertNull($ukur->status_lingkar_perut);
     }
 
-    public function test_submit_butuh_waktu_bb_dan_td(): void
+    public function test_submit_butuh_waktu_bb_tb_lingkar_perut_dan_td(): void
     {
-        $this->kirim($this->ibu(), ['pengukuran' => ['berat_badan' => null, 'td_sistolik' => '115', 'td_diastolik' => '75']], 'submit')
-            ->assertSessionHasErrors(['submit', 'bagian.waktu.usia_kehamilan_minggu', 'bagian.pengukuran.berat_badan']);
+        $this->kirim($this->ibu(), ['pengukuran' => ['berat_badan' => null, 'tinggi_badan' => null, 'lingkar_perut' => null, 'td_sistolik' => '115', 'td_diastolik' => '75']], 'submit')
+            ->assertSessionHasErrors(['submit', 'bagian.waktu.usia_kehamilan_minggu', 'bagian.pengukuran.berat_badan',
+                'bagian.pengukuran.tinggi_badan', 'bagian.pengukuran.lingkar_perut']);
     }
 
     public function test_validasi_waktu_dan_kapsul(): void
