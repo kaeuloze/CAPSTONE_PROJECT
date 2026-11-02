@@ -10,7 +10,7 @@ use Carbon\CarbonInterface;
  * Kategori usia warga (WARGA.kategori_usia), ditentukan otomatis dari tanggal lahir.
  *
  * Batas usia diatur di config/posyandu.php ('kategori_usia'):
- * Balita < 5 tahun, Remaja 5–17, Dewasa 18–59, Lansia >= 60.
+ * Balita < 6 tahun, Remaja 6–17, Dewasa 18–59, Lansia >= 60.
  */
 enum KategoriUsia: string
 {

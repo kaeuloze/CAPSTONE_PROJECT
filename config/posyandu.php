@@ -29,10 +29,12 @@ return [
         'path' => trim((string) env('LOGIN_PATH', 'login'), '/') ?: 'login',
     ],
 
-    // Batas kategori usia (tahun, dihitung dari tanggal lahir). Disetujui 10 Okt 2026:
-    // Balita < 5, Remaja 5–17, Dewasa 18–59, Lansia >= 60.
+    // Batas kategori usia (tahun, dihitung dari tanggal lahir).
+    // Diperbarui setelah pengecekan bersama kader (31 Okt 2026): Balita < 6 (6 tahun kurang 1 hari),
+    // Anak Usia Sekolah & Remaja 6–17 (18 tahun kurang 1 hari), Dewasa 18–59, Lansia >= 60.
+    // Usia dihitung dalam tahun penuh, jadi "kurang 1 hari" sudah otomatis (5 th 364 hari = 5 tahun).
     'kategori_usia' => [
-        'remaja_mulai' => 5,
+        'remaja_mulai' => 6,
         'dewasa_mulai' => 18,
         'lansia_mulai' => 60,
     ],

@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 /**
  * Mutasi usia otomatis (SKF-05): memperbarui kolom warga.kategori_usia untuk warga
- * yang melewati batas usia (mis. Balita -> Remaja saat berusia 5 tahun).
+ * yang melewati batas usia (mis. Balita -> Remaja saat berusia 6 tahun).
  * Dijalankan otomatis setiap hari (routes/console.php) dan bisa dijalankan manual.
  */
 class PerbaruiKategoriUsiaWarga extends Command
