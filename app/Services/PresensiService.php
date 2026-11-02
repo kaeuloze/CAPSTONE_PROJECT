@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Enums\KategoriUsia;
+use App\Enums\StatusKondisi;
 use App\Models\Kegiatan;
 use App\Models\Warga;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 /**
  * Pengambilan data halaman Presensi (wireframe 2.42): daftar warga beserta status kehadirannya,
@@ -91,6 +93,36 @@ class PresensiService
         }
 
         return $hasil;
+    }
+
+    /**
+     * Daftar hadir untuk diekspor (Excel / halaman cetak) atas permintaan kader (31 Okt 2026):
+     * hanya warga berstatus Hadir, urut abjad nama. Kategori = status ibu (Ibu Hamil / Nifas / Menyusui)
+     * atau kategori usia pada tanggal kegiatan. Jumlah baris dibatasi jumlah warga yang hadir
+     * pada satu kegiatan, sehingga tidak dipaginasi.
+     *
+     * @return Collection<int, array{nama: string, nik: string, kategori: string, jam: string}>
+     */
+    public function daftarHadir(Kegiatan $kegiatan): Collection
+    {
+        return Warga::query()
+            ->join('kehadiran as k', function (JoinClause $join) use ($kegiatan) {
+                $join->on('k.nik', '=', 'warga.nik')
+                    ->where('k.id_kegiatan', '=', $kegiatan->id_kegiatan)
+                    ->where('k.status_kehadiran', '=', true);
+            })
+            ->orderBy('warga.nama_warga')
+            ->orderBy('warga.nik')
+            ->get(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir', 'warga.status_kondisi', 'k.waktu_kehadiran'])
+            ->map(fn (Warga $w) => [
+                'nama' => $w->nama_warga,
+                'nik' => $w->nik,
+                'kategori' => $w->status_kondisi !== StatusKondisi::Normal
+                    ? $w->status_kondisi->label()
+                    : KategoriUsia::dariTanggalLahir($w->tanggal_lahir, $kegiatan->tanggal_kegiatan)->label(),
+                'jam' => $w->waktu_kehadiran ? substr((string) $w->waktu_kehadiran, 11, 5) : '-',
+            ])
+            ->values();
     }
 
     private function dasar(Kegiatan $kegiatan, ?string $cari, ?KategoriUsia $kategori): Builder

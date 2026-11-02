@@ -6,12 +6,14 @@ use App\Enums\KategoriUsia;
 use App\Exceptions\AksiDitolakException;
 use App\Models\Kegiatan;
 use App\Models\Warga;
+use App\Services\EksporDaftarHadirExcel;
 use App\Services\KegiatanService;
 use App\Services\PresensiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Halaman Presensi / Detail Kegiatan dan Presensi (wireframe 2.42; Activity Diagram 2.7).
@@ -22,6 +24,7 @@ class PresensiController extends Controller
     public function __construct(
         private readonly KegiatanService $kegiatanService,
         private readonly PresensiService $presensiService,
+        private readonly EksporDaftarHadirExcel $ekspor,
     ) {
     }
 
@@ -76,6 +79,32 @@ class PresensiController extends Controller
         return $request->expectsJson()
             ? response()->json(['pesan' => $pesan, 'nik' => $warga->nik, 'hadir' => $hadir])
             : back()->with('sukses', $pesan);
+    }
+
+    /** Ekspor daftar hadir (hanya warga Hadir) ke Excel — permintaan kader 31 Okt 2026. */
+    public function excel(Kegiatan $kegiatan): StreamedResponse
+    {
+        $buku = $this->ekspor->buat($kegiatan, $this->presensiService->daftarHadir($kegiatan));
+
+        return response()->streamDownload(
+            fn () => $this->ekspor->tulis($buku),
+            EksporDaftarHadirExcel::namaFile($kegiatan),
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Cache-Control' => 'no-store'],
+        );
+    }
+
+    /** Halaman siap cetak daftar hadir (isi sama dengan Excel). */
+    public function cetak(Kegiatan $kegiatan): View
+    {
+        $daftar = $this->presensiService->daftarHadir($kegiatan);
+
+        return view('presensi.cetak', [
+            'kegiatan' => $kegiatan,
+            'daftar' => $daftar,
+            'judul' => EksporDaftarHadirExcel::judul(),
+            'kop' => EksporDaftarHadirExcel::kop($kegiatan, $daftar->count()),
+            'kolom' => EksporDaftarHadirExcel::KOLOM,
+        ]);
     }
 
     /** @return array{0: ?string, 1: ?KategoriUsia} */
