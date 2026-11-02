@@ -64,6 +64,40 @@ class BagianUmum
         );
     }
 
+    /**
+     * Tab Tahunan: "Pemeriksaan Kadar HB" khusus perempuan (remaja putri; lansia perempuan sejak pengecekan bersama
+     * kader 31 Okt 2026). Normal bila ≥ 12 g/dL (config ambang.hb_normal_mulai).
+     */
+    public static function hb(): Bagian
+    {
+        return new Bagian(
+            kunci: 'hb',
+            judul: 'Pemeriksaan Kadar HB',
+            relasi: 'pengukuranDasar',
+            aturan: ['kadar_hb' => self::angka(1, 25)],
+            jenis: JenisPemeriksaan::Tahunan,
+            berlaku: fn (Warga $w) => ! $w->jenis_kelamin, // hanya perempuan
+        );
+    }
+
+    /**
+     * "Pemeriksaan Gula Darah Sewaktu" untuk remaja berusia ≥ 15 tahun (pengecekan bersama kader 31 Okt 2026):
+     * kartu sendiri di tab Rutin karena remaja di bawah 15 tahun tidak diperiksa; bila berlaku, wajib diisi.
+     * Disimpan di pengukuran_dasar.kadar_gula_darah (dewasa & lansia mengisinya di kartu Penimbangan).
+     */
+    public static function gds(): Bagian
+    {
+        return new Bagian(
+            kunci: 'gds',
+            judul: 'Pemeriksaan Gula Darah Sewaktu',
+            relasi: 'pengukuranDasar',
+            aturan: ['kadar_gula_darah' => self::angka(20, 600)],
+            wajib: ['kadar_gula_darah'],
+            jenis: JenisPemeriksaan::Rutin,
+            berlaku: fn (Warga $w, CarbonInterface $tanggal) => Kalkulator::usia($w, $tanggal) >= (int) config('posyandu.ambang.gula_darah_usia_minimal'),
+        );
+    }
+
     /** Aturan 2 kotak tekanan darah (harus berpasangan). */
     public static function aturanTekananDarah(string $kunci = 'pengukuran'): array
     {

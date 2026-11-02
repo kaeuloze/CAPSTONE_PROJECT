@@ -65,6 +65,8 @@
             </div>
         @else
             @foreach ($tab['bagian'] as $kunciBagian)
+                {{-- Bagian khusus warga tertentu (mis. GDS remaja ≥ 15 tahun, HB perempuan) tidak ditampilkan bila tidak berlaku. --}}
+                @continue(! $definisi->bagian()[$kunciBagian]->berlakuUntuk($warga, $kegiatan->tanggal_kegiatan))
                 @include('pemeriksaan.partials.bagian', ['kunciBagian' => $kunciBagian])
             @endforeach
         @endif

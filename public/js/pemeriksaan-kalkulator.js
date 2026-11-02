@@ -49,8 +49,10 @@
         }
 
         if (document.getElementById('hasil-gds')) {
+            // Dewasa & lansia: di kartu Penimbangan; remaja ≥ 15 tahun: kartu GDS sendiri.
             var gds = angka('isian-pengukuran-kadar_gula_darah');
-            tulis('hasil-gds', gds === null ? 'Belum diisi (diisi Nakes)'
+            if (gds === null) { gds = angka('isian-gds-kadar_gula_darah'); }
+            tulis('hasil-gds', gds === null ? 'Belum diisi'
                 : gds + ' mg/dl — ' + (gds >= batas.gula_darah_berisiko ? 'Berisiko' : 'Normal'));
         }
 

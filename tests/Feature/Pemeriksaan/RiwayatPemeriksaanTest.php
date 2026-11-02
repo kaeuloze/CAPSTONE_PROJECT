@@ -41,7 +41,7 @@ class RiwayatPemeriksaanTest extends TestCase
 
     private function remaja(string $nik = '3404000000000001', bool $lakiLaki = false, string $nama = 'Rina'): Warga
     {
-        $warga = $this->buatWarga($nik, ['nama_warga' => $nama, 'tanggal_lahir' => '2010-03-01', 'jenis_kelamin' => $lakiLaki]);
+        $warga = $this->buatWarga($nik, ['nama_warga' => $nama, 'tanggal_lahir' => '2012-03-01', 'jenis_kelamin' => $lakiLaki]);
         $this->kegiatan->kehadiran()->create(['nik' => $warga->nik, 'status_kehadiran' => true, 'waktu_kehadiran' => now()]);
 
         return $warga;

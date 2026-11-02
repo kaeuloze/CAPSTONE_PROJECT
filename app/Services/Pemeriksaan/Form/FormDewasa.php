@@ -66,7 +66,8 @@ class FormDewasa extends DefinisiForm
     {
         return [
             BagianUmum::penimbangan(
-                wajib: ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'lila', 'td_sistolik', 'td_diastolik'],
+                // Gula darah wajib sejak pengecekan bersama kader (31 Okt 2026).
+                wajib: ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'lila', 'td_sistolik', 'td_diastolik', 'kadar_gula_darah'],
                 tambahan: ['lila', 'kadar_gula_darah'],
             ),
             BagianUmum::tbc(),

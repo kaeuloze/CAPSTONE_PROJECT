@@ -42,7 +42,7 @@ class FormLansia extends DefinisiForm
         return [
             'rutin' => ['label' => 'Pemeriksaan Rutin Bulanan', 'bagian' => ['pengukuran', 'tbc']],
             'enam_bulan' => ['label' => 'Pemeriksaan 6 Bulan Sekali', 'bagian' => ['sensorik'], 'jenis' => JenisPemeriksaan::EnamBulanan, 'catatan' => $tidakWajib],
-            'tahunan' => ['label' => 'Pemeriksaan Tahunan', 'bagian' => ['puma', 'aks', 'skilas'], 'jenis' => JenisPemeriksaan::Tahunan, 'catatan' => $tidakWajib],
+            'tahunan' => ['label' => 'Pemeriksaan Tahunan', 'bagian' => ['puma', 'aks', 'skilas', 'hb'], 'jenis' => JenisPemeriksaan::Tahunan, 'catatan' => $tidakWajib],
         ];
     }
 
@@ -65,7 +65,8 @@ class FormLansia extends DefinisiForm
     {
         return [
             BagianUmum::penimbangan(
-                wajib: ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'lila', 'td_sistolik', 'td_diastolik'],
+                // Gula darah wajib sejak pengecekan bersama kader (31 Okt 2026).
+                wajib: ['berat_badan', 'tinggi_badan', 'lingkar_perut', 'lila', 'td_sistolik', 'td_diastolik', 'kadar_gula_darah'],
                 tambahan: ['lila', 'kadar_gula_darah'],
             ),
             BagianUmum::tbc(),
@@ -73,6 +74,7 @@ class FormLansia extends DefinisiForm
             BagianUmum::puma(),
             $this->aks(),
             $this->skilas(),
+            BagianUmum::hb(), // hanya lansia perempuan (pengecekan bersama kader 31 Okt 2026)
             BagianUmum::penyuluhan(),
         ];
     }

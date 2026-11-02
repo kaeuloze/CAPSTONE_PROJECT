@@ -116,7 +116,17 @@ class Kalkulator
         return (float) $lilaCm < (float) config('posyandu.ambang.lila_kek_di_bawah') ? \App\Enums\StatusLila::Kek : \App\Enums\StatusLila::Normal;
     }
 
-    /** GDS Berisiko bila ≥ 200 mg/dl (disetujui); dihitung dari angka, tanpa kolom status. */
+    /** Kadar HB (remaja putri & lansia perempuan): Normal bila ≥ 12 g/dL, Berisiko bila kurang; tanpa kolom status. */
+    public static function statusHb(mixed $kadarGdl): ?StatusRisiko
+    {
+        if (! is_numeric($kadarGdl)) {
+            return null;
+        }
+
+        return (float) $kadarGdl >= (float) config('posyandu.ambang.hb_normal_mulai') ? StatusRisiko::Normal : StatusRisiko::Berisiko;
+    }
+
+    /** GDS Berisiko bila ≥ 150 mg/dl (config ambang.gula_darah_berisiko); dihitung dari angka, tanpa kolom status. */
     public static function statusGulaDarah(mixed $kadarMgDl): ?StatusRisiko
     {
         if (! is_numeric($kadarMgDl)) {
