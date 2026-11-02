@@ -11,9 +11,11 @@ use App\Exceptions\DataSudahBerubahException;
 use App\Models\Kegiatan;
 use App\Models\Pemeriksaan;
 use App\Models\Warga;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +38,51 @@ class PemeriksaanService
     {
         [$sqlKategori, $ikatan] = $this->sqlKategori($kegiatan->tanggal_kegiatan);
 
+        return $this->queryHadirBukanBalita($kegiatan)
+            ->where(fn (Builder $q) => $q->whereNull('p.id_pemeriksaan')
+                ->orWhere('p.status_pemeriksaan', StatusPemeriksaan::Draft->value))
+            ->when($kategori, fn ($q) => $q->whereRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) = ?", [...$ikatan, $kategori->value]))
+            ->cari($cari)
+            ->select(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir'])
+            ->selectRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) as kategori_form", $ikatan)
+            ->selectRaw('p.status_pemeriksaan as status_pemeriksaan')
+            // Antrean: yang hadir paling awal di atas (pengecekan kader 31 Okt 2026).
+            ->orderBy('k.waktu_kehadiran')
+            ->orderBy('warga.nama_warga')
+            ->orderBy('warga.nik')
+            ->paginate(config('posyandu.presensi.per_halaman'))
+            ->withQueryString();
+    }
+
+    /**
+     * Warga (bukan balita) yang Hadir pada kegiatan sejak waktu tertentu, untuk notifikasi lonceng
+     * di Kelola Pemeriksaan. Memakai ">=" agar warga yang hadir pada detik yang sama tidak terlewat
+     * (penyaringan ganda dilakukan di layar berdasarkan NIK).
+     *
+     * @return Collection<int, Warga> berisi nik, nama_warga, waktu_kehadiran (teks "Y-m-d H:i:s")
+     */
+    public function hadirSejak(Kegiatan $kegiatan, string $sejak): Collection
+    {
+        return $this->queryHadirBukanBalita($kegiatan)
+            ->where('k.waktu_kehadiran', '>=', $sejak)
+            ->orderBy('k.waktu_kehadiran')
+            ->limit(50)
+            ->get(['warga.nik', 'warga.nama_warga', 'k.waktu_kehadiran']);
+    }
+
+    /** Waktu hadir paling akhir warga (bukan balita) pada kegiatan; titik awal notifikasi lonceng. */
+    public function hadirTerakhir(Kegiatan $kegiatan): ?string
+    {
+        $waktu = $this->queryHadirBukanBalita($kegiatan)->max('k.waktu_kehadiran');
+
+        return $waktu ? CarbonImmutable::parse($waktu)->format('Y-m-d H:i:s') : null;
+    }
+
+    /** Warga berstatus Hadir pada kegiatan (alias k = kehadiran, p = pemeriksaan), tanpa balita. */
+    private function queryHadirBukanBalita(Kegiatan $kegiatan): Builder
+    {
+        [$sqlKategori, $ikatan] = $this->sqlKategori($kegiatan->tanggal_kegiatan);
+
         return Warga::query()
             ->join('kehadiran as k', function (JoinClause $join) use ($kegiatan) {
                 $join->on('k.nik', '=', 'warga.nik')
@@ -45,18 +92,7 @@ class PemeriksaanService
             ->leftJoin('pemeriksaan as p', function (JoinClause $join) use ($kegiatan) {
                 $join->on('p.nik', '=', 'warga.nik')->where('p.id_kegiatan', '=', $kegiatan->id_kegiatan);
             })
-            ->where(fn (Builder $q) => $q->whereNull('p.id_pemeriksaan')
-                ->orWhere('p.status_pemeriksaan', StatusPemeriksaan::Draft->value))
-            ->whereRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) <> 'balita'", $ikatan)
-            ->when($kategori, fn ($q) => $q->whereRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) = ?", [...$ikatan, $kategori->value]))
-            ->cari($cari)
-            ->select(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir'])
-            ->selectRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) as kategori_form", $ikatan)
-            ->selectRaw('p.status_pemeriksaan as status_pemeriksaan')
-            ->orderBy('warga.nama_warga')
-            ->orderBy('warga.nik')
-            ->paginate(config('posyandu.presensi.per_halaman'))
-            ->withQueryString();
+            ->whereRaw("COALESCE(p.kategori_usia_saat_periksa, {$sqlKategori}) <> 'balita'", $ikatan);
     }
 
     /** Kategori form untuk warga pada tanggal kegiatan; null bila balita (tidak diperiksa di menu ini). */

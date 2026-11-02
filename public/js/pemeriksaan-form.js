@@ -12,7 +12,15 @@
     // ---- Tab ----
     var tombolTab = document.querySelectorAll('[data-tab]');
     var catatanAksi = document.getElementById('catatan-aksi');
-    function bukaTab(kunci) {
+    // Tab yang dibuka dicatat di alamat (#tab=...) agar setelah halaman di-refresh form tetap
+    // di tab yang sama (pengecekan kader 31 Okt 2026). Tidak memakai id elemen agar halaman tidak melompat.
+    function catatTab(kunci) {
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search + '#tab=' + kunci);
+        }
+    }
+    function bukaTab(kunci, catat) {
+        if (catat) { catatTab(kunci); }
         var catatan = null;
         tombolTab.forEach(function (t) {
             var aktif = t.getAttribute('data-tab') === kunci;
@@ -42,19 +50,28 @@
                 dialogPeringatan.showModal();
                 return;
             }
-            bukaTab(t.getAttribute('data-tab'));
+            bukaTab(t.getAttribute('data-tab'), true);
         });
     });
     if (dialogPeringatan) {
         document.getElementById('peringatan-lanjut').addEventListener('click', function () {
             tabMenunggu.dataset.sudahDiingatkan = '1';
             dialogPeringatan.close();
-            bukaTab(tabMenunggu.getAttribute('data-tab'));
+            bukaTab(tabMenunggu.getAttribute('data-tab'), true);
         });
         document.getElementById('peringatan-kembali').addEventListener('click', function () { dialogPeringatan.close(); });
     }
     var tabPertama = document.querySelector('[data-tab].aktif');
     if (tabPertama) { bukaTab(tabPertama.getAttribute('data-tab')); }
+    // Setelah refresh: buka lagi tab terakhir (peringatan interval tidak diulang karena sudah dijawab sebelumnya).
+    var tabTersimpan = /^#tab=([\w-]+)$/.exec(window.location.hash);
+    if (tabTersimpan) {
+        var tombolTersimpan = document.querySelector('[data-tab="' + tabTersimpan[1] + '"]');
+        if (tombolTersimpan && !tombolTersimpan.disabled) {
+            tombolTersimpan.dataset.sudahDiingatkan = '1';
+            bukaTab(tabTersimpan[1]);
+        }
+    }
     // Bila ada isian salah di tab lain, langsung buka tab tersebut.
     var salahPertama = form.querySelector('.salah');
     if (salahPertama) {
