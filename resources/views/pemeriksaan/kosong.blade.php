@@ -1,6 +1,9 @@
 <x-layouts.app title="Kelola Pemeriksaan" active="pemeriksaan">
 
-    <div class="mx-auto max-w-2xl py-8">
+    {{-- Dicek berkala: halaman dimuat ulang otomatis begitu ada kegiatan yang dimulai. --}}
+    <div class="mx-auto max-w-2xl py-8" id="menunggu-kegiatan"
+         data-url-status="{{ route('pemeriksaan.status') }}"
+         data-jeda="{{ max(2, (int) config('posyandu.presensi.polling_detik')) * 1000 }}">
 
         <div class="card p-10 text-center">
 
@@ -40,5 +43,7 @@
             </a>
         </div>
     </div>
+
+    <script src="{{ asset('js/pemeriksaan-daftar.js') }}" defer></script>
 
 </x-layouts.app>

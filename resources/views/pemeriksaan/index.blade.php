@@ -1,12 +1,13 @@
 @php
     $jeda = max(2, (int) config('posyandu.presensi.polling_detik'));
 
-    $warnaKategori = [
-        'remaja'    => 'sky',
-        'dewasa'    => 'mawar',
-        'lansia'    => 'violet',
-        'ibu_hamil' => 'rose',
-        'ibu_nifas' => 'rose',
+    // Warna badge kategori; dipakai juga oleh JS saat daftar diperbarui otomatis (data-kelas-kategori).
+    $kelasKategori = [
+        'remaja'    => 'bg-sky-100 text-sky-700 ring-1 ring-sky-200',
+        'dewasa'    => 'bg-mawar-100 text-mawar-700 ring-1 ring-mawar-200',
+        'lansia'    => 'bg-violet-100 text-violet-700 ring-1 ring-violet-200',
+        'ibu_hamil' => 'bg-mawar-100 text-mawar-700 ring-1 ring-mawar-200',
+        'ibu_nifas' => 'bg-mawar-100 text-mawar-700 ring-1 ring-mawar-200',
     ];
 @endphp
 
@@ -16,7 +17,9 @@
     <div id="antrean"
          data-url-status="{{ route('pemeriksaan.status') }}"
          data-id-kegiatan="{{ $kegiatan->id_kegiatan }}"
-         data-jeda="{{ $jeda * 1000 }}">
+         data-jeda="{{ $jeda * 1000 }}"
+         data-hadir-terakhir="{{ $hadirTerakhir }}"
+         data-kelas-kategori="{{ json_encode($kelasKategori) }}">
 
         {{-- ═══════════ HEADER ═══════════ --}}
         <div class="mb-5 flex flex-wrap items-start justify-between gap-4">
@@ -33,6 +36,26 @@
                 <x-ui.badge warna="slate">
                     {{ \Carbon\Carbon::parse($kegiatan->tanggal_kegiatan)->translatedFormat('d M Y') }}
                 </x-ui.badge>
+
+                {{-- Lonceng notifikasi warga baru Hadir (pengecekan kader 31 Okt 2026) --}}
+                <div class="relative" id="lonceng">
+                    <button type="button" id="tombol-lonceng"
+                            class="relative grid h-9 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-mawar-700"
+                            aria-label="Notifikasi warga baru hadir" aria-expanded="false" aria-controls="daftar-lonceng">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                        <span id="angka-lonceng" hidden
+                              class="absolute -right-1 -top-1 min-w-[1.25rem] rounded-full bg-rose-600 px-1 text-center text-[11px] font-bold leading-5 text-white">0</span>
+                    </button>
+                    <div id="daftar-lonceng" hidden
+                         class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+                        <p class="text-xs font-semibold text-slate-700">Warga baru hadir</p>
+                        <ul id="isi-lonceng" class="mt-2 max-h-64 space-y-1 overflow-y-auto text-[13px] text-slate-600">
+                            <li class="text-slate-400" data-kosong>Belum ada warga baru sejak halaman dibuka.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -113,10 +136,8 @@
                                 <td>{{ $warga->nama_warga }}</td>
                                 <td>{{ $warga->nik }}</td>
                                 <td>
-                                    <span class="badge {{ $warnaKategori[$kategori] === 'sky' ? 'bg-sky-100 text-sky-700 ring-1 ring-sky-200'
-        : ($warnaKategori[$kategori] === 'violet' ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-                          : 'bg-mawar-100 text-mawar-700 ring-1 ring-mawar-200') }}">
- {{ \App\Enums\KategoriPemeriksaan::from($kategori)->label() }}
+                                    <span class="badge {{ $kelasKategori[$kategori] }}">
+                                        {{ \App\Enums\KategoriPemeriksaan::from($kategori)->label() }}
                                     </span>
                                 </td>
                                 <td>
@@ -158,6 +179,21 @@
             Diperbarui otomatis setiap {{ $jeda }} detik
         </p>
     </div>
+
+    {{-- Pesan singkat warga baru hadir (diisi JS dari templat; kelas Tailwind ditulis di sini agar ikut di-build) --}}
+    <div id="pesan-lonceng" class="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2" aria-live="polite"></div>
+    <template id="templat-pesan-lonceng">
+        <div class="pointer-events-auto flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-[13px] text-slate-700 shadow-lg">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-500"></span>
+            <span><strong data-nama class="font-semibold text-slate-900"></strong> baru hadir <span data-jam class="text-slate-400"></span></span>
+        </div>
+    </template>
+    <template id="templat-isi-lonceng">
+        <li class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50">
+            <span data-nama class="truncate font-medium text-slate-800"></span>
+            <span data-jam class="shrink-0 text-[12px] text-slate-400"></span>
+        </li>
+    </template>
 
 
     {{-- ═══════════ JS LIVE-UPDATE ═══════════ --}}

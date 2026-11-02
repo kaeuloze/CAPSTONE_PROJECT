@@ -45,6 +45,7 @@ class PemeriksaanController extends Controller
             'daftar' => $this->layanan->antrean($kegiatan, $cari, $kategori),
             'cari' => $cari ?? '',
             'kategoriDipilih' => $kategori,
+            'hadirTerakhir' => $this->layanan->hadirTerakhir($kegiatan),
         ]);
     }
 
@@ -68,10 +69,27 @@ class PemeriksaanController extends Controller
                 'nik' => $w->nik,
                 'nama' => $w->nama_warga,
                 'kategori' => KategoriPemeriksaan::from($w->kategori_form)->label(),
+                'kode_kategori' => $w->kategori_form,
                 'draft' => $w->status_pemeriksaan === StatusPemeriksaan::Draft->value,
                 'url' => route('pemeriksaan.form', $w->nik),
             ]),
+            // Notifikasi lonceng: warga yang Hadir sejak waktu hadir terakhir yang sudah diketahui layar.
+            'hadir_terakhir' => $this->layanan->hadirTerakhir($kegiatan),
+            'hadir_baru' => $this->sejak($request) === null ? [] : $this->layanan->hadirSejak($kegiatan, $this->sejak($request))
+                ->map(fn ($w) => [
+                    'nik' => $w->nik,
+                    'nama' => $w->nama_warga,
+                    'jam' => substr((string) $w->waktu_kehadiran, 11, 5),
+                ])->values(),
         ])->header('Cache-Control', 'no-store');
+    }
+
+    /** Parameter ?sejak= (format "Y-m-d H:i:s"); selain format itu diabaikan. */
+    private function sejak(Request $request): ?string
+    {
+        $sejak = $request->query('sejak');
+
+        return is_string($sejak) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $sejak) ? $sejak : null;
     }
 
     /** Formulir pemeriksaan sesuai kategori warga ("Mulai Pemeriksaan" / "Pemeriksaan Belum Selesai"). */

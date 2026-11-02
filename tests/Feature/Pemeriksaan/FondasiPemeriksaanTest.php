@@ -142,6 +142,53 @@ class FondasiPemeriksaanTest extends TestCase
             ->assertJson(['total' => 1, 'baris' => [['nik' => $warga->nik, 'nama' => 'Ani Dewasa', 'kategori' => 'Dewasa', 'draft' => false]]]);
     }
 
+    public function test_antrean_urut_waktu_hadir_paling_awal_di_atas(): void
+    {
+        $this->hadirkan($this->buatWarga('3404000000000001', ['nama_warga' => 'Zaenal Datang Duluan']));
+        $this->travel(2)->minutes();
+        $this->hadirkan($this->buatWarga('3404000000000002', ['nama_warga' => 'Ani Datang Belakangan']));
+
+        $this->actingAs($this->kader)->get(route('pemeriksaan.index'))
+            ->assertSeeInOrder(['Zaenal Datang Duluan', 'Ani Datang Belakangan']);
+        $baris = $this->actingAs($this->kader)->getJson(route('pemeriksaan.status'))->json('baris');
+        $this->assertSame(['Zaenal Datang Duluan', 'Ani Datang Belakangan'], array_column($baris, 'nama'));
+        $this->assertSame('dewasa', $baris[0]['kode_kategori']);
+    }
+
+    public function test_lonceng_memberi_tahu_warga_yang_baru_hadir(): void
+    {
+        $this->hadirkan($this->buatWarga('3404000000000001', ['nama_warga' => 'Ani Dewasa']));
+        $this->hadirkan($this->buatWarga('3404000000000009', ['nama_warga' => 'Caca Balita', 'tanggal_lahir' => '2024-01-01']));
+
+        // Halaman dibuka: titik awal = waktu hadir terakhir (balita tidak dihitung).
+        $this->actingAs($this->kader)->get(route('pemeriksaan.index'))
+            ->assertSee('data-hadir-terakhir="2026-10-16 08:00:00"', false)
+            ->assertSee('Notifikasi warga baru hadir');
+
+        $this->travel(3)->minutes();
+        $this->hadirkan($this->buatWarga('3404000000000002', ['nama_warga' => 'Budi Baru', 'tanggal_lahir' => '2010-05-01']));
+        $this->hadirkan($this->buatWarga('3404000000000008', ['nama_warga' => 'Dedi Balita', 'tanggal_lahir' => '2025-01-01']));
+
+        $this->actingAs($this->kader)->getJson(route('pemeriksaan.status', ['sejak' => '2026-10-16 08:00:00']))
+            ->assertJsonPath('hadir_terakhir', '2026-10-16 08:03:00')
+            ->assertJsonPath('hadir_baru', [
+                ['nik' => '3404000000000001', 'nama' => 'Ani Dewasa', 'jam' => '08:00'], // detik yang sama → disaring di layar
+                ['nik' => '3404000000000002', 'nama' => 'Budi Baru', 'jam' => '08:03'],
+            ]);
+
+        // Tanpa ?sejak / format salah → tidak ada daftar warga baru.
+        $this->actingAs($this->kader)->getJson(route('pemeriksaan.status'))->assertJsonPath('hadir_baru', []);
+        $this->actingAs($this->kader)->getJson(route('pemeriksaan.status', ['sejak' => "' OR 1=1"]))->assertJsonPath('hadir_baru', []);
+    }
+
+    public function test_halaman_tanpa_kegiatan_menunggu_kegiatan_dimulai(): void
+    {
+        $this->kegiatan->update(['status_kegiatan' => false]);
+
+        $this->actingAs($this->kader)->get(route('pemeriksaan.index'))
+            ->assertSee('id="menunggu-kegiatan"', false)->assertSee('js/pemeriksaan-daftar.js');
+    }
+
     public function test_polling_memberi_tahu_bila_tidak_ada_kegiatan_aktif(): void
     {
         $this->kegiatan->update(['status_kegiatan' => false]);
