@@ -10,6 +10,7 @@ class VaksinSeeder extends Seeder
     /**
      * Master vaksin imunisasi dasar, dicatat per dosis
      * (sesuai wireframe Gambar 2.60 "Imunisasi Dasar (per dosis)" & Gambar 2.61 Master Vaksin).
+     * Pengecekan kader 31 Okt 2026: Polio cukup 1–3 (Polio 4 dihapus), tambah JE usia 10 bulan.
      */
     public function run(): void
     {
@@ -19,12 +20,12 @@ class VaksinSeeder extends Seeder
             'Polio 1' => 'Polio dosis ke-1',
             'Polio 2' => 'Polio dosis ke-2',
             'Polio 3' => 'Polio dosis ke-3',
-            'Polio 4' => 'Polio dosis ke-4',
             'DPT-HB-Hib 1' => 'Difteri, Pertusis, Tetanus, Hep B, Hib dosis ke-1',
             'DPT-HB-Hib 2' => 'Difteri, Pertusis, Tetanus, Hep B, Hib dosis ke-2',
             'DPT-HB-Hib 3' => 'Difteri, Pertusis, Tetanus, Hep B, Hib dosis ke-3',
             'Campak / MR' => 'Campak & Rubella',
             'IPV' => 'Polio suntik (Inactivated)',
+            'JE (Japanese Encephalitis)' => 'Japanese Encephalitis, diberikan usia 10 bulan',
         ];
 
         foreach ($daftar as $nama => $deskripsi) {
