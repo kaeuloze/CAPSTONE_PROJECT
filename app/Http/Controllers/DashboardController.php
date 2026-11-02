@@ -37,7 +37,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    /** Polling realtime tab Bulan Ini (keputusan 23): hanya angka grafik. */
+    /** Polling realtime tab Bulan Ini (keputusan 23): angka grafik & kotak ringkasan. */
     public function data(Request $request): JsonResponse
     {
         [, $periode, $kategori] = $this->filter($request);
@@ -47,6 +47,7 @@ class DashboardController extends Controller
             'periode' => $periode->kode(),
             'ada_kegiatan' => $data['kegiatan']->isNotEmpty(),
             'grafik' => $this->layanan->angka($data),
+            'ringkasan' => $data['ringkasan'],
         ])->header('Cache-Control', 'no-store');
     }
 

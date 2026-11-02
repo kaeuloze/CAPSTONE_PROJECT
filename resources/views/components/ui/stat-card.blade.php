@@ -1,4 +1,5 @@
 @props([
+    'kunci'      => null,      // bila diisi: angka diperbarui JS lewat [data-ringkasan="kunci"]
     'label'      => '',
     'nilai'      => 0,
     'suffix'     => '',
@@ -37,7 +38,8 @@
 
     {{-- Angka --}}
     <div class="mt-3 flex items-baseline gap-1.5">
-        <span class="text-4xl font-extrabold tabular-nums leading-none tracking-tight {{ $w['text'] }}">
+        <span class="text-4xl font-extrabold tabular-nums leading-none tracking-tight {{ $w['text'] }}"
+              @if ($kunci) data-ringkasan="{{ $kunci }}" @endif>
             {{ $nilai }}
         </span>
         @if($suffix)
