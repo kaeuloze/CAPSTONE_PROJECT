@@ -41,7 +41,7 @@
                 </p>
             </div>
 
-            {{-- Ekspor daftar hadir: hanya warga Hadir (permintaan kader 31 Okt 2026) --}}
+            {{-- Ekspor daftar hadir: warga Hadir & Tidak Hadir + total (permintaan kader 31 Okt, koreksi tim 4 Nov 2026) --}}
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('presensi.excel', $kegiatan) }}" class="btn btn-secondary py-2 text-[13px]">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
