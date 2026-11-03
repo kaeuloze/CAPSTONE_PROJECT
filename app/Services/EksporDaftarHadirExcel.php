@@ -14,12 +14,12 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * Daftar hadir satu kegiatan dalam Excel (.xlsx) agar kader tidak lagi membuat absen manual
- * (permintaan kader, 31 Okt 2026). Kop sederhana; kolom No, Nama, NIK, Kategori, Jam Hadir,
- * Tanda Tangan (kosong, diisi di kertas).
+ * (permintaan kader, 31 Okt 2026; koreksi tim 4 Nov 2026): semua warga Hadir & Tidak Hadir,
+ * kolom No, Nama, NIK, Kategori, Hadir / Tidak Hadir, total di bawah tabel.
  */
 class EksporDaftarHadirExcel
 {
-    public const KOLOM = ['No', 'Nama', 'NIK', 'Kategori', 'Jam Hadir', 'Tanda Tangan'];
+    public const KOLOM = ['No', 'Nama', 'NIK', 'Kategori', 'Hadir / Tidak Hadir'];
 
     public static function judul(): string
     {
@@ -36,17 +36,34 @@ class EksporDaftarHadirExcel
      *
      * @return array<string, string>
      */
-    public static function kop(Kegiatan $kegiatan, int $jumlahHadir): array
+    public static function kop(Kegiatan $kegiatan): array
     {
         return [
             'Kegiatan' => $kegiatan->nama_kegiatan,
             'Tanggal' => $kegiatan->tanggalLengkap(),
             'Wilayah' => (string) config('posyandu.profil.wilayah') ?: '-',
-            'Jumlah hadir' => $jumlahHadir.' warga',
         ];
     }
 
-    /** @param Collection<int, array{nama: string, nik: string, kategori: string, jam: string}> $daftar */
+    public static function statusKehadiran(bool $hadir): string
+    {
+        return $hadir ? 'Hadir' : 'Tidak Hadir';
+    }
+
+    /**
+     * Total di bawah tabel (label => jumlah), dipakai juga oleh halaman cetak.
+     *
+     * @param  Collection<int, array{hadir: bool}>  $daftar
+     * @return array<string, int>
+     */
+    public static function total(Collection $daftar): array
+    {
+        $hadir = $daftar->where('hadir', true)->count();
+
+        return ['Hadir' => $hadir, 'Tidak Hadir' => $daftar->count() - $hadir, 'Total warga' => $daftar->count()];
+    }
+
+    /** @param Collection<int, array{nama: string, nik: string, kategori: string, hadir: bool}> $daftar */
     public function buat(Kegiatan $kegiatan, Collection $daftar): Spreadsheet
     {
         $buku = new Spreadsheet;
@@ -55,12 +72,12 @@ class EksporDaftarHadirExcel
         $lembar->setTitle('Daftar Hadir');
 
         $lembar->setCellValue('A1', self::judul());
-        $lembar->mergeCells('A1:F1');
+        $lembar->mergeCells('A1:E1');
         $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(13);
         $lembar->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         $baris = 2;
-        foreach (self::kop($kegiatan, $daftar->count()) as $label => $isi) {
+        foreach (self::kop($kegiatan) as $label => $isi) {
             $baris++;
             $lembar->setCellValue("A{$baris}", $label);
             $lembar->mergeCells("A{$baris}:B{$baris}");
@@ -70,7 +87,7 @@ class EksporDaftarHadirExcel
 
         $kepala = $baris + 2;
         $lembar->fromArray(self::KOLOM, null, "A{$kepala}");
-        $lembar->getStyle("A{$kepala}:F{$kepala}")->applyFromArray([
+        $lembar->getStyle("A{$kepala}:E{$kepala}")->applyFromArray([
             'font' => ['bold' => true],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E5E7EB']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
@@ -83,24 +100,32 @@ class EksporDaftarHadirExcel
             $lembar->setCellValueExplicit("B{$baris}", $w['nama'], DataType::TYPE_STRING);
             $lembar->setCellValueExplicit("C{$baris}", $w['nik'], DataType::TYPE_STRING); // NIK tetap 16 digit, tidak jadi angka
             $lembar->setCellValueExplicit("D{$baris}", $w['kategori'], DataType::TYPE_STRING);
-            $lembar->setCellValueExplicit("E{$baris}", $w['jam'], DataType::TYPE_STRING);
-            $lembar->getRowDimension($baris)->setRowHeight(28); // ruang tanda tangan
+            $lembar->setCellValueExplicit("E{$baris}", self::statusKehadiran($w['hadir']), DataType::TYPE_STRING);
         }
         if ($daftar->isEmpty()) {
             $baris++;
-            $lembar->setCellValue("A{$baris}", 'Belum ada warga yang hadir.');
-            $lembar->mergeCells("A{$baris}:F{$baris}");
+            $lembar->setCellValue("A{$baris}", 'Belum ada warga yang tercatat.');
+            $lembar->mergeCells("A{$baris}:E{$baris}");
         }
 
-        $lembar->getStyle("A{$kepala}:F{$baris}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $lembar->getStyle('A'.($kepala + 1).":F{$baris}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $lembar->getStyle("A{$kepala}:E{$baris}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         foreach (['A', 'D', 'E'] as $kolom) {
             $lembar->getStyle($kolom.($kepala + 1).":{$kolom}{$baris}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         }
 
+        // Total di bawah tabel (permintaan tim): Hadir, Tidak Hadir, Total warga.
+        $baris++;
+        foreach (self::total($daftar) as $label => $jumlah) {
+            $baris++;
+            $lembar->setCellValue("D{$baris}", $label);
+            $lembar->setCellValue("E{$baris}", $jumlah);
+            $lembar->getStyle("D{$baris}:E{$baris}")->getFont()->setBold(true);
+            $lembar->getStyle("E{$baris}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+
         $lembar->setCellValue('A'.($baris + 2), 'Diunduh pada '.now()->translatedFormat('j F Y H:i').' WIB.');
 
-        foreach (['A' => 6, 'B' => 32, 'C' => 21, 'D' => 15, 'E' => 11, 'F' => 26] as $kolom => $lebar) {
+        foreach (['A' => 6, 'B' => 34, 'C' => 21, 'D' => 16, 'E' => 20] as $kolom => $lebar) {
             $lembar->getColumnDimension($kolom)->setWidth($lebar);
         }
         $lembar->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4)->setFitToWidth(1)->setFitToHeight(0);

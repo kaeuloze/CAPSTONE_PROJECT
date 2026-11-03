@@ -96,31 +96,29 @@ class PresensiService
     }
 
     /**
-     * Daftar hadir untuk diekspor (Excel / halaman cetak) atas permintaan kader (31 Okt 2026):
-     * hanya warga berstatus Hadir, urut abjad nama. Kategori = status ibu (Ibu Hamil / Nifas / Menyusui)
-     * atau kategori usia pada tanggal kegiatan. Jumlah baris dibatasi jumlah warga yang hadir
-     * pada satu kegiatan, sehingga tidak dipaginasi.
+     * Daftar hadir untuk diekspor (Excel / halaman cetak). Koreksi tim 4 Nov 2026: memuat warga Hadir
+     * dan Tidak Hadir (bukan hanya yang hadir), urut abjad nama; warga sama dengan halaman Presensi
+     * (berlangsung: semua warga; arsip: warga yang tercatat). Yang belum ditandai = Tidak Hadir.
+     * Kategori = status ibu (Ibu Hamil / Nifas / Menyusui) atau kategori usia pada tanggal kegiatan.
+     * Jumlah baris dibatasi jumlah warga posyandu, sehingga tidak dipaginasi.
      *
-     * @return Collection<int, array{nama: string, nik: string, kategori: string, jam: string}>
+     * @return Collection<int, array{nama: string, nik: string, kategori: string, hadir: bool}>
      */
     public function daftarHadir(Kegiatan $kegiatan): Collection
     {
-        return Warga::query()
-            ->join('kehadiran as k', function (JoinClause $join) use ($kegiatan) {
-                $join->on('k.nik', '=', 'warga.nik')
-                    ->where('k.id_kegiatan', '=', $kegiatan->id_kegiatan)
-                    ->where('k.status_kehadiran', '=', true);
-            })
+        return $this->dasar($kegiatan, null, null)
+            ->select(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir', 'warga.status_kondisi'])
+            ->selectRaw('COALESCE(k.status_kehadiran, 0) as hadir')
             ->orderBy('warga.nama_warga')
             ->orderBy('warga.nik')
-            ->get(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir', 'warga.status_kondisi', 'k.waktu_kehadiran'])
+            ->get()
             ->map(fn (Warga $w) => [
                 'nama' => $w->nama_warga,
                 'nik' => $w->nik,
                 'kategori' => $w->status_kondisi !== StatusKondisi::Normal
                     ? $w->status_kondisi->label()
                     : KategoriUsia::dariTanggalLahir($w->tanggal_lahir, $kegiatan->tanggal_kegiatan)->label(),
-                'jam' => $w->waktu_kehadiran ? substr((string) $w->waktu_kehadiran, 11, 5) : '-',
+                'hadir' => (bool) $w->hadir,
             ])
             ->values();
     }

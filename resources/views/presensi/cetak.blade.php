@@ -1,4 +1,5 @@
-{{-- Halaman siap cetak daftar hadir (permintaan kader 31 Okt 2026). Halaman mandiri tanpa menu,
+{{-- Halaman siap cetak daftar hadir (permintaan kader 31 Okt 2026; koreksi tim 4 Nov 2026: semua warga
+     Hadir & Tidak Hadir + total di bawah, tanpa jam hadir & tanda tangan). Halaman mandiri tanpa menu,
      gaya ditulis di sini agar hasil cetak rapi tanpa bergantung pada build Tailwind. --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -20,10 +21,10 @@
         .tabel { width: 100%; border-collapse: collapse; }
         .tabel th, .tabel td { border: 1px solid #334155; padding: 6px 8px; vertical-align: middle; }
         .tabel th { background: #e5e7eb; text-align: center; }
-        .tabel td { height: 34px; }
         .tengah { text-align: center; }
         .nik { font-family: "Courier New", monospace; white-space: nowrap; }
-        .ttd { width: 26%; }
+        .total { margin: 12px 0 0 auto; border-collapse: collapse; font-weight: 700; }
+        .total td { padding: 2px 0 2px 12px; }
         .kosong { text-align: center; color: #64748b; }
         .catatan { margin-top: 10px; color: #64748b; font-size: 11px; }
         @page { size: A4 portrait; margin: 12mm; }
@@ -58,7 +59,7 @@
             <thead>
                 <tr>
                     @foreach ($kolom as $judulKolom)
-                        <th @class(['ttd' => $loop->last])>{{ $judulKolom }}</th>
+                        <th>{{ $judulKolom }}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -69,13 +70,19 @@
                         <td>{{ $w['nama'] }}</td>
                         <td class="nik">{{ $w['nik'] }}</td>
                         <td class="tengah">{{ $w['kategori'] }}</td>
-                        <td class="tengah">{{ $w['jam'] }}</td>
-                        <td></td>
+                        <td class="tengah">{{ \App\Services\EksporDaftarHadirExcel::statusKehadiran($w['hadir']) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ count($kolom) }}" class="kosong">Belum ada warga yang hadir.</td></tr>
+                    <tr><td colspan="{{ count($kolom) }}" class="kosong">Belum ada warga yang tercatat.</td></tr>
                 @endforelse
             </tbody>
+        </table>
+
+        {{-- Total di bawah tabel (permintaan tim 4 Nov 2026) --}}
+        <table class="total">
+            @foreach ($total as $label => $jumlah)
+                <tr><td>{{ $label }}</td><td>: {{ $jumlah }} warga</td></tr>
+            @endforeach
         </table>
 
         <p class="catatan">Dicetak dari Sistem Informasi {{ config('posyandu.profil.nama') }} pada {{ now()->locale('id')->translatedFormat('j F Y H:i') }} WIB.</p>
