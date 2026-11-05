@@ -22,6 +22,6 @@
 @endphp
 
 <div class="w-full {{ $tinggi }} overflow-hidden rounded-full bg-slate-100">
-    <div class="h-full rounded-full bg-{{ $bar }} transition-all duration-500"
+    <div class="h-full rounded-full {{ $bar }} transition-all duration-500"
          style="width: {{ $persen }}%"></div>
 </div>
