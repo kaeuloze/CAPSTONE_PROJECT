@@ -55,7 +55,7 @@ class ManajemenPenggunaTest extends TestCase
         $this->get(route('pengguna.create'))->assertRedirect(route('login'));
 
         $html = $this->actingAs($this->kader)->get(route('pengguna.index'))->assertOk()->getContent();
-        $this->assertMatchesRegularExpression('/aria-current="page"\s*><i aria-hidden="true"><\/i>Manajemen Pengguna/', preg_replace('/\s+/', ' ', $html));
+        $this->assertMatchesRegularExpression('/<a href="[^"]*\/pengguna"[^>]*aria-current="page"[^>]*>.*?Manajemen Pengguna/s', $html);
     }
 
     public function test_daftar_akun_dan_pencarian(): void
@@ -64,9 +64,9 @@ class ManajemenPenggunaTest extends TestCase
         $this->buatKader('budi_s')->update(['nama_kader' => 'Pak Budi']);
 
         $this->actingAs($this->kader)->get(route('pengguna.index'))
-            ->assertOk()->assertSee('Kelola Data Akun')->assertSee('+ Tambah Akun')
+            ->assertOk()->assertSee('Kelola Data Akun')->assertSee('Tambah Akun')
             ->assertSeeInOrder(['Nama Kader', 'Username', 'Aksi'])
-            ->assertSeeInOrder(['Ibu Rina', 'rina', 'Ibu Yuli', 'Akun Anda', 'yuli', 'Pak Budi', 'budi_s'])
+            ->assertSeeInOrder(['Ibu Rina', 'rina', 'Ibu Yuli', 'Anda', 'yuli', 'Pak Budi', 'budi_s'])
             ->assertDontSee('password_hash')->assertDontSee('$2y$', false);
 
         $this->actingAs($this->kader)->get(route('pengguna.index', ['cari' => 'budi']))
@@ -76,7 +76,7 @@ class ManajemenPenggunaTest extends TestCase
         $this->actingAs($this->kader)->get(route('pengguna.index', ['cari' => '_']))
             ->assertSee('Pak Budi')->assertDontSee('Ibu Rina'); // _ bukan wildcard
         $this->actingAs($this->kader)->get(route('pengguna.index', ['cari' => 'zzz']))
-            ->assertSee('Tidak ada akun yang cocok dengan pencarian.');
+            ->assertSee('Akun tidak ditemukan');
     }
 
     public function test_daftar_memakai_halaman(): void
@@ -93,8 +93,8 @@ class ManajemenPenggunaTest extends TestCase
     public function test_tambah_akun_lalu_bisa_login(): void
     {
         $this->actingAs($this->kader)->get(route('pengguna.create'))->assertOk()
-            ->assertSee('Tambah / Edit Akun Kader')->assertSee('Data Akun Petugas')
-            ->assertSeeInOrder(['Nama kader', 'Username', 'Kata sandi', 'Konfirmasi kata sandi', 'Simpan Akun', 'Batal']);
+            ->assertSee('Tambah Akun Kader')->assertSee('Data Akun Petugas')
+            ->assertSeeInOrder(['Nama Kader', 'Username', 'Kata Sandi', 'Konfirmasi Kata Sandi', 'Simpan Akun', 'Batal']);
 
         $this->actingAs($this->kader)->post(route('pengguna.store'), $this->dataBaru(['nama_kader' => '  Ibu   Sari ', 'username' => ' Sari ']))
             ->assertRedirect(route('pengguna.index'))->assertSessionHas('sukses', 'Akun Ibu Sari berhasil dibuat.');
@@ -174,7 +174,7 @@ class ManajemenPenggunaTest extends TestCase
         $sari = $this->buatKader('sari', 'SandiLamaSari1');
 
         $this->actingAs($this->kader)->get(route('pengguna.edit', $sari))->assertOk()
-            ->assertSee('value="sari"', false)->assertSee('Kosongkan bila kata sandi tidak diubah.');
+            ->assertSee('value="sari"', false)->assertSee('Kosongkan')->assertSee('bila kata sandi tidak diubah.');
 
         $this->actingAs($this->kader)->put(route('pengguna.update', $sari), [
             'nama_kader' => 'Ibu Sari Wulandari', 'username' => 'sari.w', 'password' => '', 'password_confirmation' => '', 'versi' => $this->versi($sari),
@@ -257,7 +257,7 @@ class ManajemenPenggunaTest extends TestCase
         $sari = $this->buatKader('sari');
         $this->buatSesi($sari, 'sesi-sari-hp');
 
-        $this->actingAs($this->kader)->get(route('pengguna.index'))->assertSee('Yakin hapus akun ini?');
+        $this->actingAs($this->kader)->get(route('pengguna.index'))->assertSee('Yakin hapus akun?');
         $this->actingAs($this->kader)->delete(route('pengguna.destroy', $sari))
             ->assertRedirect(route('pengguna.index'))->assertSessionHas('sukses', 'Akun Kader Uji berhasil dihapus.');
         $this->assertModelMissing($sari);

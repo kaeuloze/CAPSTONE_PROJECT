@@ -5,6 +5,7 @@ namespace Tests\Feature\Pemeriksaan;
 use App\Enums\JenisPemeriksaan;
 use App\Enums\StatusAks;
 use App\Enums\StatusPpok;
+use App\Enums\StatusRisiko;
 use App\Models\Kader;
 use App\Models\Kegiatan;
 use App\Models\Pemeriksaan;
@@ -95,7 +96,7 @@ class FormLansiaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Lansia (&gt;= 60 Tahun)', false)->assertSee('Lansia · 67 th')
+            ->assertSee('Pemeriksaan — Lansia (&gt;= 60 Tahun)', false)->assertSee('Lansia &middot; 67 th', false)
             ->assertSeeInOrder(['Pemeriksaan Rutin Bulanan', 'Pemeriksaan 6 Bulan Sekali', 'Pemeriksaan Tahunan'])
             ->assertSee('LILA (cm)')->assertSee('Kadar gula darah sewaktu (mg/dl)')->assertSee('Gula darah (GDS)')
             ->assertSee('Tes Penglihatan (Hitung Jari)')
@@ -223,9 +224,9 @@ class FormLansiaTest extends TestCase
 
         $p = Pemeriksaan::sole();
         $this->assertSame('11.5', $p->pengukuranDasar->kadar_hb);
-        $this->assertContains(\App\Enums\JenisPemeriksaan::Tahunan, $p->jenis_pemeriksaan);
-        $this->assertSame(\App\Enums\StatusRisiko::Berisiko, Kalkulator::statusHb('11.9'));
-        $this->assertSame(\App\Enums\StatusRisiko::Normal, Kalkulator::statusHb('12'));
+        $this->assertContains(JenisPemeriksaan::Tahunan, $p->jenis_pemeriksaan);
+        $this->assertSame(StatusRisiko::Berisiko, Kalkulator::statusHb('11.9'));
+        $this->assertSame(StatusRisiko::Normal, Kalkulator::statusHb('12'));
         $this->actingAs($this->kader)->get(route('riwayat.warga', $warga->nik))->assertSee('LILA KEK')->assertSee('HB Rendah');
         $this->actingAs($this->kader)->get(route('riwayat.show', $p))->assertSee('22 cm — KEK')->assertSee('11,5 g/dL — Berisiko');
     }

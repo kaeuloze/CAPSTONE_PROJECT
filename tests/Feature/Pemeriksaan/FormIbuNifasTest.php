@@ -9,6 +9,7 @@ use App\Models\Kader;
 use App\Models\Kegiatan;
 use App\Models\Pemeriksaan;
 use App\Models\PemeriksaanBumil;
+use App\Models\PengukuranDasar;
 use App\Models\Warga;
 use App\Services\Pemeriksaan\Form\FormIbuNifas;
 use Carbon\CarbonImmutable;
@@ -75,10 +76,10 @@ class FormIbuNifasTest extends TestCase
         // Tab Ibu Nifas langsung terbuka (tab Ibu Hamil dikunci).
         $this->assertMatchesRegularExpression('/aria-selected="true"\s+class="aktif"\s+data-tab="nifas"/', $respon->getContent());
         $respon->assertOk()
-            ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Nifas · 30 th')
+            ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Nifas &middot; 30 th', false)
             ->assertSee('disabled title="Status ibu saat ini: Ibu Nifas"', false)
             ->assertSee('Waktu ke Posyandu Setelah Bersalin')->assertSee('&lt; 7 hari', false)->assertSee('Bulan 24')
-            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'Tekanan darah (mmHg)'])
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'Tekanan Darah (mmHg)'])
             ->assertSee('Tinggi badan dan lingkar perut hanya dicatat.')
             ->assertDontSee('LILA (cm)')
             ->assertSee('Ploting IMT sesuai kurva Buku KIA')
@@ -119,7 +120,7 @@ class FormIbuNifasTest extends TestCase
         $this->assertSame('ibu_nifas', Pemeriksaan::sole()->getRawOriginal('kategori_usia_saat_periksa'));
 
         // TB & lingkar perut hanya dicatat: tanpa IMT & status lingkar perut.
-        $ukur = \App\Models\PengukuranDasar::sole();
+        $ukur = PengukuranDasar::sole();
         $this->assertEquals(152, (float) $ukur->tinggi_badan);
         $this->assertEquals(85, (float) $ukur->lingkar_perut);
         $this->assertNull($ukur->status_imt);

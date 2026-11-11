@@ -32,13 +32,13 @@ class MasterVaksinTest extends TestCase
         Vaksin::create(['nama_vaksin' => 'Polio 1']);
 
         $this->actingAs($this->kader)->get(route('vaksin.index'))
-            ->assertOk()->assertSee('Master Vaksin')->assertSee('+ Tambah Vaksin')
+            ->assertOk()->assertSee('Master Vaksin')->assertSee('Tambah Vaksin')
             ->assertSeeInOrder(['BCG', 'Pencegahan TBC berat', 'Polio 1'])
             ->assertSee('Tambah / Edit Vaksin');
         $this->actingAs($this->kader)->get(route('vaksin.index', ['cari' => 'pol']))
             ->assertSee('Polio 1')->assertDontSee('Pencegahan TBC berat');
         $this->actingAs($this->kader)->get(route('vaksin.index', ['cari' => '%']))
-            ->assertSee('Tidak ada vaksin yang cocok dengan pencarian.');
+            ->assertSee('Vaksin tidak ditemukan');
     }
 
     public function test_tambah_vaksin_dengan_validasi(): void
@@ -103,6 +103,6 @@ class MasterVaksinTest extends TestCase
     {
         $this->get(route('vaksin.index'))->assertRedirect(route('login'));
         $html = $this->actingAs($this->kader)->get(route('vaksin.index'))->getContent();
-        $this->assertMatchesRegularExpression('/aria-current="page"\s*><i aria-hidden="true"><\/i>Master Vaksin/', preg_replace('/\s+/', ' ', $html));
+        $this->assertMatchesRegularExpression('/<a href="[^"]*\/vaksin"[^>]*aria-current="page"[^>]*>.*?Master Vaksin/s', $html);
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\JenisIbu;
 use App\Enums\JenisPemeriksaan;
 use App\Enums\StatusImt;
 use App\Enums\StatusLila;
+use App\Enums\StatusRisiko;
 use App\Enums\StatusTekananDarah;
 use App\Models\Kader;
 use App\Models\Kegiatan;
@@ -85,11 +86,11 @@ class FormIbuHamilTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Hamil · 28 th')
+            ->assertSee('Pemeriksaan — Ibu Hamil / Nifas')->assertSee('Ibu Hamil &middot; 28 th', false)
             ->assertSeeInOrder(['Ibu Hamil', 'Ibu Nifas'])
             ->assertSee('disabled title="Status ibu saat ini: Ibu Hamil"', false)
             ->assertSee('Pemeriksaan Sesuai Umur Kehamilan')->assertSee('&lt; 4 minggu', false)->assertSee('36 - 40 minggu')
-            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan darah (mmHg)'])
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan Darah (mmHg)'])
             ->assertSee('Tinggi badan dan lingkar perut hanya dicatat.')
             ->assertSee('Ploting IMT sesuai kurva Buku KIA')->assertSee('Risiko (IMT sebelum hamil &gt; 25 kg/m²)', false)
             ->assertSee('Demam ≥ 2 minggu') // 4 gejala TBC sesuai kertas
@@ -97,7 +98,8 @@ class FormIbuHamilTest extends TestCase
             ->assertSee('name="bagian[pelayanan][komposisi_mt_bumil_kek]"', false)
             ->assertSee('Mengikuti kelas ibu hamil')->assertSee('Rujukan ke Puskesmas')
             ->assertSee('Ploting LILA')
-            ->assertSee('Simpan dan Submit berlaku untuk tab sesuai status ibu saat ini');
+            ->assertSee('Simpan dan Submit berlaku untuk seluruh tab')
+            ->assertSee('(Ibu Hamil, Ibu Nifas)');
     }
 
     // ---------- Simpan & ploting otomatis ----------
@@ -118,7 +120,7 @@ class FormIbuHamilTest extends TestCase
 
         $ukur = PengukuranDasar::sole();
         $this->assertSame('140/80', $ukur->tekanan_darah);
-        $this->assertSame('22.0', $ukur->getRawOriginal('lila'));
+        $this->assertEquals(22.0, (float) $ukur->getRawOriginal('lila'));
         // TB & lingkar perut hanya dicatat: tanpa IMT & status lingkar perut.
         $this->assertEquals(155, (float) $ukur->tinggi_badan);
         $this->assertEquals(92, (float) $ukur->lingkar_perut);
@@ -145,7 +147,7 @@ class FormIbuHamilTest extends TestCase
         $this->assertFalse($bumil->status_rutin_mt_kek);
         $this->assertTrue($bumil->ikut_kelas_ibu_hamil);
         $this->assertSame(StatusLila::Normal, $bumil->status_ploting_lila);
-        $this->assertSame(\App\Enums\StatusRisiko::Berisiko, SkriningTbc::sole()->status_gejala_tbc);
+        $this->assertSame(StatusRisiko::Berisiko, SkriningTbc::sole()->status_gejala_tbc);
         $this->assertEquals([JenisPemeriksaan::Rutin], Pemeriksaan::sole()->jenis_pemeriksaan);
     }
 

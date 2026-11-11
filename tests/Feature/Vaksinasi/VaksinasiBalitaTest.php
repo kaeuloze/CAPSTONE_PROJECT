@@ -85,7 +85,7 @@ class VaksinasiBalitaTest extends TestCase
         $this->hadir($this->buatWarga('3404000000000003', ['nama_warga' => 'Remaja Hadir', 'tanggal_lahir' => '2015-01-01']));
 
         $this->actingAs($this->kader)->get(route('vaksinasi.index'))
-            ->assertOk()->assertSee('Kelola Vaksinasi Balita')->assertSee('Kegiatan aktif: Posyandu Oktober')
+            ->assertOk()->assertSee('Daftar Vaksinasi Balita')->assertSee('Posyandu Oktober')
             ->assertSee('Adik Bayi')->assertSee('Buka')
             ->assertDontSee('Balita Belum Hadir')->assertDontSee('Remaja Hadir');
 
@@ -99,7 +99,7 @@ class VaksinasiBalitaTest extends TestCase
     {
         $this->kegiatan->update(['status_kegiatan' => false]);
 
-        $this->actingAs($this->kader)->get(route('vaksinasi.index'))->assertSee('Belum ada kegiatan posyandu yang aktif');
+        $this->actingAs($this->kader)->get(route('vaksinasi.index'))->assertSee('Belum ada kegiatan Posyandu yang aktif');
         $this->actingAs($this->kader)->getJson(route('vaksinasi.status'))->assertJson(['aktif' => false]);
     }
 
@@ -126,7 +126,7 @@ class VaksinasiBalitaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('vaksinasi.form', $bayi->nik))
             ->assertOk()
-            ->assertSee('Usia 4 bulan')->assertSee('Imunisasi Dasar (per dosis)')
+            ->assertSeeText('Usia 4 bulan')->assertSee('Imunisasi Dasar (per dosis)')
             ->assertSeeInOrder(['Hepatitis B (HB-0)', 'Sudah', 'value="2026-06-01"', 'BCG', 'Belum'], false)
             ->assertSee('ASI Eksklusif')->assertSee('Bulan 0')->assertSee('Bulan 6')->assertSee('Tidak Recall');
     }
@@ -231,7 +231,7 @@ class VaksinasiBalitaTest extends TestCase
         $bayi = $this->bayi();
         $this->simpan($bayi, [$this->hb0->id_vaksin => ['sudah' => '1', 'tanggal' => '2026-06-01']], ['3' => 'ya'])->assertSessionHas('sukses');
 
-        $this->actingAs($this->kader)->get(route('riwayat.index'))->assertSee('16/10/2026');
+        $this->actingAs($this->kader)->get(route('riwayat.index'))->assertSeeText('16 Okt 2026');
         $this->actingAs($this->kader)->get(route('riwayat.warga', $bayi->nik))
             ->assertSee('Riwayat Vaksinasi &amp; ASI Eksklusif', false)
             ->assertSee('16 Oktober 2026')->assertSee('Posyandu Oktober')

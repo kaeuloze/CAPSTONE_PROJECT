@@ -32,30 +32,39 @@ class StrukturDatabaseTest extends TestCase
 
     public function test_aturan_hapus_relasi_sesuai_keputusan(): void
     {
-        $aturan = collect(DB::select(
-            'SELECT TABLE_NAME t, REFERENCED_TABLE_NAME r, DELETE_RULE d FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ?',
-            [DB::getDatabaseName()]
-        ));
+        $aturan = collect(self::TABEL_ERD)->flatMap(fn (string $tabel) => collect(Schema::getForeignKeys($tabel))
+            ->map(fn (array $kunci) => [
+                't' => $tabel,
+                'r' => $kunci['foreign_table'],
+                'd' => strtoupper($kunci['on_delete']),
+            ]));
 
         $this->assertCount(19, $aturan);
         foreach ($aturan as $a) {
-            $harapan = in_array($a->r, ['pemeriksaan', 'rekapitulasi']) ? 'CASCADE' : 'RESTRICT';
-            $this->assertSame($harapan, $a->d, "{$a->t} -> {$a->r}");
+            $harapan = in_array($a['r'], ['pemeriksaan', 'rekapitulasi']) ? 'CASCADE' : 'RESTRICT';
+            $this->assertSame($harapan, $a['d'], "{$a['t']} -> {$a['r']}");
         }
     }
 
     public function test_tipe_kolom_hasil_keputusan(): void
     {
-        $tipe = fn (string $tabel, string $kolom) => DB::selectOne(
-            'SELECT COLUMN_TYPE c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?',
-            [DB::getDatabaseName(), $tabel, $kolom]
-        )?->c;
+        $kolom = fn (string $tabel, string $nama) => collect(Schema::getColumns($tabel))->firstWhere('name', $nama);
+        $jenisPemeriksaan = $kolom('pemeriksaan', 'jenis_pemeriksaan');
 
-        $this->assertSame('varchar(16)', $tipe('pemeriksaan', 'nik'));
-        $this->assertSame("set('rutin','enam_bulanan','tahunan')", $tipe('pemeriksaan', 'jenis_pemeriksaan'));
-        $this->assertSame('datetime', $tipe('kehadiran', 'waktu_kehadiran'));
-        $this->assertNull($tipe('vaksinasi', 'jenis_vaksinasi'));
-        $this->assertNotNull($tipe('skrining_puma', 'gejala_dahak'));
+        $this->assertNotNull($kolom('pemeriksaan', 'nik'));
+        $this->assertNotNull($jenisPemeriksaan);
+        $this->assertSame('datetime', $kolom('kehadiran', 'waktu_kehadiran')['type_name']);
+        $this->assertNull($kolom('vaksinasi', 'jenis_vaksinasi'));
+        $this->assertNotNull($kolom('skrining_puma', 'gejala_dahak'));
+
+        if (DB::getDriverName() === 'mysql') {
+            $tipe = fn (string $tabel, string $nama) => $kolom($tabel, $nama)['type'];
+            $this->assertSame('varchar(16)', $tipe('pemeriksaan', 'nik'));
+            $this->assertSame("set('rutin','enam_bulanan','tahunan')", $tipe('pemeriksaan', 'jenis_pemeriksaan'));
+        } else {
+            $this->assertSame('varchar', $kolom('pemeriksaan', 'nik')['type']);
+            $this->assertSame('varchar', $jenisPemeriksaan['type']);
+        }
     }
 
     public function test_draft_dengan_isian_kosong_boleh_disimpan(): void

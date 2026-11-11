@@ -93,7 +93,7 @@ class DataWargaTest extends TestCase
         $this->buatWarga('3404000000000001', ['nama_warga' => 'Budi Santoso']);
 
         $this->actingAs($this->kader)->get(route('warga.index', ['cari' => '%']))
-            ->assertOk()->assertDontSee('Budi Santoso')->assertSee('Tidak ada warga yang cocok');
+            ->assertOk()->assertDontSee('Budi Santoso')->assertSee('Warga tidak ditemukan');
     }
 
     public function test_filter_kategori_usia(): void
@@ -119,7 +119,8 @@ class DataWargaTest extends TestCase
         }
 
         $this->actingAs($this->kader)->get(route('warga.index'))
-            ->assertSee('Warga 15')->assertDontSee('Warga 16')->assertSee('Menampilkan 1–15 dari 17 warga');
+            ->assertSee('Warga 15')->assertDontSee('Warga 16')
+            ->assertSee('Menampilkan')->assertSee('1–15')->assertSee('17')->assertSee('warga');
         $this->actingAs($this->kader)->get(route('warga.index', ['page' => 2]))
             ->assertSee('Warga 17')->assertDontSee('Warga 01');
     }

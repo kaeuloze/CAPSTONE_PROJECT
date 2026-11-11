@@ -57,7 +57,11 @@ class KategoriUsiaTest extends TestCase
             $hasil = \App\Models\Warga::query()->kategori($kategori)->get();
             $this->assertNotEmpty($hasil);
             foreach ($hasil as $warga) {
-                $this->assertSame($kategori, $warga->kategori_usia_terkini, $warga->tanggal_lahir->toDateString());
+                $this->assertSame(
+                    $kategori,
+                    $warga->kategori_usia_terkini,
+                    "{$kategori->value}: {$warga->tanggal_lahir->toDateString()}",
+                );
             }
         }
         $this->assertSame(8, \App\Models\Warga::query()->kategori(KategoriUsia::Balita)->count()

@@ -19,7 +19,7 @@ class LoginTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('Masuk Sistem Posyandu');
+            ->assertSee('Masuk ke Sistem');
     }
 
     public function test_kader_dapat_login_dan_diarahkan_ke_dashboard(): void
