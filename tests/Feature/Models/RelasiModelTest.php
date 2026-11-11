@@ -13,6 +13,7 @@ use App\Models\Pemeriksaan;
 use App\Models\Penyakit;
 use App\Models\Rekapitulasi;
 use App\Models\Vaksin;
+use App\Models\Warga;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\Concerns\MembuatDataUji;
@@ -50,7 +51,7 @@ class RelasiModelTest extends TestCase
     public function test_warga_memakai_nik_dan_enum(): void
     {
         $this->buatWarga('3404000000000077', ['status_kondisi' => 'hamil']);
-        $warga = \App\Models\Warga::find('3404000000000077');
+        $warga = Warga::find('3404000000000077');
 
         $this->assertSame(StatusKondisi::Hamil, $warga->status_kondisi);
         $this->assertSame('Ibu Hamil', $warga->status_kondisi->label());

@@ -138,7 +138,7 @@ class RekapitulasiTest extends TestCase
     private function nilaiDiLayar(string $kategori, array $query = []): array
     {
         $html = $this->actingAs($this->kader)->get(route('rekapitulasi.show', array_merge(['kategori' => $kategori], $query)))->assertOk()->getContent();
-        preg_match_all('#<tr data-kode="([A-Z_]+)">\s*<td>[^<]*</td>\s*<td[^>]*>(\d+)</td>#u', $html, $m);
+        preg_match_all('#<tr data-kode="([A-Z_]+)".*?<span[^>]*>\s*(\d+)\s*</span>.*?</tr>#su', $html, $m);
 
         return array_map('intval', array_combine($m[1], $m[2]));
     }
@@ -150,7 +150,7 @@ class RekapitulasiTest extends TestCase
         $this->get(route('rekapitulasi.ekspor', 'remaja'))->assertRedirect(route('login'));
 
         $html = $this->actingAs($this->kader)->get(route('rekapitulasi.index'))->assertOk()->getContent();
-        $this->assertMatchesRegularExpression('/aria-current="page"\s*><i aria-hidden="true"><\/i>Rekapitulasi/', preg_replace('/\s+/', ' ', $html));
+        $this->assertMatchesRegularExpression('/<a href="[^"]*\/rekapitulasi"[^>]*aria-current="page"[^>]*>.*?Rekapitulasi/s', $html);
     }
 
     public function test_halaman_pilihan_kategori(): void
@@ -250,7 +250,7 @@ class RekapitulasiTest extends TestCase
         $nilai = $this->nilaiDiLayar('remaja', ['bulan' => 8, 'tahun' => 2026]);
         $this->assertSame(0, array_sum($nilai));
         $this->actingAs($this->kader)->get(route('rekapitulasi.show', ['remaja', 'bulan' => 8, 'tahun' => 2026]))
-            ->assertSee('Tidak ada kegiatan posyandu pada periode ini');
+            ->assertSee('Tidak ada kegiatan Posyandu pada periode ini');
 
         $this->actingAs($this->kader)->get(route('rekapitulasi.show', ['remaja', 'bulan' => 13, 'tahun' => 2026]))->assertSessionHasErrors('bulan');
         $this->actingAs($this->kader)->get(route('rekapitulasi.show', ['remaja', 'bulan' => 'x', 'tahun' => 2026]))->assertSessionHasErrors('bulan');

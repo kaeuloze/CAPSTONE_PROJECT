@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Database;
 
+use App\Enums\JenisPemeriksaan;
 use App\Enums\StatusPemeriksaan;
 use App\Models\Kegiatan;
 use App\Models\Pemeriksaan;
@@ -44,7 +45,9 @@ class DataDummySeederTest extends TestCase
             $this->assertGreaterThan(10, Pemeriksaan::selesai()->where('kategori_usia_saat_periksa', $kategori)->count(), $kategori);
         }
         // Yang di-Submit selalu mencatat jenis Rutin; draft hanya ada di kegiatan yang berlangsung.
-        $this->assertSame(0, Pemeriksaan::selesai()->whereRaw('NOT FIND_IN_SET(?, jenis_pemeriksaan)', ['rutin'])->count());
+        $selesaiTanpaRutin = Pemeriksaan::selesai()->get()
+            ->filter(fn (Pemeriksaan $p) => ! in_array(JenisPemeriksaan::Rutin, $p->jenis_pemeriksaan, true));
+        $this->assertCount(0, $selesaiTanpaRutin);
         $this->assertSame(0, Pemeriksaan::draft()->whereHas('kegiatan', fn ($q) => $q->where('status_kegiatan', false))->count());
         $this->assertGreaterThan(0, Pemeriksaan::where('status_pemeriksaan', StatusPemeriksaan::Draft->value)->count());
 

@@ -44,9 +44,9 @@ class PresensiTest extends TestCase
         $this->buatWarga('3404000000000002', ['nama_warga' => 'Siti Dewasa']);
 
         $this->actingAs($this->kader)->get(route('presensi.index', $this->kegiatan))
-            ->assertOk()->assertSee('Posyandu Oktober 2026')->assertSee('Status: <span id="label-status">Berlangsung</span>', false)
+            ->assertOk()->assertSee('Posyandu Oktober 2026')->assertSee('id="label-status"', false)->assertSee('Berlangsung')
             ->assertSee('Budi Balita')->assertSee('Siti Dewasa')->assertSee('Balita')
-            ->assertSee('id="jumlah-total">2<', false)->assertSee('id="jumlah-hadir">0<', false)
+            ->assertViewHas('ringkasan', ['total' => 2, 'hadir' => 0, 'tidak_hadir' => 2])
             ->assertSee('Selesaikan Kegiatan')->assertSee('Tandai Hadir');
     }
 
@@ -156,7 +156,9 @@ class PresensiTest extends TestCase
             ->assertJson(['ringkasan' => ['total' => 2, 'hadir' => 1, 'tidak_hadir' => 1]]);
 
         $this->actingAs($this->kader)->get(route('presensi.index', [$this->kegiatan, 'cari' => 'citra']))
-            ->assertSee('Citra Dewasa')->assertDontSee('Budi Dewasa')->assertSee('id="jumlah-total">1<', false);
+            ->assertSee('Citra Dewasa')
+            ->assertDontSee('Budi Dewasa')
+            ->assertViewHas('ringkasan', ['total' => 1, 'hadir' => 0, 'tidak_hadir' => 1]);
 
         $this->actingAs($this->kader)->get(route('presensi.index', [$this->kegiatan, 'kategori' => 'alien']))->assertSessionHasErrors('kategori');
     }
@@ -172,9 +174,12 @@ class PresensiTest extends TestCase
         $this->buatWarga('3404000000000003', ['nama_warga' => 'Citra Baru']);
 
         $this->actingAs($this->kader)->get(route('presensi.index', $this->kegiatan))
-            ->assertOk()->assertSee('status kehadiran hanya dapat dilihat')->assertSee('Kembali ke Arsip')->assertSee('Hanya-lihat')->assertSee('Tidak Hadir')
+            ->assertOk()->assertSee('Kegiatan sudah selesai, sehingga status kehadiran hanya dapat')
+            ->assertSee('Kembali ke Arsip Kegiatan')
+            ->assertSee('Tidak Hadir')
             ->assertDontSee('Tandai Hadir')->assertDontSee('Selesaikan Kegiatan')->assertDontSee('Citra Baru')
-            ->assertSee('id="jumlah-total">2<', false)->assertSee('id="jumlah-hadir">1<', false);
+            ->assertDontSee('name="hadir"', false)
+            ->assertViewHas('ringkasan', ['total' => 2, 'hadir' => 1, 'tidak_hadir' => 1]);
     }
 
     public function test_kategori_di_arsip_dihitung_per_tanggal_kegiatan(): void

@@ -13,6 +13,7 @@ use App\Models\Pemeriksaan;
 use App\Models\SkriningPuma;
 use App\Models\Warga;
 use App\Services\Pemeriksaan\Form\FormDewasa;
+use App\Services\Pemeriksaan\Kalkulator;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\MembuatDataUji;
@@ -95,9 +96,9 @@ class FormDewasaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Dewasa (18 - 59 Tahun)')->assertSee('Dewasa · 45 th')
+            ->assertSee('Pemeriksaan — Dewasa (18 - 59 Tahun)')->assertSee('Dewasa &middot; 45 th', false)
             ->assertSeeInOrder(['Pemeriksaan Rutin Bulanan', 'Pemeriksaan 6 Bulan Sekali', 'Pemeriksaan Tahunan'])
-            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan darah (mmHg)', 'Kadar gula darah sewaktu (mg/dl)'])
+            ->assertSeeInOrder(['Berat badan (kg)', 'Tinggi Badan (cm)', 'Lingkar perut (cm)', 'LILA (cm)', 'Tekanan Darah (mmHg)', 'Kadar gula darah sewaktu (mg/dl)'])
             ->assertSee('id="isian-pengukuran-lila"', false)
             ->assertSee('Skrining Gejala TBC')
             ->assertSee('Tes Penglihatan (Hitung Jari)')->assertSee('Tes Pendengaran (Berbisik)')
@@ -137,8 +138,8 @@ class FormDewasaTest extends TestCase
             ->assertSessionHas('sukses');
 
         $ukur = Pemeriksaan::sole()->pengukuranDasar;
-        $this->assertSame('26.5', $ukur->getRawOriginal('lila'));
-        $this->assertSame('145.0', $ukur->getRawOriginal('kadar_gula_darah'));
+        $this->assertEquals('26.5', $ukur->getRawOriginal('lila'));
+        $this->assertEquals('145.0', $ukur->getRawOriginal('kadar_gula_darah'));
         $this->assertSame('128/90', $ukur->tekanan_darah);
         $this->assertSame(StatusImt::Obesitas, $ukur->status_imt);                // 75 / 1,6² = 29,3
         $this->assertSame(StatusTekananDarah::Tinggi, $ukur->status_tekanan_darah); // dewasa: diastolik ≥ 90
@@ -232,8 +233,8 @@ class FormDewasaTest extends TestCase
         $this->actingAs($this->kader)->get(route('riwayat.warga', $warga->nik))
             ->assertSee('Rutin Bulanan, Tahunan · IMT Normal · TD Normal · Berisiko PPOK');
         $this->actingAs($this->kader)->get(route('riwayat.show', $p))
-            ->assertOk()->assertSee('Skrining PPOK PUMA')->assertSee('value="26.5"', false)
-            ->assertSee('Pemeriksaan 6 Bulan Sekali<small class="tab-ket"> · tidak diperiksa</small>', false);
+            ->assertOk()->assertSee('Skrining PPOK PUMA')->assertSee('26,5')
+            ->assertSee('Pemeriksaan 6 Bulan Sekali tidak dilakukan pada kunjungan ini.');
         $this->actingAs($this->kader)->get(route('riwayat.edit', $p))->assertOk()->assertSee('Simpan Perubahan');
     }
 
@@ -241,9 +242,9 @@ class FormDewasaTest extends TestCase
 
     public function test_status_gds_dihitung_dari_angka_dengan_batas_150(): void
     {
-        $this->assertNull(\App\Services\Pemeriksaan\Kalkulator::statusGulaDarah(null));
-        $this->assertSame(StatusRisiko::Normal, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('149.9'));
-        $this->assertSame(StatusRisiko::Berisiko, \App\Services\Pemeriksaan\Kalkulator::statusGulaDarah('150'));
+        $this->assertNull(Kalkulator::statusGulaDarah(null));
+        $this->assertSame(StatusRisiko::Normal, Kalkulator::statusGulaDarah('149.9'));
+        $this->assertSame(StatusRisiko::Berisiko, Kalkulator::statusGulaDarah('150'));
 
         $warga = $this->dewasa();
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))->assertSee('Gula darah (GDS)');

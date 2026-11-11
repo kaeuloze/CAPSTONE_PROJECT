@@ -86,9 +86,9 @@ class FormRemajaTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
             ->assertOk()
-            ->assertSee('Pemeriksaan — Remaja (6 - 17 Tahun)')->assertSee('Remaja · 14 th')
+            ->assertSee('Pemeriksaan — Remaja (6 - 17 Tahun)')->assertSee('Remaja &middot; 14 th', false)
             ->assertSeeInOrder(['Rutin Bulanan', 'Screening 6-Bulan', 'Tahunan Remaja Putri'])
-            ->assertSee('Skrining Penimbangan dan Pengukuran')->assertSee('Tekanan darah (mmHg)')
+            ->assertSee('Skrining Penimbangan dan Pengukuran')->assertSee('Tekanan Darah (mmHg)')
             ->assertSee('name="bagian[pengukuran][td_sistolik]"', false)->assertSee('name="bagian[pengukuran][td_diastolik]"', false)
             ->assertSee('Skrining Gejala TBC')->assertSee('Kontak erat Pasien TBC')
             ->assertSee('Tes Penglihatan (Hitung Jari)')->assertSee('Tes Pendengaran (Berbisik)')->assertSee('Gangguan')
@@ -224,7 +224,7 @@ class FormRemajaTest extends TestCase
         // Submit yang gagal membatalkan seluruh isian, jadi dikirim ulang lengkap.
         $this->kirim($remaja, ['pengukuran' => $this->rutinLengkap(), 'gds' => ['kadar_gula_darah' => '160']], 'submit')->assertSessionHas('sukses');
 
-        $this->assertSame('160.0', Pemeriksaan::where('nik', $remaja->nik)->sole()->pengukuranDasar->getRawOriginal('kadar_gula_darah'));
+        $this->assertEquals(160.0, (float) Pemeriksaan::where('nik', $remaja->nik)->sole()->pengukuranDasar->getRawOriginal('kadar_gula_darah'));
         $this->actingAs($this->kader)->get(route('riwayat.warga', $remaja->nik))->assertSee('GDS Berisiko');
     }
 

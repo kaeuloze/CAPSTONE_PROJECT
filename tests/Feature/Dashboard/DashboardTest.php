@@ -102,7 +102,7 @@ class DashboardTest extends TestCase
             ->assertSee('Bulan Ini (Oktober 2026)')->assertSee('Arsip Bulan Sebelumnya')->assertSee('Ekspor ke Excel (.xlsx)')
             ->assertSeeInOrder(['Distribusi Status Gizi (IMT)', 'Grafik Risiko PTM', 'Distribusi Tekanan Darah', 'Skrining TBC'])
             ->assertSeeInOrder(['Normal (18,5–24,9)', 'Risiko Kurus (&lt;18,5)', 'Risiko Gemuk (≥25)'], false)
-            ->assertSee('Filter Kategori: Semua')
+            ->assertSee('Semua Kategori')
             ->assertSee('data-url="'.e(route('dashboard.data')).'"', false)
             ->assertSee('js/dashboard.js');
     }
@@ -156,24 +156,28 @@ class DashboardTest extends TestCase
 
         // Bawaan: bulan lalu (September 2026).
         $this->actingAs($this->kader)->get(route('dashboard', ['tab' => 'arsip']))->assertOk()
-            ->assertSee('Menampilkan data: <strong>September 2026</strong>', false)
-            ->assertSee('Pilih periode:')->assertDontSee('id="indikator-langsung"', false)
+            ->assertSee('Menampilkan data:')
+            ->assertSee('September 2026')
+            ->assertSee('Pilih Periode')->assertDontSee('id="indikator-langsung"', false)
             ->assertDontSee('data-url=', false);
 
         $html = $this->actingAs($this->kader)->get(route('dashboard', ['tab' => 'arsip', 'bulan' => 9, 'tahun' => 2026]))->getContent();
-        $this->assertMatchesRegularExpression('#data-grafik="ptm".*?data-kunci="'.$dm->id_penyakit.'">\s*<span class="nilai-batang">1</span>#s', $html);
+        $this->assertMatchesRegularExpression(
+            '#data-grafik="ptm".*?data-kunci="'.$dm->id_penyakit.'"\s*>\s*<span class="nilai-batang[^"]*">\s*1\s*</span>#s',
+            $html
+        );
 
         $this->actingAs($this->kader)->get(route('dashboard', ['tab' => 'arsip', 'bulan' => 10, 'tahun' => 2026]))
             ->assertSessionHasErrors(['bulan' => 'Arsip hanya untuk bulan sebelumnya. Bulan ini ada di tab Bulan Ini.']);
         $this->actingAs($this->kader)->get(route('dashboard', ['tab' => 'arsip', 'bulan' => 8, 'tahun' => 2026]))
-            ->assertSee('Tidak ada kegiatan posyandu pada Agustus 2026');
+            ->assertSee('Tidak ada kegiatan Posyandu pada Agustus 2026');
     }
 
     public function test_tanpa_kegiatan_bulan_ini(): void
     {
         $this->actingAs($this->kader)->get(route('dashboard'))->assertOk()
-            ->assertSee('belum ada kegiatan posyandu bulan ini')
-            ->assertSee('Tidak ada kegiatan posyandu pada Oktober 2026');
+            ->assertSee('belum ada kegiatan Posyandu bulan ini')
+            ->assertSee('Tidak ada kegiatan Posyandu pada Oktober 2026');
         $this->assertSame(['normal' => 0, 'kurus' => 0, 'gemuk' => 0], $this->angka()['imt']);
     }
 

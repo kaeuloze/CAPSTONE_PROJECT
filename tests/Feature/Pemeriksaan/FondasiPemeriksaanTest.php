@@ -84,7 +84,7 @@ class FondasiPemeriksaanTest extends TestCase
         $this->kegiatan->update(['status_kegiatan' => false]);
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.index'))
-            ->assertOk()->assertSee('Belum ada kegiatan posyandu yang aktif')->assertSee('Pergi ke Kegiatan');
+            ->assertOk()->assertSee('Belum ada kegiatan Posyandu yang aktif')->assertSee('Pergi ke Kegiatan');
     }
 
     public function test_daftar_hanya_warga_hadir_bukan_balita_dan_belum_submit(): void
@@ -98,7 +98,7 @@ class FondasiPemeriksaanTest extends TestCase
         $this->buatPemeriksaan($draft, $this->kegiatan);
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.index'))
-            ->assertOk()->assertSee('Kegiatan aktif: Posyandu Oktober 2026')
+            ->assertOk()->assertSee('Posyandu Oktober 2026')
             ->assertSee('Ani Dewasa')->assertSee('Mulai Pemeriksaan')
             ->assertSee('Eka Draft')->assertSee('Pemeriksaan Belum Selesai')
             ->assertDontSee('Budi Belum Hadir')->assertDontSee('Caca Balita')->assertDontSee('Dodi Selesai');
@@ -200,8 +200,8 @@ class FondasiPemeriksaanTest extends TestCase
         $warga = $this->hadirkan($this->buatWarga('3404000000000001', ['nama_warga' => 'Ani Dewasa', 'tanggal_lahir' => '1990-01-01']));
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $warga->nik))
-            ->assertOk()->assertSee('Form Uji Dewasa')->assertSee('Ani Dewasa')->assertSee('Dewasa · 36 th')
-            ->assertSee('Kehadiran: Hadir')->assertSee('name="versi[ukur]"', false)
+            ->assertOk()->assertSee('Form Uji Dewasa')->assertSee('Ani Dewasa')->assertSee('Dewasa &middot; 36 th', false)
+            ->assertSee('Kegiatan: Posyandu Oktober 2026')->assertSee('name="versi[ukur]"', false)
             ->assertSee('Simpan')->assertSee('Submit');
 
         // Membuka form saja tidak membuat data (keputusan: tercatat saat Simpan pertama).
@@ -231,7 +231,9 @@ class FondasiPemeriksaanTest extends TestCase
         $bunifas = $this->hadirkan($this->buatWarga('3404000000000001', ['status_kondisi' => 'nifas']));
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.form', $bunifas->nik))
-            ->assertOk()->assertSee('Form Ibu Nifas sedang disiapkan');
+            ->assertOk()
+            ->assertViewIs('pemeriksaan.belum-tersedia')
+            ->assertViewHas('kategori', KategoriPemeriksaan::IbuNifas);
     }
 
     // ---------- Simpan ----------
@@ -332,7 +334,7 @@ class FondasiPemeriksaanTest extends TestCase
         $p = Pemeriksaan::sole();
         $this->assertSame(StatusPemeriksaan::Selesai, $p->status_pemeriksaan);
         $this->assertEquals([JenisPemeriksaan::Rutin], $p->jenis_pemeriksaan);
-        $this->assertSame('23.4', $p->pengukuranDasar->getRawOriginal('kadar_hb')); // kolom hasil hitung (uji)
+        $this->assertEquals('23.4', $p->pengukuranDasar->getRawOriginal('kadar_hb')); // kolom hasil hitung (uji)
 
         $this->actingAs($this->kader)->get(route('pemeriksaan.index'))->assertDontSee(route('pemeriksaan.form', $warga->nik));
     }

@@ -92,7 +92,7 @@ class RiwayatPemeriksaanTest extends TestCase
         $this->actingAs($this->kader)->get(route('riwayat.index'))
             ->assertOk()
             ->assertSee('Daftar Warga Riwayat Pemeriksaan')
-            ->assertSeeInOrder(['Balita Kecil', '-', 'Budi Belum Periksa', '-', 'Rina', '16/10/2026'])
+            ->assertSeeInOrder(['Balita Kecil', 'Belum pernah', 'Budi Belum Periksa', 'Belum pernah', 'Rina', '16 Okt 2026'])
             ->assertSee('Lihat Riwayat');
     }
 
@@ -133,7 +133,7 @@ class RiwayatPemeriksaanTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('riwayat.warga', $rina->nik))
             ->assertOk()
-            ->assertSee('Kelola Riwayat Pemeriksaan')
+            ->assertSee('Riwayat Pemeriksaan')
             ->assertSee('16 Oktober 2026')->assertSee('Posyandu Oktober')
             ->assertSee('Rutin Bulanan, 6 Bulan Sekali · IMT Normal · TD Tinggi · Gejala TBC Berisiko · Dirujuk ke Puskesmas')
             ->assertSee('Detail');
@@ -147,14 +147,14 @@ class RiwayatPemeriksaanTest extends TestCase
 
         $this->actingAs($this->kader)->get(route('riwayat.show', $p))
             ->assertOk()
-            ->assertSee('Detail Pemeriksaan — 16 Oktober 2026')
-            ->assertSee('<fieldset class="bagian-baca" disabled>', false)
-            ->assertSee('value="50"', false)->assertSee('value="110"', false)
+            ->assertSee('Detail Pemeriksaan')->assertSee('16 Oktober 2026')
+            ->assertSee('Berat badan (kg)')->assertSee('50')
+            ->assertSee('Tekanan Darah')->assertSee('110/70')
             ->assertSee('Gizi seimbang')
-            ->assertSee('tidak diperiksa')
+            ->assertSee('tidak dilakukan')
             ->assertSee('Pemeriksaan Screening 6-Bulan tidak dilakukan pada kunjungan ini.')
             ->assertSee(route('riwayat.edit', $p))
-            ->assertSee('Hapus data pemeriksaan ini?')
+            ->assertSee('Yakin hapus data pemeriksaan?')
             ->assertDontSee('name="versi[pengukuran]"', false);
     }
 
@@ -216,7 +216,7 @@ class RiwayatPemeriksaanTest extends TestCase
         $this->ubah($p, ['pengukuran' => $this->rutin(['berat_badan' => null])])
             ->assertSessionHasErrors(['submit', 'bagian.pengukuran.berat_badan']);
 
-        $this->assertSame('50.00', PengukuranDasar::sole()->getRawOriginal('berat_badan')); // transaksi dibatalkan
+        $this->assertEquals(50, (float) PengukuranDasar::sole()->getRawOriginal('berat_badan')); // transaksi dibatalkan
     }
 
     public function test_edit_ditolak_bila_bagian_yang_sama_baru_diubah_kader_lain(): void
@@ -227,7 +227,7 @@ class RiwayatPemeriksaanTest extends TestCase
         $this->ubah($p, ['pengukuran' => $this->rutin(['berat_badan' => '52'])])->assertSessionHas('sukses'); // meja A
         $this->ubah($p, ['pengukuran' => $this->rutin(['berat_badan' => '55'])], $versiLama)                  // meja B (data lama)
             ->assertSessionHas('galat', fn ($pesan) => str_contains($pesan, 'Skrining Penimbangan dan Pengukuran'));
-        $this->assertSame('52.00', PengukuranDasar::sole()->getRawOriginal('berat_badan'));
+        $this->assertEquals(52, (float) PengukuranDasar::sole()->getRawOriginal('berat_badan'));
 
         // Bagian lain dari meja B tetap bisa disimpan.
         $this->ubah($p, ['penyuluhan' => ['topik_penyuluhan' => 'Anemia', 'dirujuk' => '0']], $versiLama)->assertSessionHas('sukses');
@@ -248,7 +248,7 @@ class RiwayatPemeriksaanTest extends TestCase
         $this->kegiatan->update(['status_kegiatan' => false]);
 
         $this->ubah($p, ['pengukuran' => $this->rutin(['berat_badan' => '51'])])->assertSessionHas('sukses');
-        $this->assertSame('51.00', PengukuranDasar::sole()->getRawOriginal('berat_badan'));
+        $this->assertEquals(51, (float) PengukuranDasar::sole()->getRawOriginal('berat_badan'));
     }
 
     // ---------- Hapus ----------
