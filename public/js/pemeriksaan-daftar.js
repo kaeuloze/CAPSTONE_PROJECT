@@ -46,9 +46,14 @@
         baris.forEach(function (b) {
             var tr = document.createElement('tr');
             tr.className = 'transition hover:bg-mawar-50/40';
-            tr.appendChild(sel(String(b.no)));
-            tr.appendChild(sel(b.nama));
-            tr.appendChild(sel(b.nik));
+            tr.appendChild(sel(String(b.no), 'sembunyi-hp'));
+            var tdNama = sel(b.nama);
+            var nikHp = document.createElement('span');
+            nikHp.className = 'info-hp';
+            nikHp.textContent = b.nik;
+            tdNama.appendChild(nikHp);
+            tr.appendChild(tdNama);
+            tr.appendChild(sel(b.nik, 'sembunyi-hp'));
             var tdKategori = document.createElement('td');
             var badge = document.createElement('span');
             badge.className = 'badge ' + (kelasKategori[b.kode_kategori] || '');

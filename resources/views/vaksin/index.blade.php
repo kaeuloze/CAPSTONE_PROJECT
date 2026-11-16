@@ -62,7 +62,7 @@
                     {{ $cari !== '' ? 'Vaksin tidak ditemukan' : 'Belum ada vaksin' }}
                 </p>
                 <p class="mt-1 text-sm text-slate-400">
-                    {{ $cari !== '' ? 'Coba kata kunci lain.' : 'Klik "T Vaksin" untuk menambah jenis vaksin pertama.' }}
+                    {{ $cari !== '' ? 'Coba kata kunci lain.' : 'Klik "Tambah Vaksin" untuk menambah jenis vaksin pertama.' }}
                 </p>
             </div>
         @else

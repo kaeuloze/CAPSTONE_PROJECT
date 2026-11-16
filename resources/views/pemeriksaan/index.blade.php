@@ -113,9 +113,9 @@
                 <table class="min-w-full">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="th w-14">No</th>
+                            <th class="th w-14 sembunyi-hp">No</th>
                             <th class="th">Nama Warga</th>
-                            <th class="th">NIK</th>
+                            <th class="th sembunyi-hp">NIK</th>
                             <th class="th">Kategori</th>
                             <th class="th text-right">Aksi</th>
                         </tr>
@@ -132,9 +132,9 @@
                             @endphp
 
                             <tr class="transition hover:bg-mawar-50/40">
-                                <td>{{ $daftar->firstItem() + $loop->index }}</td>
-                                <td>{{ $warga->nama_warga }}</td>
-                                <td>{{ $warga->nik }}</td>
+                                <td class="sembunyi-hp">{{ $daftar->firstItem() + $loop->index }}</td>
+                                <td>{{ $warga->nama_warga }}<span class="info-hp">{{ $warga->nik }}</span></td>
+                                <td class="sembunyi-hp">{{ $warga->nik }}</td>
                                 <td>
                                     <span class="badge {{ $kelasKategori[$kategori] }}">
                                         {{ \App\Enums\KategoriPemeriksaan::from($kategori)->label() }}

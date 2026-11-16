@@ -7,6 +7,7 @@
     'nilai' => 0,
     'suffix'=> '',
     'warna' => 'mawar',   // mawar | emerald | amber | rose | slate
+    'gelap' => false,     // true bila di atas latar gelap: label dibuat terang agar terbaca
 ])
 
 @php
@@ -25,5 +26,5 @@
     ]) }}>
         {{ $nilai }}<span class="text-sm font-semibold text-slate-400">{{ $suffix }}</span>
     </p>
-    <p class="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">{{ $label }}</p>
+    <p @class(['mt-1.5 text-[11px] font-medium uppercase tracking-wide', 'text-white/75' => $gelap, 'text-slate-500' => ! $gelap])>{{ $label }}</p>
 </div>

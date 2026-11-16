@@ -108,10 +108,10 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="th w-14">No</th>
+                            <th class="th w-14 sembunyi-hp">No</th>
                             <th class="th">Nama Warga</th>
-                            <th class="th">NIK</th>
-                            <th class="th">Tanggal Lahir</th>
+                            <th class="th sembunyi-hp">NIK</th>
+                            <th class="th sembunyi-hp">Tanggal Lahir</th>
                             <th class="th">Kategori Usia</th>
                             <th class="th text-right">Aksi</th>
                         </tr>
@@ -127,13 +127,13 @@
 
                             <tr class="transition hover:bg-mawar-50/40">
 
-                                <td class="td text-slate-400">{{ $daftarWarga->firstItem() + $loop->index }}</td>
+                                <td class="td text-slate-400 sembunyi-hp">{{ $daftarWarga->firstItem() + $loop->index }}</td>
 
                                 {{-- Nama + JK --}}
                                 <td class="td">
                                     <div class="flex items-center gap-3">
                                         <span @class([
-                                            'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold uppercase',
+                                            'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold uppercase sembunyi-hp',
                                             'bg-rose-100 text-rose-700'   => $warga->jenis_kelamin === 'perempuan',
                                             'bg-mawar-100 text-mawar-700' => $warga->jenis_kelamin !== 'perempuan',
                                         ])>
@@ -145,17 +145,18 @@
                                             <p class="text-[11px] text-slate-400">
                                                 {{ $warga->jenis_kelamin ? 'Laki-laki' : 'Perempuan' }}
                                             </p>
+                                            <span class="info-hp">{{ $warga->nik }}</span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="td">
+                                <td class="td sembunyi-hp">
                                     <code class="rounded bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700">
                                         {{ $warga->nik }}
                                     </code>
                                 </td>
 
-                                <td class="td text-[13px] text-slate-600">
+                                <td class="td text-[13px] text-slate-600 sembunyi-hp">
                                     {{ \Illuminate\Support\Carbon::parse($warga->tanggal_lahir)->translatedFormat('d M Y') }}
                                 </td>
 
@@ -177,7 +178,7 @@
                                         {{-- Lihat --}}
                                         <a href="{{ route('warga.show', $warga->nik) }}"
                                            title="Lihat detail"
-                                           class="rounded-lg p-2 text-slate-400 transition hover:bg-mawar-50 hover:text-mawar-700">
+                                           class="rounded-lg p-1.5 text-slate-400 sm:p-2 transition hover:bg-mawar-50 hover:text-mawar-700">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                       d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -188,7 +189,7 @@
                                         {{-- Edit --}}
                                         <a href="{{ route('warga.edit', $warga->nik) }}"
                                            title="Edit data"
-                                           class="rounded-lg p-2 text-slate-400 transition hover:bg-mawar-50 hover:text-mawar-700">
+                                           class="rounded-lg p-1.5 text-slate-400 sm:p-2 transition hover:bg-mawar-50 hover:text-mawar-700">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                       d="m16.862 4.487 1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
@@ -204,7 +205,7 @@
     url: @js(route('warga.destroy', $warga))
 })"
                                                 title="Hapus data"
-                                                class="rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600">
+                                                class="rounded-lg p-1.5 text-slate-400 sm:p-2 transition hover:bg-rose-50 hover:text-rose-600">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                       d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />

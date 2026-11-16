@@ -163,7 +163,7 @@
                             ASI Eksklusif
                         </h3>
                         <p class="mt-1 text-xs text-slate-500">
-                            Status pemberian ASI selama6 bulan pertama.
+                            Status pemberian ASI selama 6 bulan pertama.
                         </p>
                     </div>
 
@@ -194,7 +194,7 @@
                                         <td class="td">
                                             <select name="asi[{{ $bulan }}]" aria-label="ASI Bulan {{ $bulan }}"
                                                     class="input py-1.5 text-[13px]">
-                                                <option value="">Ya / Tidak / Tidak Recall</option>
+                                                <option value="">Pilih status</option>
                                                 @foreach (\App\Enums\StatusAsi::options() as $kode => $label)
                                                     <option value="{{ $kode }}" @selected($nilai === $kode)>{{ $label }}</option>
                                                 @endforeach

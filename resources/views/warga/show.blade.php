@@ -111,15 +111,15 @@
 
 
         {{-- ═══════════ STATUS KONDISI KHUSUS ═══════════ --}}
-        <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50/50 p-6">
-            <h3 class="text-sm font-bold uppercase tracking-wide text-rose-800">Status Kondisi Khusus</h3>
-            <p class="mt-1.5 text-[13px] leading-relaxed text-rose-900/75">
+        <div class="mt-5 card p-6">
+            <h3 class="text-sm font-bold uppercase tracking-wide text-mawar-800">Status Kondisi Khusus</h3>
+            <p class="mt-1.5 text-[13px] leading-relaxed text-slate-500">
                 Untuk ibu hamil / nifas / menyusui tidak bisa dideteksi dari tanggal lahir,
                 jadi ditandai manual oleh kader.
             </p>
 
             <div class="mt-4 flex flex-wrap items-center gap-3">
-                <span class="rounded-xl bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-800 ring-1 ring-rose-200">
+                <span class="rounded-xl bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-800 ring-1 ring-slate-200">
                     Status saat ini:
                     <strong class="text-mawar-800">{{ $kategori->label() }}</strong>
                     ({{ ($kondisi && $kondisi->value !== 'normal') ? $kondisi->label() : 'tidak ada kondisi khusus' }})
