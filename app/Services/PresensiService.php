@@ -96,29 +96,32 @@ class PresensiService
     }
 
     /**
-     * Daftar hadir untuk diekspor (Excel / halaman cetak). Koreksi tim 4 Nov 2026: memuat warga Hadir
-     * dan Tidak Hadir (bukan hanya yang hadir), urut abjad nama; warga sama dengan halaman Presensi
-     * (berlangsung: semua warga; arsip: warga yang tercatat). Yang belum ditandai = Tidak Hadir.
+     * Daftar hadir untuk diekspor (Excel / halaman cetak). Hasil uji coba bersama kader 8 Nov 2026:
+     * hanya warga berstatus Hadir, urut abjad nama. NIK hanya 4 digit terakhir (pembeda nama yang sama,
+     * tanpa membuka NIK lengkap di kertas cetak).
      * Kategori = status ibu (Ibu Hamil / Nifas / Menyusui) atau kategori usia pada tanggal kegiatan.
      * Jumlah baris dibatasi jumlah warga posyandu, sehingga tidak dipaginasi.
      *
-     * @return Collection<int, array{nama: string, nik: string, kategori: string, hadir: bool}>
+     * @return Collection<int, array{nama: string, nik4: string, kategori: string}>
      */
     public function daftarHadir(Kegiatan $kegiatan): Collection
     {
-        return $this->dasar($kegiatan, null, null)
+        return Warga::query()
+            ->join('kehadiran as k', function (JoinClause $join) use ($kegiatan) {
+                $join->on('k.nik', '=', 'warga.nik')
+                    ->where('k.id_kegiatan', '=', $kegiatan->id_kegiatan)
+                    ->where('k.status_kehadiran', '=', true);
+            })
             ->select(['warga.nik', 'warga.nama_warga', 'warga.tanggal_lahir', 'warga.status_kondisi'])
-            ->selectRaw('COALESCE(k.status_kehadiran, 0) as hadir')
             ->orderBy('warga.nama_warga')
             ->orderBy('warga.nik')
             ->get()
             ->map(fn (Warga $w) => [
                 'nama' => $w->nama_warga,
-                'nik' => $w->nik,
+                'nik4' => substr($w->nik, -4),
                 'kategori' => $w->status_kondisi !== StatusKondisi::Normal
                     ? $w->status_kondisi->label()
                     : KategoriUsia::dariTanggalLahir($w->tanggal_lahir, $kegiatan->tanggal_kegiatan)->label(),
-                'hadir' => (bool) $w->hadir,
             ])
             ->values();
     }
