@@ -271,6 +271,16 @@
 .bagian-periksa {
     @apply rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6;
 }
+/* Jarak antar-isi kartu (isian, centang, keterangan, hasil) agar tidak menempel. */
+.bagian-periksa > * + * { @apply mt-4; }
+.bagian-periksa > input[type="hidden"] + * { @apply mt-0; }
+.bagian-periksa > h2 + .ket,
+.bagian-periksa > .judul-bagian + .ket { @apply mt-1; }
+.bagian-periksa > .baris-centang + .baris-centang,
+.bagian-periksa > .galat-isian + .baris-centang { @apply mt-2; }
+.bagian-periksa > .baris-centang + .galat-isian { @apply mt-1.5; }
+.bagian-periksa > .sub-kelompok { @apply mt-5; }
+.bagian-periksa > .sub-kelompok + * { @apply mt-2; }
 
 /* ---------- ISIAN ---------- */
 .isian { @apply block; }
@@ -341,6 +351,13 @@ dialog .kepala-dialog {
 dialog .dialog-tombol {
     @apply flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4;
 }
+/* Isi dialog konfirmasi formulir pemeriksaan (pengingat jadwal & batal). */
+dialog .isi-dialog { @apply flex items-start gap-4 px-6 pb-5 pt-6; }
+dialog .ikon-dialog { @apply grid h-10 w-10 shrink-0 place-items-center rounded-full; }
+dialog .ikon-dialog.kuning { @apply bg-amber-100 text-amber-600; }
+dialog .ikon-dialog.abu { @apply bg-slate-100 text-slate-600; }
+dialog .judul-dialog { @apply text-base font-bold text-slate-900; }
+dialog .teks-dialog { @apply mt-1.5 text-sm leading-relaxed text-slate-600; }
 /* ===== FORMULIR PEMERIKSAAN — partial tambahan ===== */
 
 /* ---------- Keterangan (teks kecil di bawah judul) ---------- */
@@ -387,9 +404,10 @@ dialog .dialog-tombol {
 /* ---------- Tombol 'tombol' (compat teammate) ---------- */
 .tombol {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
-           text-sm font-semibold transition focus:outline-none focus:ring-2
-           focus:ring-mawar-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+           text-sm font-semibold transition focus:outline-none focus-visible:ring-2
+           focus-visible:ring-mawar-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
 }
+.tombol.kedua { @apply bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50; }
 .tombol.abu { @apply bg-mawar-700 text-white hover:bg-mawar-800; }
 .tombol.utama { @apply bg-mawar-800 text-white hover:bg-mawar-700; }
 .tombol.kecil { @apply px-3 py-1.5 text-[12px]; }
