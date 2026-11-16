@@ -9,6 +9,7 @@
           judul: 'Judul dialog',
           pesan: 'Keterangan tambahan.',
           aksi:  'Ya, Hapus', // teks tombol konfirmasi
+          batal: 'Batal',     // opsional, teks tombol batal (bawaan "Batal")
           tone:  'danger',               // danger | warning | success
           url:   @js(route('warga.destroy', $warga)), // tujuan form saat dikonfirmasi (opsional)
           metode: 'DELETE',              // opsional, bawaan DELETE
@@ -17,8 +18,8 @@
     Teks dari data (nama warga, dll.) WAJIB lewat @js(...) agar tanda petik tidak merusak kode JavaScript.
     Bila `url` diisi, tombol konfirmasi mengirim form POST (+ _method & token CSRF) ke url tersebut.
 --}}
-<div x-data="{ open: false, judul: '', pesan: '', aksi: 'Ya, Lanjutkan', tone: 'danger', url: '', metode: 'DELETE', peringatan: '', mengirim: false }"
-     @konfirmasi-hapus.window="open = true; mengirim = false; judul = $event.detail.judul; pesan = $event.detail.pesan; aksi = $event.detail.aksi ?? 'Ya, Lanjutkan'; tone = $event.detail.tone ?? 'danger'; url = $event.detail.url ?? ''; metode = $event.detail.metode ?? 'DELETE'; peringatan = $event.detail.peringatan ?? ''"
+<div x-data="{ open: false, judul: '', pesan: '', aksi: 'Ya, Lanjutkan', batal: 'Batal', tone: 'danger', url: '', metode: 'DELETE', peringatan: '', mengirim: false }"
+     @konfirmasi-hapus.window="open = true; mengirim = false; judul = $event.detail.judul; pesan = $event.detail.pesan; aksi = $event.detail.aksi ?? 'Ya, Lanjutkan'; batal = $event.detail.batal ?? 'Batal'; tone = $event.detail.tone ?? 'danger'; url = $event.detail.url ?? ''; metode = $event.detail.metode ?? 'DELETE'; peringatan = $event.detail.peringatan ?? ''"
      @keydown.escape.window="open = false">
 
     {{-- Form tersembunyi yang dikirim saat aksi dikonfirmasi (hapus data, dll.). --}}
@@ -80,7 +81,7 @@
 
             {{-- Footer --}}
             <div class="flex justify-end gap-2.5 border-t border-slate-100 bg-slate-50/70 px-6 py-4">
-                <button type="button" @click="open = false" class="btn btn-secondary py-2 text-[13px]">
+                <button type="button" @click="open = false" class="btn btn-secondary py-2 text-[13px]" x-text="batal">
                     Batal
                 </button>
                 <button type="button" class="btn disabled:opacity-60" :disabled="mengirim"

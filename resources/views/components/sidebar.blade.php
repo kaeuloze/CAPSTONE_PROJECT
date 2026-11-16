@@ -60,18 +60,24 @@
         @endforeach
     </nav>
 
-    {{-- Logout --}}
+    {{-- Logout: konfirmasi dulu lewat x-confirm-dialog (wireframe), agar kader tidak keluar karena salah tekan. --}}
     <div class="border-t border-slate-200 p-3">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit"
-                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50">
-                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                </svg>
-                <span>Keluar</span>
-            </button>
-        </form>
+        <button type="button"
+                @click="$dispatch('konfirmasi-hapus', {
+                    judul: 'Apakah Anda yakin ingin keluar dari akun ini?',
+                    pesan: 'Anda perlu login kembali untuk membuka sistem.',
+                    aksi: 'Ya',
+                    batal: 'Tidak',
+                    tone: 'warning',
+                    url: @js(route('logout')),
+                    metode: 'POST',
+                })"
+                class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50">
+            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            <span>Keluar</span>
+        </button>
     </div>
 </aside>
