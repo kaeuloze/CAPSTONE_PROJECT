@@ -240,6 +240,6 @@
     </div>
 
     {{-- ═══════════ JS LIVE-UPDATE ═══════════ --}}
-    <script src="{{ asset('js/dashboard.js') }}" defer></script>
+    <script src="@aset('js/dashboard.js')" defer></script>
 
 </x-layouts.app>

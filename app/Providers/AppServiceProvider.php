@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\AsetPublik;
 use App\Services\Pemeriksaan\Form\FormDewasa;
 use App\Services\Pemeriksaan\Form\FormIbuHamil;
 use App\Services\Pemeriksaan\Form\FormIbuNifas;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\NotPwnedVerifier;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -48,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // @aset('js/presensi.js') → alamat file dengan tanda versi agar browser tidak memakai file lama dari cache.
+        Blade::directive('aset', fn (string $path) => '<?php echo e(\\'.AsetPublik::class.'::url('.$path.')); ?>');
+
         // Halaman publik: batas permintaan per menit per alamat IP (melindungi server dari banjir pengunjung/bot).
         RateLimiter::for('publik', fn (Request $request) => Limit::perMinute((int) config('posyandu.publik.maks_per_menit'))->by($request->ip()));
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('judul') — {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/sementara.css') }}">
+    <link rel="stylesheet" href="@aset('css/sementara.css')">
 </head>
 <body>
 @php
@@ -79,7 +79,7 @@
     </div>
 </dialog>
 
-<script src="{{ asset('js/sementara.js') }}"></script>
+<script src="@aset('js/sementara.js')"></script>
 @stack('skrip')
 </body>
 </html>

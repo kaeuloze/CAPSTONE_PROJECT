@@ -44,6 +44,6 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/pemeriksaan-daftar.js') }}" defer></script>
+    <script src="@aset('js/pemeriksaan-daftar.js')" defer></script>
 
 </x-layouts.app>
