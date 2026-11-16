@@ -58,11 +58,23 @@
             <form method="POST" action="{{ route('login.store') }}" class="mt-4 space-y-3">
                 @csrf
 
+                {{-- Pesan bila login gagal (username/kata sandi salah, kolom kosong, atau terlalu banyak percobaan) --}}
+                @if ($errors->any())
+                    <div class="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] font-medium text-rose-700" role="alert">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" /><path stroke-linecap="round" d="M12 8v4m0 4h.01" />
+                        </svg>
+                        <span>{{ $errors->first() }}</span>
+                    </div>
+                @endif
+
                 {{-- Username --}}
                 <div>
                     <label for="username" class="label !mb-1 text-[13px]">Username</label>
                     <input id="username" name="username" type="text" required autofocus
                            autocomplete="username"
+                           value="{{ old('username') }}"
+                           @if ($errors->any()) aria-invalid="true" @endif
                            class="input py-1.5 text-[13px]"
                            placeholder="Masukkan username" />
                 </div>
@@ -98,18 +110,8 @@
                     </div>
                 </div>
 
-                {{-- Opsi --}}
-                <div class="flex items-center justify-between">
-                    <label class="flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-600">
-                        <input type="checkbox" name="remember"
-                               class="h-3.5 w-3.5 rounded border-slate-300 text-mawar-600 focus:ring-mawar-500">
-                        Ingat saya
-                    </label>
-
-                    <a href="#" class="text-[11px] font-medium text-mawar-700 transition hover:text-mawar-900">
-                        Lupa kata sandi?
-                    </a>
-                </div>
+                {{-- "Ingat saya" & "Lupa kata sandi?" sengaja tidak ada: tidak ada di proposal, perangkat posyandu
+                     dipakai bergantian, dan kata sandi kader yang lupa diganti lewat menu Manajemen Pengguna. --}}
 
                 {{-- Submit --}}
                 <button type="submit" class="btn btn-primary w-full py-2 text-[13px]">
