@@ -29,8 +29,13 @@
         }
         baris.forEach(function (b) {
             var tr = document.createElement('tr');
-            tr.appendChild(sel(b.nama));
-            tr.appendChild(sel(b.nik));
+            var tdNama = sel(b.nama);
+            var nikHp = document.createElement('span');
+            nikHp.className = 'info-hp';
+            nikHp.textContent = b.nik;
+            tdNama.appendChild(nikHp);
+            tr.appendChild(tdNama);
+            tr.appendChild(sel(b.nik, 'sembunyi-hp'));
             var tdStatus = document.createElement('td');
             var badge = document.createElement('span');
             badge.className = 'badge hadir';

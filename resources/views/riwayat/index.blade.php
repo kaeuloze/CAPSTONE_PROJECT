@@ -77,11 +77,11 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="th w-14">No</th>
+                            <th class="th w-14 sembunyi-hp">No</th>
                             <th class="th">Nama Warga</th>
-                            <th class="th">NIK</th>
+                            <th class="th sembunyi-hp">NIK</th>
                             <th class="th">Kategori Usia</th>
-                            <th class="th">Kunjungan Terakhir</th>
+                            <th class="th sembunyi-hp">Kunjungan Terakhir</th>
                             <th class="th text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -91,19 +91,23 @@
                             @php $kategori = $warga->kategori_usia_terkini; @endphp
 
                             <tr class="transition hover:bg-mawar-50/40">
-                                <td class="td text-slate-400">{{ $daftarWarga->firstItem() + $loop->index }}</td>
+                                <td class="td text-slate-400 sembunyi-hp">{{ $daftarWarga->firstItem() + $loop->index }}</td>
 
                                 <td class="td">
                                     <div class="flex items-center gap-3">
-                                        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full
+                                        <span class="sembunyi-hp grid h-9 w-9 shrink-0 place-items-center rounded-full
  bg-mawar-100 text-[11px] font-bold uppercase text-mawar-700">
                                             {{ \Illuminate\Support\Str::substr($warga->nama_warga, 0, 2) }}
                                         </span>
-                                        <span class="font-semibold text-slate-900">{{ $warga->nama_warga }}</span>
+                                        <span class="min-w-0">
+                                            <span class="block font-semibold text-slate-900">{{ $warga->nama_warga }}</span>
+                                            <span class="info-hp">{{ $warga->nik }}</span>
+                                            <span class="info-hp !font-sans">Terakhir: {{ $warga->kunjungan_terakhir ? \Illuminate\Support\Carbon::parse($warga->kunjungan_terakhir)->translatedFormat('d M Y') : 'belum pernah' }}</span>
+                                        </span>
                                     </div>
                                 </td>
 
-                                <td class="td">
+                                <td class="td sembunyi-hp">
                                     <code class="rounded bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700">
                                         {{ $warga->nik }}
                                     </code>
@@ -115,7 +119,7 @@
                                     </x-ui.badge>
                                 </td>
 
-                                <td class="td text-[13px]">
+                                <td class="td text-[13px] sembunyi-hp">
                                     @if ($warga->kunjungan_terakhir)
                                         <span class="font-medium text-slate-700">
                                             {{ \Illuminate\Support\Carbon::parse($warga->kunjungan_terakhir)->translatedFormat('d M Y') }}
@@ -134,7 +138,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                       d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                             </svg>
-                                            Lihat Riwayat
+                                            <span class="sm:hidden">Lihat</span><span class="sembunyi-hp">Lihat Riwayat</span>
                                         </a>
                                     </div>
                                 </td>

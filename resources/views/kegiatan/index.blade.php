@@ -77,9 +77,9 @@
 
                         {{-- Statistik kehadiran --}}
                         <div class="mt-6 grid grid-cols-3 gap-3 rounded-xl bg-white/[.07] p-4 ring-1 ring-white/10 backdrop-blur-sm">
-                            <x-ui.mini-stat label="Total Warga" :nilai="$ringkasan['total']" class="text-white" />
-                            <x-ui.mini-stat label="Hadir" :nilai="$ringkasan['hadir']" class="text-emerald-300" />
-                            <x-ui.mini-stat label="Belum Hadir" :nilai="$ringkasan['tidak_hadir']" class="text-amber-300" />
+                            <x-ui.mini-stat label="Total Warga" :nilai="$ringkasan['total']" class="text-white" gelap />
+                            <x-ui.mini-stat label="Hadir" :nilai="$ringkasan['hadir']" class="text-emerald-300" gelap />
+                            <x-ui.mini-stat label="Belum Hadir" :nilai="$ringkasan['tidak_hadir']" class="text-amber-300" gelap />
                         </div>
 
                         {{-- Progress --}}

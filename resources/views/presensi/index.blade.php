@@ -180,9 +180,9 @@
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th class="th w-14">No</th>
+                                <th class="th w-14 sembunyi-hp">No</th>
                                 <th class="th">Nama Warga</th>
-                                <th class="th">Kategori</th>
+                                <th class="th sembunyi-hp">Kategori</th>
                                 <th class="th">Status Kehadiran</th>
                                 @if ($berlangsung)
                                     <th class="th text-right">Aksi</th>
@@ -197,14 +197,14 @@
                                 <tr data-nik="{{ $warga->nik }}"
                                     class="transition {{ $hadir ? 'bg-emerald-50/30 hover:bg-emerald-50/60' : 'hover:bg-slate-50' }}">
 
-                                    <td class="td text-slate-400">
+                                    <td class="td text-slate-400 sembunyi-hp">
                                         {{ $daftar->firstItem() + $loop->index }}
                                     </td>
 
                                     <td class="td">
                                         <div class="flex items-center gap-3">
                                             <span @class([
-                                                'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold uppercase',
+                                                'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold uppercase sembunyi-hp',
                                                 'bg-mawar-100 text-mawar-700' => $warga->jenis_kelamin !== 'perempuan',
                                                 'bg-rose-100 text-rose-700'   => $warga->jenis_kelamin === 'perempuan',
                                             ])>{{ substr($warga->nama_warga, 0, 2) }}</span>
@@ -216,7 +216,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="td">
+                                    <td class="td sembunyi-hp">
                                         <x-ui.badge warna="mawar">
                                             {{ \App\Enums\KategoriUsia::dariTanggalLahir($warga->tanggal_lahir, $kegiatan->tanggal_kegiatan)->label() }}
                                         </x-ui.badge>

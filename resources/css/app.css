@@ -263,6 +263,13 @@
 }
 .tab-ket { @apply text-[10px] font-normal opacity-70; }
 
+/* ---------- TABEL DI LAYAR HP ---------- */
+/* Kolom pelengkap (No, NIK, tanggal, dsb.) disembunyikan di HP agar tombol aksi tetap terlihat tanpa menggeser tabel. */
+@media (max-width: 639.98px) {
+    .sembunyi-hp { display: none !important; }
+}
+.info-hp { @apply mt-0.5 block font-mono text-[11px] font-normal text-slate-400 sm:hidden; }
+
 /* ---------- PANEL ---------- */
 /* JANGAN pakai kelas display di sini — JS mengatur atribut [hidden] */
 .panel-tab { @apply space-y-5; }

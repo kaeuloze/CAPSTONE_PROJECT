@@ -72,10 +72,10 @@
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="th w-14">No</th>
+                            <th class="th w-14 sembunyi-hp">No</th>
                             <th class="th">Nama Kader</th>
-                            <th class="th">Username</th>
-                            <th class="th">Dibuat</th>
+                            <th class="th sembunyi-hp">Username</th>
+                            <th class="th sembunyi-hp">Dibuat</th>
                             <th class="th text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -85,7 +85,7 @@
                             @php $saya = auth()->id() === $akun->getKey(); @endphp
 
                             <tr class="transition hover:bg-mawar-50/40">
-                                <td class="td text-slate-400">{{ $daftarAkun->firstItem() + $loop->index }}</td>
+                                <td class="td text-slate-400 sembunyi-hp">{{ $daftarAkun->firstItem() + $loop->index }}</td>
 
                                 {{-- Nama + badge "Anda" --}}
                                 <td class="td">
@@ -105,17 +105,18 @@
                                             <p class="text-[11px] text-slate-400">
                                                 Diperbarui {{ $akun->updated_at?->translatedFormat('d M Y H:i') ?? '—' }}
                                             </p>
+                                            <span class="info-hp">{{ $akun->username }}</span>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="td">
+                                <td class="td sembunyi-hp">
                                     <code class="rounded bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700">
                                         {{ $akun->username }}
                                     </code>
                                 </td>
 
-                                <td class="td text-[13px] text-slate-600">
+                                <td class="td text-[13px] text-slate-600 sembunyi-hp">
                                     {{ $akun->created_at?->translatedFormat('d M Y') ?? '—' }}
                                 </td>
 

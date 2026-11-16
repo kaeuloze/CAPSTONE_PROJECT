@@ -72,7 +72,7 @@
                     <thead class="bg-slate-50">
                         <tr>
                             <th class="th">Nama Balita</th>
-                            <th class="th">NIK</th>
+                            <th class="th sembunyi-hp">NIK</th>
                             <th class="th">Status</th>
                             <th class="th text-right">Aksi</th>
                         </tr>
@@ -82,8 +82,8 @@
                     <tbody id="isi-balita" data-pesan-kosong="{{ $pesanKosong }}">
                         @forelse ($daftar as $balita)
                             <tr>
-                                <td>{{ $balita->nama_warga }}</td>
-                                <td>{{ $balita->nik }}</td>
+                                <td>{{ $balita->nama_warga }}<span class="info-hp">{{ $balita->nik }}</span></td>
+                                <td class="sembunyi-hp">{{ $balita->nik }}</td>
                                 <td><span class="badge hadir">Hadir</span></td>
                                 <td>
                                     <a href="{{ route('vaksinasi.form', $balita->nik) }}" class="tombol kecil abu">
