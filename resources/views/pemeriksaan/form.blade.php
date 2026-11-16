@@ -101,11 +101,16 @@
 
 
         {{-- ═══════════ DIALOG PERINGATAN INTERVAL ═══════════ --}}
-        <dialog id="dialog-peringatan" aria-labelledby="judul-peringatan">
-            <h3 id="judul-peringatan">Perhatian</h3>
-            <p id="isi-peringatan"></p>
+        <dialog id="dialog-peringatan" aria-labelledby="judul-peringatan" aria-describedby="isi-peringatan">
+            <div class="isi-dialog">
+                <span class="ikon-dialog kuning"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div>
+                    <h3 id="judul-peringatan" class="judul-dialog">Pengingat Jadwal Pemeriksaan</h3>
+                    <p id="isi-peringatan" class="teks-dialog"></p>
+                </div>
+            </div>
             <div class="dialog-tombol">
-                <button type="button" class="tombol" onclick="this.closest('dialog').close()" id="peringatan-kembali">Kembali</button>
+                <button type="button" class="tombol kedua" onclick="this.closest('dialog').close()" id="peringatan-kembali">Kembali</button>
                 <button type="button" class="tombol utama" id="peringatan-lanjut">Lanjutkan</button>
             </div>
         </dialog>
@@ -113,10 +118,15 @@
 
         {{-- ═══════════ DIALOG BATAL ═══════════ --}}
         <dialog id="dialog-batal" aria-labelledby="judul-batal">
-            <h3 id="judul-batal">Tinggalkan form tanpa menyimpan?</h3>
-            <p>Perubahan yang belum disimpan akan hilang.</p>
+            <div class="isi-dialog">
+                <span class="ikon-dialog abu"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                <div>
+                    <h3 id="judul-batal" class="judul-dialog">Tinggalkan form tanpa menyimpan?</h3>
+                    <p class="teks-dialog">Perubahan yang belum disimpan akan hilang.</p>
+                </div>
+            </div>
             <div class="dialog-tombol">
-                <button type="button" class="tombol" onclick="this.closest('dialog').close()">Tidak</button>
+                <button type="button" class="tombol kedua" onclick="this.closest('dialog').close()">Tidak</button>
                 <a href="{{ route('pemeriksaan.index') }}" class="tombol utama">Ya, Tinggalkan</a>
             </div>
         </dialog>
