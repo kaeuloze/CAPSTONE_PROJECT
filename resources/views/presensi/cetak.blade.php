@@ -1,5 +1,5 @@
-{{-- Halaman siap cetak daftar hadir (permintaan kader 31 Okt 2026; koreksi tim 4 Nov 2026: semua warga
-     Hadir & Tidak Hadir + total di bawah, tanpa jam hadir & tanda tangan). Halaman mandiri tanpa menu,
+{{-- Halaman siap cetak daftar hadir (permintaan kader 31 Okt 2026; hasil uji coba 8 Nov 2026: hanya warga
+     Hadir, kolom No, Nama, NIK 4 digit terakhir, Kategori, jumlah hadir di bawah). Halaman mandiri tanpa menu,
      gaya ditulis di sini agar hasil cetak rapi tanpa bergantung pada build Tailwind. --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -68,17 +68,16 @@
                     <tr>
                         <td class="tengah">{{ $loop->iteration }}</td>
                         <td>{{ $w['nama'] }}</td>
-                        <td class="nik">{{ $w['nik'] }}</td>
+                        <td class="nik tengah">{{ $w['nik4'] }}</td>
                         <td class="tengah">{{ $w['kategori'] }}</td>
-                        <td class="tengah">{{ \App\Services\EksporDaftarHadirExcel::statusKehadiran($w['hadir']) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ count($kolom) }}" class="kosong">Belum ada warga yang tercatat.</td></tr>
+                    <tr><td colspan="{{ count($kolom) }}" class="kosong">Belum ada warga yang hadir.</td></tr>
                 @endforelse
             </tbody>
         </table>
 
-        {{-- Total di bawah tabel (permintaan tim 4 Nov 2026) --}}
+        {{-- Jumlah warga hadir di bawah tabel --}}
         <table class="total">
             @foreach ($total as $label => $jumlah)
                 <tr><td>{{ $label }}</td><td>: {{ $jumlah }} warga</td></tr>

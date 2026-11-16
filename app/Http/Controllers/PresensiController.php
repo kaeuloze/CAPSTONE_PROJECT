@@ -81,7 +81,7 @@ class PresensiController extends Controller
             : back()->with('sukses', $pesan);
     }
 
-    /** Ekspor daftar hadir (warga Hadir & Tidak Hadir) ke Excel — permintaan kader 31 Okt, koreksi tim 4 Nov 2026. */
+    /** Ekspor daftar hadir (hanya warga Hadir) ke Excel — permintaan kader 31 Okt, hasil uji coba 8 Nov 2026. */
     public function excel(Kegiatan $kegiatan): StreamedResponse
     {
         $buku = $this->ekspor->buat($kegiatan, $this->presensiService->daftarHadir($kegiatan));

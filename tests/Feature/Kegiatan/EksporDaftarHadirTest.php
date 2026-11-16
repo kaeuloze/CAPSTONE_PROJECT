@@ -12,9 +12,9 @@ use Tests\Concerns\MembuatDataUji;
 use Tests\TestCase;
 
 /**
- * Ekspor daftar hadir presensi ke Excel + halaman siap cetak (permintaan kader 31 Okt 2026, koreksi tim 4 Nov):
- * semua warga Hadir & Tidak Hadir, urut abjad, kolom No, Nama, NIK, Kategori, Hadir / Tidak Hadir,
- * total Hadir / Tidak Hadir di bawah tabel.
+ * Ekspor daftar hadir presensi ke Excel + halaman siap cetak (permintaan kader 31 Okt 2026, hasil uji coba
+ * bersama kader 8 Nov 2026): hanya warga Hadir, urut abjad, kolom No, Nama, NIK (4 digit terakhir), Kategori,
+ * jumlah hadir di bawah tabel.
  */
 class EksporDaftarHadirTest extends TestCase
 {
@@ -76,40 +76,40 @@ class EksporDaftarHadirTest extends TestCase
             ->assertSee('data-cetak-langsung', false)->assertSee('js/presensi-cetak.js');
     }
 
-    public function test_excel_semua_warga_hadir_dan_tidak_hadir_urut_abjad_dengan_total(): void
+    public function test_excel_hanya_warga_hadir_urut_abjad_dengan_nik_4_digit_dan_jumlah(): void
     {
         $lembar = $this->unduh();
 
         $this->assertSame('DAFTAR HADIR POSYANDU MAWAR 1', $lembar->getCell('A1')->getValue());
         $this->assertSame(': Posyandu Oktober 2026', $lembar->getCell('C3')->getValue());
         $this->assertSame(': Sabtu, 10 Oktober 2026', $lembar->getCell('C4')->getValue());
-        $this->assertSame(['No', 'Nama', 'NIK', 'Kategori', 'Hadir / Tidak Hadir'], $lembar->rangeToArray('A7:E7')[0]);
-        $this->assertNull($lembar->getCell('F7')->getValue()); // tanpa jam hadir & tanda tangan
+        $this->assertSame(['No', 'Nama', 'NIK (4 digit terakhir)', 'Kategori'], $lembar->rangeToArray('A7:D7')[0]);
+        $this->assertNull($lembar->getCell('E7')->getValue()); // tanpa kolom Hadir, jam hadir, tanda tangan
         $this->assertSame([
-            [1, 'Ani Hamil', '3404000000000002', 'Ibu Hamil', 'Hadir'],
-            [2, 'Budi Balita', '3404000000000003', 'Balita', 'Hadir'],
-            [3, 'Citra Belum Hadir', '3404000000000004', 'Dewasa', 'Tidak Hadir'], // belum ditandai saat berlangsung
-            [4, 'Dodi Batal', '3404000000000005', 'Dewasa', 'Tidak Hadir'],
-            [5, 'Zaenal Dewasa', '3404000000000001', 'Dewasa', 'Hadir'],
-        ], $lembar->rangeToArray('A8:E12', null, false, false));
-        // Total di bawah tabel.
-        $this->assertSame([['Hadir', 3], ['Tidak Hadir', 2], ['Total warga', 5]], $lembar->rangeToArray('D14:E16', null, false, false));
+            [1, 'Ani Hamil', '0002', 'Ibu Hamil'],
+            [2, 'Budi Balita', '0003', 'Balita'],
+            [3, 'Zaenal Dewasa', '0001', 'Dewasa'],
+        ], $lembar->rangeToArray('A8:D10', null, false, false));
+        // Warga yang belum ditandai / dibatalkan tidak ikut.
+        $this->assertNull($lembar->getCell('B11')->getValue());
+        $this->assertSame([['Total hadir', 3]], $lembar->rangeToArray('C12:D12', null, false, false));
     }
 
-    public function test_halaman_cetak(): void
+    public function test_halaman_cetak_sama_dengan_excel(): void
     {
         $this->actingAs($this->kader)->get(route('presensi.cetak', $this->kegiatan))
             ->assertOk()->assertSee('DAFTAR HADIR POSYANDU MAWAR 1')->assertSee('Sabtu, 10 Oktober 2026')
-            ->assertSeeInOrder(['No', 'Nama', 'NIK', 'Kategori', 'Hadir / Tidak Hadir'])
-            ->assertSeeInOrder(['Ani Hamil', 'Hadir', 'Budi Balita', 'Hadir', 'Citra Belum Hadir', 'Tidak Hadir',
-                'Dodi Batal', 'Tidak Hadir', 'Zaenal Dewasa', 'Hadir'])
-            ->assertSeeInOrder(['Hadir', ': 3 warga', 'Tidak Hadir', ': 2 warga', 'Total warga', ': 5 warga'])
+            ->assertSeeInOrder(['No', 'Nama', 'NIK (4 digit terakhir)', 'Kategori'])
+            ->assertSeeInOrder(['Ani Hamil', '0002', 'Ibu Hamil', 'Budi Balita', '0003', 'Balita', 'Zaenal Dewasa', '0001', 'Dewasa'])
+            ->assertSeeInOrder(['Total hadir', ': 3 warga'])
+            ->assertDontSee('Citra Belum Hadir')->assertDontSee('Dodi Batal')->assertDontSee('Tidak Hadir')
+            ->assertDontSee('3404000000000002') // NIK lengkap tidak tampil di kertas cetak
             ->assertDontSee('Jam Hadir')->assertDontSee('Tanda Tangan')
             ->assertSee("window.addEventListener('load', function () { window.print(); });", false) // langsung mencetak
             ->assertDontSee(route('presensi.excel', $this->kegiatan)); // tombol Excel cukup di halaman Presensi
     }
 
-    public function test_arsip_hanya_warga_yang_tercatat_dan_kegiatan_kosong(): void
+    public function test_arsip_hanya_warga_hadir_dan_kegiatan_kosong(): void
     {
         $arsip = Kegiatan::create([
             'nama_kegiatan' => 'Posyandu September 2026', 'tanggal_kegiatan' => '2026-09-12',
@@ -118,17 +118,17 @@ class EksporDaftarHadirTest extends TestCase
         $arsip->kehadiran()->create(['nik' => '3404000000000003', 'status_kehadiran' => true, 'waktu_kehadiran' => '2026-09-12 08:00:00']);
         $arsip->kehadiran()->create(['nik' => '3404000000000004', 'status_kehadiran' => false, 'waktu_kehadiran' => '2026-09-12 08:00:00']);
 
-        // Sama dengan halaman Presensi arsip: hanya warga yang tercatat pada kegiatan itu.
+        // Arsip: hanya warga yang Hadir pada kegiatan itu.
         $this->actingAs($this->kader)->get(route('presensi.cetak', $arsip))
-            ->assertOk()->assertSeeInOrder(['Budi Balita', 'Hadir', 'Citra Belum Hadir', 'Tidak Hadir'])
-            ->assertDontSee('Zaenal Dewasa')->assertSeeInOrder(['Total warga', ': 2 warga']);
+            ->assertOk()->assertSee('Budi Balita')->assertDontSee('Citra Belum Hadir')
+            ->assertDontSee('Zaenal Dewasa')->assertSeeInOrder(['Total hadir', ': 1 warga']);
 
         $kosong = Kegiatan::create([
             'nama_kegiatan' => 'Posyandu Agustus 2026', 'tanggal_kegiatan' => '2026-08-12',
             'status_kegiatan' => false, 'waktu_dibuka' => now(),
         ]);
         $this->actingAs($this->kader)->get(route('presensi.cetak', $kosong))
-            ->assertOk()->assertSee('Belum ada warga yang tercatat.');
+            ->assertOk()->assertSee('Belum ada warga yang hadir.');
         $this->actingAs($this->kader)->get(route('presensi.excel', $kosong))->assertOk();
     }
 }
