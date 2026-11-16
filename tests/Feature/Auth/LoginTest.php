@@ -22,6 +22,16 @@ class LoginTest extends TestCase
             ->assertSee('Masuk ke Sistem');
     }
 
+    public function test_halaman_login_tanpa_ingat_saya_dan_lupa_kata_sandi(): void
+    {
+        // Tidak ada di proposal; kata sandi yang lupa diganti lewat menu Manajemen Pengguna.
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertDontSee('Ingat saya')
+            ->assertDontSee('Lupa kata sandi')
+            ->assertDontSee('name="remember"', false);
+    }
+
     public function test_kader_dapat_login_dan_diarahkan_ke_dashboard(): void
     {
         $kader = $this->buatKader();
@@ -53,6 +63,19 @@ class LoginTest extends TestCase
             ->assertSessionHasErrors(['username' => self::PESAN_GAGAL]);
 
         $this->assertGuest();
+    }
+
+    public function test_pesan_gagal_tampil_dan_username_tetap_terisi(): void
+    {
+        $this->buatKader();
+
+        $this->from(route('login'))
+            ->followingRedirects()
+            ->post(route('login.store'), ['username' => 'kader_uji', 'password' => 'salah'])
+            ->assertOk()
+            ->assertSee(self::PESAN_GAGAL)
+            ->assertSee('value="kader_uji"', false)
+            ->assertDontSee('value="salah"', false);
     }
 
     public function test_username_tidak_terdaftar_memakai_pesan_yang_sama(): void
