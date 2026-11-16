@@ -291,7 +291,7 @@
     <div id="notifikasi" aria-live="assertive"></div>
 
     {{-- ═══════════ JS LIVE-UPDATE ═══════════ --}}
-    <script src="{{ asset('js/presensi.js') }}" defer></script>
-    <script src="{{ asset('js/presensi-cetak.js') }}" defer></script>
+    <script src="@aset('js/presensi.js')" defer></script>
+    <script src="@aset('js/presensi-cetak.js')" defer></script>
 
 </x-layouts.app>

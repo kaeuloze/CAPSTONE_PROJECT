@@ -21,5 +21,5 @@
     </div>
 </section>
 @push('skrip')
-    <script src="{{ asset('js/pemeriksaan-kalkulator.js') }}"></script>
+    <script src="@aset('js/pemeriksaan-kalkulator.js')"></script>
 @endpush

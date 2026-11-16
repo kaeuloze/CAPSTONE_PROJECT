@@ -106,6 +106,6 @@
 
 
     {{-- ═══════════ JS ═══════════ --}}
-    <script src="{{ asset('js/pemeriksaan-form.js') }}" defer></script>
+    <script src="@aset('js/pemeriksaan-form.js')" defer></script>
 
 </x-layouts.app>

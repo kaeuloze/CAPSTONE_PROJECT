@@ -118,6 +118,6 @@
 
 
     {{-- ═══════════ JS LIVE-UPDATE ═══════════ --}}
-    <script src="{{ asset('js/vaksinasi-daftar.js') }}" defer></script>
+    <script src="@aset('js/vaksinasi-daftar.js')" defer></script>
 
 </x-layouts.app>

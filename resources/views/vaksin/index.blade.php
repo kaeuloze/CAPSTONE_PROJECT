@@ -236,6 +236,6 @@
 
 
     {{-- ═══════════ JS ═══════════ --}}
-    <script src="{{ asset('js/vaksin.js') }}" defer></script>
+    <script src="@aset('js/vaksin.js')" defer></script>
 
 </x-layouts.app>
