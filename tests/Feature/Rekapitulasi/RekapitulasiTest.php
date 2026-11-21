@@ -212,6 +212,24 @@ class RekapitulasiTest extends TestCase
         $this->assertSame(0, $sept['DATANG_LANSIA']);
     }
 
+    public function test_kartu_jumlah_sasaran_berisi_total_sasaran_kategori(): void
+    {
+        $this->isiData();
+
+        // Total semua baris SASARAN_* (hadir maupun tidak), bukan tanggal acuan.
+        $this->assertSame(3, $this->kartuJumlahSasaran('remaja'));
+        $this->assertSame(3, $this->kartuJumlahSasaran('dewasa_lansia', ['bulan' => 10, 'tahun' => 2026])); // Dewasa 2 + Lansia 1
+        $this->assertSame(2, $this->kartuJumlahSasaran('ibu_hamil_nifas'));                                // Hamil 1 + Nifas 1
+    }
+
+    private function kartuJumlahSasaran(string $kategori, array $query = []): int
+    {
+        $html = $this->actingAs($this->kader)->get(route('rekapitulasi.show', array_merge(['kategori' => $kategori], $query)))->assertOk()->getContent();
+        $this->assertSame(1, preg_match('#data-ringkasan="jumlah-sasaran">(\d+)</p>#', $html, $m));
+
+        return (int) $m[1];
+    }
+
     public function test_rekap_ibu_hamil_nifas(): void
     {
         $this->isiData();

@@ -93,12 +93,11 @@
             <p class="mt-2 text-lg font-extrabold tabular-nums tracking-tight text-slate-800">{{ $total }}</p>
         </div>
 
-        {{-- Acuan sasaran --}}
+        {{-- Jumlah sasaran: total warga sasaran kategori ini pada periode terpilih (hadir maupun tidak).
+             Tanggal acuan perhitungannya tetap tertulis di keterangan bawah tabel. --}}
         <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
             <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Jumlah Sasaran</p>
-            <p class="mt-2 text-lg font-extrabold tracking-tight text-slate-800">
-                {{ $rekap['acuan']->translatedFormat('j F Y') }}
-            </p>
+            <p class="mt-2 text-lg font-extrabold tabular-nums tracking-tight text-slate-800" data-ringkasan="jumlah-sasaran">{{ $rekap['jumlah_sasaran'] }}</p>
         </div>
     </div>
 
