@@ -49,7 +49,7 @@ class RekapitulasiService
     /**
      * Menghitung rekap, menyimpannya, dan mengembalikan data untuk tampilan/Excel.
      *
-     * @return array{kategori: KategoriRekap, periode: Periode, item: list<ItemRekap>, kegiatan: \Illuminate\Support\Collection, acuan: CarbonImmutable, rekapitulasi: Rekapitulasi}
+     * @return array{kategori: KategoriRekap, periode: Periode, item: list<ItemRekap>, kegiatan: \Illuminate\Support\Collection, acuan: CarbonImmutable, jumlah_sasaran: int, rekapitulasi: Rekapitulasi}
      */
     public function susun(KategoriRekap $kategori, Periode $periode): array
     {
@@ -62,6 +62,8 @@ class RekapitulasiService
             'item' => $item,
             'kegiatan' => $kegiatan,
             'acuan' => $this->penghitung->tanggalAcuan($periode),
+            // Total sasaran kategori (hadir maupun tidak) = jumlah semua baris SASARAN_* (mis. Dewasa + Lansia).
+            'jumlah_sasaran' => collect($item)->filter(fn (ItemRekap $i) => str_starts_with($i->kode, 'SASARAN_'))->sum('nilai'),
             'rekapitulasi' => $this->simpan($kategori, $periode, $item, $kegiatan),
         ];
     }
